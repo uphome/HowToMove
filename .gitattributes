@@ -1,0 +1,18 @@
+# 默认 LF：Windows 上 core.autocrlf=true 会把行尾改成 CRLF，
+# 破坏 data/ 里由 manifest 校验的 sha256。
+* text=auto eol=lf
+
+# 数据集必须逐字节一致，完全禁止行尾转换
+data/** -text
+*.jsonl -text
+
+# 二进制
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pt binary
+*.pth binary
+*.ckpt binary
+*.safetensors binary
+*.bin binary

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 虚拟环境
+.venv/
+venv/
+
+# 训练产物 / 可视化输出
+out/
+logs/
+data_small/
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+*.log
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 临时
+*.tmp
+*.bak
