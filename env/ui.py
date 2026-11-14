@@ -29,8 +29,10 @@ import json
 import queue
 import threading
 import time
+import urllib.parse
 import urllib.request
 import webbrowser
+from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
@@ -87,18 +89,30 @@ def build_frame(
 
 
 class VizHub:
-    """当前帧 + 订阅者扇出。所有 publish 都非阻塞。"""
+    """当前帧 + 最近若干 episode + 训练指标 + 订阅者扇出。所有 publish 非阻塞。"""
 
-    def __init__(self, queue_size: int = 8):
+    def __init__(self, queue_size: int = 8, max_episodes: int = 64):
         self._lock = threading.Lock()
         self._subs: set[queue.Queue] = set()
         self._state: dict[str, Any] = {"mode": "idle", "width": 12, "height": 12}
+        self._episodes: OrderedDict[str, dict] = OrderedDict()
+        self._train: dict[str, Any] | None = None
         self._frames = 0
         self._queue_size = queue_size
+        self._max_episodes = max_episodes
 
     def publish(self, frame: dict[str, Any]) -> None:
         with self._lock:
-            self._state = frame
+            if frame.get("mode") == "train":
+                self._train = frame.get("train")
+            else:
+                self._state = frame
+                ep = frame.get("episode")
+                if ep:
+                    self._episodes.pop(ep, None)
+                    self._episodes[ep] = frame
+                    while len(self._episodes) > self._max_episodes:
+                        self._episodes.popitem(last=False)
             self._frames += 1
             subs = list(self._subs)
         for q in subs:
@@ -114,6 +128,27 @@ class VizHub:
                 except queue.Full:
                     pass
 
+    def episodes(self) -> list[dict[str, Any]]:
+        """最近的 episode 摘要，最新的在前。"""
+        with self._lock:
+            out = []
+            for ep_id, f in reversed(self._episodes.items()):
+                info = f.get("info") or {}
+                out.append({
+                    "id": ep_id,
+                    "level": f.get("level"),
+                    "turn": f.get("turn"),
+                    "mode": f.get("mode"),
+                    "success": info.get("success"),
+                    "reward": info.get("total_reward", info.get("reward")),
+                    "ts": f.get("ts"),
+                })
+            return out
+
+    def episode(self, ep_id: str) -> dict[str, Any] | None:
+        with self._lock:
+            return self._episodes.get(ep_id)
+
     def subscribe(self) -> queue.Queue:
         q: queue.Queue = queue.Queue(maxsize=self._queue_size)
         with self._lock:
@@ -126,7 +161,7 @@ class VizHub:
 
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
-            return dict(self._state)
+            return {**self._state, "train": self._train}
 
     @property
     def frames(self) -> int:
@@ -186,6 +221,11 @@ class UIServer:
     def publish(self, frame: dict[str, Any]) -> None:
         """发布一帧（UIServer / VizHub / VizClient 都支持这个接口）。"""
         self.hub.publish(frame)
+
+    def publish_train(self, stats: dict[str, Any]) -> None:
+        """发布训练指标帧（不覆盖地图状态）。"""
+        self.hub.publish({"mode": "train", "train": dict(stats),
+                          "ts": time.time()})
 
     def show_step(
         self,
@@ -289,6 +329,16 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, self.ui.hub.snapshot())
         elif route == "/api/stream":
             self._stream()
+        elif route == "/api/episodes":
+            self._json(200, {"episodes": self.ui.hub.episodes()})
+        elif route == "/api/episode":
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            ep_id = (q.get("id") or [""])[0]
+            frame = self.ui.hub.episode(ep_id)
+            if frame is None:
+                self._json(404, {"error": f"unknown episode {ep_id!r}"})
+            else:
+                self._json(200, frame)
         elif route == "/api/health":
             self._json(200, {"ok": True, "frames": self.ui.hub.frames})
         else:
@@ -403,6 +453,42 @@ class VizClient:
         return self._post("/api/action", {"action": action})
 
 
+class TrainViz:
+    """训练进程用的推送封装：本地起服务或连已有服务；失败静默，不拖慢训练。"""
+
+    def __init__(self, url: str | None = None, *, host: str = "127.0.0.1",
+                 port: int = DEFAULT_PORT, serve: bool = False, quiet: bool = False):
+        self.server: UIServer | None = None
+        self.client: VizClient | None = None
+        if serve or url is None:
+            self.server = UIServer(host=host, port=port).start()
+            self.url = self.server.url
+            self._push = self.server.publish
+        else:
+            self.url = url.rstrip("/")
+            self.client = VizClient(self.url)
+            if not self.client.health() and not quiet:
+                print(f"[viz] {self.url} 不可用，训练继续但不推送")
+            self._push = self.client.push
+        self.enabled = True
+
+    def update(self, **stats) -> None:
+        if self.enabled:
+            self._push({"mode": "train", "train": stats, "ts": time.time()})
+
+    def frame(self, frame: dict) -> None:
+        if self.enabled:
+            self._push(frame)
+
+    # 与 UIServer / VizHub 同名，run_group / run_episode 可直接传
+    publish = frame
+
+    def close(self) -> None:
+        if self.server is not None:
+            self.server.stop()
+            self.server = None
+
+
 # ---------------------------------------------------------------- page
 
 PAGE = r"""<!doctype html>
@@ -463,6 +549,15 @@ PAGE = r"""<!doctype html>
   #prompt{max-height:180px;overflow:auto;margin:6px 0 0;padding:9px;background:#11161e;
           border:1px solid var(--line);border-radius:8px;font-size:11px;line-height:1.5;
           color:#8b94a3;white-space:pre}
+  #train{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;font-size:12px}
+  #train div{display:flex;justify-content:space-between;gap:8px}
+  #train b{font-weight:500;color:#fff}
+  .row{display:flex;gap:8px;align-items:center}
+  .row select{flex:1;min-width:0}
+  .badge{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);
+         color:var(--dim)}
+  .badge.live{color:var(--goal);border-color:#2c5a43}
+  .badge.train{color:var(--path);border-color:#4a3d6b}
 </style>
 </head>
 <body>
@@ -488,6 +583,17 @@ PAGE = r"""<!doctype html>
   </section>
 
   <aside>
+    <div class="card" id="traincard" style="display:none">
+      <h2>训练指标</h2>
+      <div id="train"></div>
+    </div>
+    <div class="card">
+      <h2>轨迹</h2>
+      <div class="row">
+        <select id="eps"><option value="">（跟随最新）</option></select>
+        <button id="follow">跟随</button>
+      </div>
+    </div>
     <div class="card">
       <h2>状态</h2>
       <div class="kv" id="stats"></div>
@@ -532,6 +638,9 @@ let shown = {x:0, y:0};     // 当前显示位置
 let playing = null;
 let frames = 0, fpsT = performance.now();
 let rewards = [];
+let latestTrain = null;
+let pinned = false;
+let epsSig = '';
 const spark = document.getElementById('spark');
 const sctx = spark.getContext('2d');
 
@@ -556,6 +665,54 @@ function drawSpark(){
   sctx.beginPath();
   sctx.arc((rewards.length-1)*step, h/2-(last/maxAbs)*(h/2-4), 2.5, 0, Math.PI*2);
   sctx.fill();
+}
+
+function fmtNum(v, d){
+  if (v === undefined || v === null) return '—';
+  if (typeof v === 'number') return Number.isInteger(v) ? String(v) : v.toFixed(d);
+  return String(v);
+}
+
+function renderTrain(){
+  const card = document.getElementById('traincard');
+  const t = latestTrain;
+  if (!t){ card.style.display = 'none'; return; }
+  card.style.display = '';
+  const ratio = (t.ratio_min !== undefined && t.ratio_max !== undefined)
+    ? `${fmtNum(t.ratio_min,3)}~${fmtNum(t.ratio_max,3)}` : '—';
+  const rows = [
+    ['update', fmtNum(t.update, 0)],
+    ['episodes', fmtNum(t.episodes, 0)],
+    ['mean reward', fmtNum(t.mean_reward, 2)],
+    ['success', fmtNum(t.success, 0)],
+    ['loss', fmtNum(t.loss, 4)],
+    ['pg', fmtNum(t.pg, 4)],
+    ['kl', fmtNum(t.kl, 4)],
+    ['ratio', ratio],
+    ['clip', fmtNum(t.clip_frac, 2)],
+    ['drop', fmtNum(t.drop_frac, 2)],
+    ['grad norm', fmtNum(t.grad_norm, 3)],
+    ['degenerate', fmtNum(t.degenerate, 0)],
+  ];
+  document.getElementById('train').innerHTML = rows
+    .map(([k,v]) => `<div><span class="dim">${k}</span><b>${v}</b></div>`).join('');
+}
+
+async function refreshEps(){
+  try {
+    const r = await api('/api/episodes');
+    const list = r.episodes || [];
+    const sig = list.map(e => e.id).join('|');
+    if (sig === epsSig) return;
+    epsSig = sig;
+    const sel = document.getElementById('eps');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">（跟随最新）</option>' + list.slice(0, 40).map(e => {
+      const mark = e.success === true ? 'OK' : e.success === false ? 'X' : '-';
+      return `<option value="${e.id}">${mark} ${e.id} · ${e.level || ''} · t${e.turn ?? '?'}</option>`;
+    }).join('');
+    if (cur) sel.value = cur;
+  } catch (err) { /* UI 服务可能刚重启 */ }
 }
 
 function setStatus(on, text){
@@ -779,9 +936,33 @@ function connect(){
   es.onopen = () => { setStatus(true, '已连接'); log('SSE 已连接', 'good'); };
   es.onerror = () => { setStatus(false, '重连中…'); };
   es.onmessage = (e) => {
-    try { applyState(JSON.parse(e.data)); } catch(err){ log('parse error: '+err, 'bad'); }
+    try {
+      const s = JSON.parse(e.data);
+      if (s.mode === 'train') { latestTrain = s.train; renderTrain(); return; }
+      if (pinned) return;
+      applyState(s);
+    } catch(err){ log('parse error: '+err, 'bad'); }
   };
 }
+
+document.getElementById('eps').onchange = async (ev) => {
+  const id = ev.target.value;
+  if (!id){ pinned = false; setStatus(true, '已连接'); return; }
+  try {
+    const f = await api('/api/episode?id=' + encodeURIComponent(id));
+    pinned = true;
+    applyState(f);
+    setStatus(true, '已暂停 · ' + id);
+    log(`查看历史轨迹 ${id}`, 'warn');
+  } catch (err) { log(String(err), 'bad'); }
+};
+
+document.getElementById('follow').onclick = () => {
+  pinned = false;
+  document.getElementById('eps').value = '';
+  setStatus(true, '已连接');
+  api('/api/state').then(s => { if (s && s.width) applyState(s); }).catch(() => {});
+};
 
 (async function init(){
   const sel = document.getElementById('level');
@@ -793,6 +974,9 @@ function connect(){
     else applyState(s);
   } catch(e){ log(String(e), 'bad'); }
   connect();
+  refreshEps();
+  setInterval(refreshEps, 2000);
+  try { const s0 = await api('/api/state'); if (s0 && s0.train){ latestTrain = s0.train; renderTrain(); } } catch(e){}
   requestAnimationFrame(tick);
 })();
 </script>
