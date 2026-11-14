@@ -150,6 +150,27 @@ class GRPOTrainer:
         self.updates = blob.get("updates", 0)
 
 
+def samples_from_trajectory(traj, advantage: float) -> list[Sample]:
+    """把一条多步轨迹摊平成训练样本：每一步一个 (prompt, completion, old_logps)。
+
+    advantage 是轨迹级标量，广播到该轨迹的所有 token（GRPO 的标准做法）。
+    """
+    out = []
+    for t in getattr(traj, "turns", []):
+        if not (t.token_logprobs and t.prompt_ids and t.tokens):
+            continue
+        if len(t.token_logprobs) != len(t.tokens):
+            continue
+        out.append(Sample(
+            prompt_ids=list(t.prompt_ids),
+            completion_ids=list(t.tokens),
+            old_logps=[float(x) for x in t.token_logprobs],
+            advantage=float(advantage),
+            meta={"turn": t.turn, "episode": None},
+        ))
+    return out
+
+
 def group_advantages(rewards: list[float], eps: float = 1e-4
                      ) -> tuple[list[float], bool]:
     """组内标准化。返回 (advantages, degenerate)。
@@ -168,4 +189,5 @@ def group_advantages(rewards: list[float], eps: float = 1e-4
     return [(r - mean) / (std + eps) for r in rewards], False
 
 
-__all__ = ["GRPOTrainer", "Sample", "TrainConfig", "group_advantages"]
+__all__ = ["GRPOTrainer", "Sample", "TrainConfig", "group_advantages",
+           "samples_from_trajectory"]

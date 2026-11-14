@@ -34,27 +34,35 @@ class EnginePolicy:
         self.total_tokens = 0
 
     def act(self, obs: Observation) -> Step:
-        _, prompt_ids = render_prompt(self.tokenizer, obs.prompt,
-                                      self.enable_thinking)
+        return self.act_batch([obs])[0]
+
+    def act_batch(self, obs_list: list[Observation]) -> list[Step]:
+        """一次前向服务整组轨迹（run_group 的核心）。"""
+        prompts = [render_prompt(self.tokenizer, o.prompt,
+                                 self.enable_thinking)[1] for o in obs_list]
         t0 = time.perf_counter()
-        sample = self.engine.generate(prompt_ids, self.sampling)
+        samples = self.engine.generate_batch(prompts, self.sampling)
         latency = time.perf_counter() - t0
 
-        text = self.tokenizer.decode(sample.token_ids, skip_special_tokens=True)
-        action = parse_action(text)
-
-        self.calls += 1
+        steps = []
+        for ids, sample in zip(prompts, samples):
+            text = self.tokenizer.decode(sample.token_ids,
+                                         skip_special_tokens=True)
+            action = parse_action(text)
+            steps.append(Step(
+                text=text,
+                action=action,
+                tokens=sample.token_ids,
+                logprob=sample.mean_logprob,
+                latency=latency,
+                finish=sample.finish_reason,
+                prompt_ids=ids,
+                token_logprobs=sample.logprobs,
+            ))
+            self.total_tokens += len(sample.token_ids)
+        self.calls += len(obs_list)
         self.total_latency += latency
-        self.total_tokens += len(sample.token_ids)
-
-        return Step(
-            text=text,
-            action=action,
-            tokens=sample.token_ids,
-            logprob=sample.mean_logprob,
-            latency=latency,
-            finish=sample.finish_reason,
-        )
+        return steps
 
     # ---- 统计 ----
 

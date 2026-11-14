@@ -50,6 +50,8 @@ class Step:
     logprob: float | None = None
     latency: float = 0.0
     finish: str = "stop"
+    prompt_ids: list[int] | None = None
+    token_logprobs: list[float] | None = None
 
 
 @dataclass
@@ -63,6 +65,9 @@ class Turn:
     info: dict[str, Any]
     logprob: float | None = None
     pos: tuple[int, int] = (0, 0)
+    prompt_ids: list[int] | None = None
+    tokens: list[int] | None = None
+    token_logprobs: list[float] | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -259,6 +264,9 @@ def run_episode(
             info=result.info,
             logprob=step.logprob,
             pos=result.pos,
+            prompt_ids=step.prompt_ids,
+            tokens=step.tokens,
+            token_logprobs=step.token_logprobs,
         ))
 
         if ui is not None:
@@ -285,6 +293,94 @@ def run_episode(
     traj.success = env.terminated and env.pos == maze.goal
     traj.truncated = env.truncated
     return traj
+
+
+def run_group(
+    maze: Maze,
+    policy: "Policy",
+    g: int,
+    *,
+    ui: "UIServer | None" = None,
+    episode_prefix: str = "g",
+    obs_style: str = "minimal",
+    memory: int = 0,
+    show_visited: bool = False,
+    delay: float = 0.0,
+) -> list[Trajectory]:
+    """同步批量 rollout：G 条轨迹每轮一起生成一次。
+
+    与 run_episode 的区别：所有存活轨迹共享一次 engine.generate_batch，
+    这是把 G 路并发的延迟摊平的关键。返回 G 条 Trajectory。
+    """
+    envs = [MazeEnv(maze, memory=memory) for _ in range(g)]
+    trajs = [Trajectory(maze=maze) for _ in range(g)]
+    tags = [f"{episode_prefix}/g{i}" for i in range(g)]
+    from env.ui import build_frame
+
+    turn = 0
+    while True:
+        active = [i for i, e in enumerate(envs) if not e.done]
+        if not active:
+            break
+        turn += 1
+        obs_list = []
+        for i in active:
+            env = envs[i]
+            visited = tuple(trajs[i].path[:-1]) if show_visited else ()
+            prompt = render_observation(maze, env.pos, env.last_actions,
+                                        style=obs_style, visited=visited)
+            obs_list.append(Observation(prompt, maze, env.pos,
+                                        list(env.last_actions), turn))
+
+        batch_fn = getattr(policy, "act_batch", None)
+        steps = batch_fn(obs_list) if batch_fn else [policy.act(o) for o in obs_list]
+
+        for i, obs, step in zip(active, obs_list, steps):
+            env = envs[i]
+            applied = step.action if step.action in ACTIONS else "invalid"
+            result = env.step(applied)
+            traj = trajs[i]
+            traj.total_reward += result.reward
+            traj.turns.append(Turn(
+                turn=turn, prompt=obs.prompt, text=step.text,
+                action=applied, reward=result.reward, done=result.done,
+                info=result.info, logprob=step.logprob, pos=result.pos,
+                prompt_ids=step.prompt_ids, tokens=step.tokens,
+                token_logprobs=step.token_logprobs,
+            ))
+            if ui is not None:
+                ui.publish(build_frame(
+                    maze, env.pos, path=maze.shortest_path(), mode="live",
+                    info={"action": applied, "reward": round(result.reward, 3),
+                          **result.info},
+                    llm={
+                        "text": step.text,
+                        "action": step.action,
+                        "tokens": len(step.tokens) if step.tokens else None,
+                        "logprob": step.logprob,
+                        "latency": round(step.latency, 3),
+                        "finish": step.finish,
+                    },
+                    prompt=obs.prompt,
+                    episode=tags[i],
+                    turn=turn,
+                ))
+        if delay:
+            time.sleep(delay)
+
+    for i, env in enumerate(envs):
+        trajs[i].success = env.terminated and env.pos == maze.goal
+        trajs[i].truncated = env.truncated
+        if ui is not None:
+            t = trajs[i]
+            ui.publish(build_frame(
+                maze, env.pos, path=t.path, mode="done",
+                info={"success": t.success,
+                      "total_reward": round(t.total_reward, 2),
+                      "steps": t.steps, "reason": "done"},
+                episode=tags[i], turn=turn,
+            ))
+    return trajs
 
 
 def main() -> None:
