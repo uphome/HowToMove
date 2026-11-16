@@ -1,21 +1,23 @@
 """把迷宫状态渲染成文本观测。
 
-四种风格（M1 实测 Qwen3-0.6B 接地能力很弱，需要挑信息密度合适的编码）：
+风格：
+    minimal  当前 pos + goal + 墙的绝对坐标（默认；最贴近原始任务）
+    rel      全局相对坐标：goal delta、墙相对当前 pos、四边距离
+    grid     12 行 ASCII 网格 + 绝对坐标 + delta
+    coords   绝对坐标 + 墙的绝对坐标列表
+    rows     墙按行分组、x 连续段压缩
+    bitmap   12 行 0/1 占用图 + 绝对坐标
 
-    grid    12 行 ASCII 网格（默认）
-    coords  起点/终点/当前 + 障碍坐标列表（项目书原始设计）
-    rows    障碍按行分组、x 连续段压缩（最省 token）
-    bitmap  12 行 0/1 占用图 + 独立坐标行
-
-所有风格都带 `delta=(dx,dy)`：实测 12x12 网格会稀释模型对坐标的注意力，
-显式 delta 把工具调用合法率从 4/8 提到 8/8。
+grid/coords/rows/bitmap 都带 `delta=(dx,dy)`：M1 实测显式 delta 能显著
+提高工具调用和方向选择的正确率。`rel` 则完全去掉绝对坐标，只保留
+以当前 agent 为原点的相对信息。
 """
 
 from __future__ import annotations
 
 from .maze import AGENT, FREE, GOAL, WALL, Maze
 
-STYLES = ("minimal", "coords", "rows", "grid", "bitmap")
+STYLES = ("minimal", "rel", "coords", "rows", "grid", "bitmap")
 
 HEADER_COORD = "maze {w}x{h}, x=right y=down"
 
@@ -103,6 +105,32 @@ def _minimal_block(maze: Maze, pos: tuple[int, int]) -> str:
             f"walls: {cells or 'none'}")
 
 
+def _rel_block(maze: Maze, pos: tuple[int, int]) -> str:
+    """全局相对坐标：origin=当前 pos。
+
+    - goal: goal - pos
+    - walls_rel: wall - pos，按距离/方向排序
+    - bounds: 到四条边的步数，避免丢失越界信息
+    """
+    dx = maze.goal[0] - pos[0]
+    dy = maze.goal[1] - pos[1]
+    left = pos[0]
+    right = maze.width - 1 - pos[0]
+    up = pos[1]
+    down = maze.height - 1 - pos[1]
+    walls = sorted(
+        ((x - pos[0], y - pos[1]) for x, y in maze.walls),
+        key=lambda d: (abs(d[0]) + abs(d[1]), d[1], d[0]),
+    )
+    cells = " ".join(f"({x:+d},{y:+d})" for x, y in walls)
+    return "\n".join([
+        f"map {maze.width}x{maze.height}, x=right y=down, origin=you",
+        f"goal: delta=({dx:+d},{dy:+d})",
+        f"bounds: left={left} right={right} up={up} down={down}",
+        f"walls_rel: {cells or 'none'}",
+    ])
+
+
 def render_state(
     maze: Maze,
     pos: tuple[int, int],
@@ -117,6 +145,8 @@ def render_state(
 
     if style == "minimal":
         return _minimal_block(maze, pos)
+    if style == "rel":
+        return _rel_block(maze, pos)
 
     coord = _coord_line(maze, pos)
     tail = _last_line(last_actions)

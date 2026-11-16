@@ -40,7 +40,7 @@ def main() -> int:
     ap.add_argument("--max-tokens", type=int, default=48)
     ap.add_argument("--delay", type=float, default=0.0, help="每步额外停顿（看动画用）")
     ap.add_argument("--obs-style", default="minimal",
-                    choices=["grid", "coords", "rows", "bitmap"])
+                    choices=["minimal", "rel", "grid", "coords", "rows", "bitmap"])
     ap.add_argument("--memory", type=int, default=3, help="last 动作记忆条数")
     ap.add_argument("--visited", action="store_true", help="把走过的格子标成 ','")
     ap.add_argument("--serve", action="store_true", help="本进程内起 UI")

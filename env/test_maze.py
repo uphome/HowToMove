@@ -309,17 +309,45 @@ def test_agent_marker_tracks_position():
 def test_render_styles(style: str):
     maze = generate(level="L3", seed=114)
     text = render_state(maze, maze.start, ["up", "left"], style=style)
-    assert "pos=(" in text
     if style == "minimal":
         assert text.startswith("pos=(")
         assert "walls:" in text
         return
+    if style == "rel":
+        assert text.startswith("map 12x12")
+        assert "origin=you" in text
+        assert "goal: delta=(" in text
+        assert "bounds:" in text
+        assert "walls_rel:" in text
+        assert "pos=(" not in text
+        assert "last=" not in text
+        return
+    assert "pos=(" in text
     assert "delta=(" in text
     assert "last=up,left" in text
     assert "maze" in text.splitlines()[0]
     dx = maze.goal[0] - maze.start[0]
     dy = maze.goal[1] - maze.start[1]
     assert f"delta=({dx:+d},{dy:+d})" in text
+
+
+def test_render_rel_bounds_and_relative_walls():
+    maze = generate(level="L0", seed=0)
+    pos = (3, 9)
+    text = render_state(maze, pos, ["up"], style="rel")
+    dx = maze.goal[0] - pos[0]
+    dy = maze.goal[1] - pos[1]
+    assert f"goal: delta=({dx:+d},{dy:+d})" in text
+    assert "bounds: left=3 right=8 up=9 down=2" in text
+    assert "walls_rel: none" in text
+    assert "pos=(" not in text
+
+    walled = generate(level="L3", seed=114)
+    text = render_state(walled, walled.start, style="rel")
+    assert len(walled.walls) > 0
+    wx, wy = next(iter(walled.walls))
+    rel = (wx - walled.start[0], wy - walled.start[1])
+    assert f"({rel[0]:+d},{rel[1]:+d})" in text
 
 
 def test_render_style_rejects_unknown():

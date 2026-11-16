@@ -59,6 +59,25 @@ train/val/test 的 map 不重叠。
 > `--out /tmp/opencode/data_states`，训练时用
 > `--state-dir /tmp/opencode/data_states`。
 
+### 观测编码 A/B
+
+`env/render.py` 新增了 `rel` 风格（全局相对坐标）：
+
+```text
+map 12x12, x=right y=down, origin=you
+goal: delta=(-7,+2)
+bounds: left=7 right=4 up=1 down=10
+walls_rel: none
+```
+
+10 update 的 A/B 结果见 `reports/relative_obs_ab.md`：
+
+- absolute：balanced test 65.62% → 89.06%
+- relative：balanced test 31.25% → 31.25%，模型退化成常量 `right`
+
+结论：当前 signed-delta 相对格式对 Qwen3-0.6B 太难，不能直接 GRPO；
+下一步应尝试方向词 / 局部 7×7 / SFT 冷启动。
+
 ### natural eval
 
 `data/eval_states.jsonl` 保留为 **natural eval**：
