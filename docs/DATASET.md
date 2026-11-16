@@ -374,3 +374,46 @@ CI 里跑 `build_dataset.py && check_dataset.py`。
 
 不建议。生成器一改，训练/评测的数据分布就悄悄变了，指标不可比。
 用冻结的地图集，生成器只影响"以后新造的数据"。
+
+---
+
+## 11. 动作均衡单步状态集（`data/states/`）
+
+地图集是 map-level 的；单步实验需要 state-level 的 `(map, pos)`。
+如果每张图只随机取一个位置，斜对角双最优状态会占绝大多数，
+`down` 等单方向状态会被掩盖。
+
+`scripts/build_states.py` 从现有地图枚举自由格，并按 `optimal_actions`
+分类后做配额：
+
+| class | 含义 |
+|---|---|
+| `singleton_up/down/left/right` | 只有一个最优动作 |
+| `mixed_dr/dl/ur/ul` | 两个最优动作（斜对角） |
+
+L0 默认配额：
+
+| split | 每个 singleton 方向 | 每个 mixed 组合 | 总数 |
+|---|---:|---:|---:|
+| train | 64 | 16 | 320 |
+| val | 12 | 4 | 64 |
+| test | 12 | 4 | 64 |
+
+L1–L4 使用较低配额（train 32/8，val/test 8/4），实际数量写进
+`data/states/manifest.json`。
+
+```bash
+python scripts/build_states.py
+python scripts/check_states.py
+```
+
+产物：
+
+```
+data/states/{train,val,test}.jsonl
+data/states/manifest.json
+```
+
+`check_states.py` 校验 sha256、BFS 动作、action_class、配额、四方向均衡，
+以及 train/val/test 的 map_id 不重叠。现有 `data/eval_states.jsonl`
+保留为 natural eval，不被覆盖。

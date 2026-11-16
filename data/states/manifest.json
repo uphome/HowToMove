@@ -1,0 +1,628 @@
+{
+  "version": 1,
+  "created_at": "2026-11-16T15:46:26",
+  "builder": "scripts/build_states.py",
+  "generator": {
+    "source": "data/maps/*.jsonl",
+    "min_dist": 3,
+    "obs_style": "minimal"
+  },
+  "quotas": {
+    "L0": {
+      "train": {
+        "singleton": 64,
+        "mixed": 16
+      },
+      "val": {
+        "singleton": 12,
+        "mixed": 4
+      },
+      "test": {
+        "singleton": 12,
+        "mixed": 4
+      }
+    },
+    "L1": {
+      "train": {
+        "singleton": 32,
+        "mixed": 8
+      },
+      "val": {
+        "singleton": 8,
+        "mixed": 4
+      },
+      "test": {
+        "singleton": 8,
+        "mixed": 4
+      }
+    },
+    "L2": {
+      "train": {
+        "singleton": 32,
+        "mixed": 8
+      },
+      "val": {
+        "singleton": 8,
+        "mixed": 4
+      },
+      "test": {
+        "singleton": 8,
+        "mixed": 4
+      }
+    },
+    "L3": {
+      "train": {
+        "singleton": 32,
+        "mixed": 8
+      },
+      "val": {
+        "singleton": 8,
+        "mixed": 4
+      },
+      "test": {
+        "singleton": 8,
+        "mixed": 4
+      }
+    },
+    "L4": {
+      "train": {
+        "singleton": 32,
+        "mixed": 8
+      },
+      "val": {
+        "singleton": 8,
+        "mixed": 4
+      },
+      "test": {
+        "singleton": 8,
+        "mixed": 4
+      }
+    }
+  },
+  "files": {
+    "train.jsonl": {
+      "count": 960,
+      "sha256": "b11c2889d38afda3181c3521794d45082dcf7036062d7aafef0ec2a12a804726"
+    },
+    "val.jsonl": {
+      "count": 256,
+      "sha256": "2fd757b23ad0ff57ce8260bf530a6bd0ce82ccff22639d87ba245629d3c08ca4"
+    },
+    "test.jsonl": {
+      "count": 256,
+      "sha256": "ac1a9f60e872556ecebc3fae0cdd4910f3114617469905b5620539bb745363a7"
+    }
+  },
+  "counts": {
+    "train": {
+      "L0": {
+        "total": 320,
+        "actual": {
+          "singleton_up": 64,
+          "singleton_down": 64,
+          "singleton_left": 64,
+          "singleton_right": 64,
+          "mixed_dr": 16,
+          "mixed_dl": 16,
+          "mixed_ur": 16,
+          "mixed_ul": 16
+        },
+        "target": {
+          "singleton": 64,
+          "mixed": 16
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 2309,
+          "singleton_down": 2231,
+          "singleton_left": 2253,
+          "singleton_right": 2270,
+          "mixed_dr": 17975,
+          "mixed_dl": 16940,
+          "mixed_ur": 17533,
+          "mixed_ul": 18203
+        }
+      },
+      "L1": {
+        "total": 160,
+        "actual": {
+          "singleton_up": 32,
+          "singleton_down": 32,
+          "singleton_left": 32,
+          "singleton_right": 32,
+          "mixed_dr": 8,
+          "mixed_dl": 8,
+          "mixed_ur": 8,
+          "mixed_ul": 8
+        },
+        "target": {
+          "singleton": 32,
+          "mixed": 8
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 3585,
+          "singleton_down": 3956,
+          "singleton_left": 3427,
+          "singleton_right": 3797,
+          "mixed_dr": 16806,
+          "mixed_dl": 15909,
+          "mixed_ur": 13757,
+          "mixed_ul": 13188
+        }
+      },
+      "L2": {
+        "total": 160,
+        "actual": {
+          "singleton_up": 32,
+          "singleton_down": 32,
+          "singleton_left": 32,
+          "singleton_right": 32,
+          "mixed_dr": 8,
+          "mixed_dl": 8,
+          "mixed_ur": 8,
+          "mixed_ul": 8
+        },
+        "target": {
+          "singleton": 32,
+          "mixed": 8
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 3628,
+          "singleton_down": 3521,
+          "singleton_left": 3759,
+          "singleton_right": 3462,
+          "mixed_dr": 14440,
+          "mixed_dl": 15400,
+          "mixed_ur": 14518,
+          "mixed_ul": 16276
+        }
+      },
+      "L3": {
+        "total": 160,
+        "actual": {
+          "singleton_up": 32,
+          "singleton_down": 32,
+          "singleton_left": 32,
+          "singleton_right": 32,
+          "mixed_dr": 8,
+          "mixed_dl": 8,
+          "mixed_ur": 8,
+          "mixed_ul": 8
+        },
+        "target": {
+          "singleton": 32,
+          "mixed": 8
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 3865,
+          "singleton_down": 4074,
+          "singleton_left": 3905,
+          "singleton_right": 3868,
+          "mixed_dr": 14407,
+          "mixed_dl": 14137,
+          "mixed_ur": 14361,
+          "mixed_ul": 14351
+        }
+      },
+      "L4": {
+        "total": 160,
+        "actual": {
+          "singleton_up": 32,
+          "singleton_down": 32,
+          "singleton_left": 32,
+          "singleton_right": 32,
+          "mixed_dr": 8,
+          "mixed_dl": 8,
+          "mixed_ur": 8,
+          "mixed_ul": 8
+        },
+        "target": {
+          "singleton": 32,
+          "mixed": 8
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 4696,
+          "singleton_down": 4564,
+          "singleton_left": 4403,
+          "singleton_right": 4343,
+          "mixed_dr": 13282,
+          "mixed_dl": 13358,
+          "mixed_ur": 12654,
+          "mixed_ul": 12376
+        }
+      }
+    },
+    "val": {
+      "L0": {
+        "total": 64,
+        "actual": {
+          "singleton_up": 12,
+          "singleton_down": 12,
+          "singleton_left": 12,
+          "singleton_right": 12,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 12,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 312,
+          "singleton_down": 290,
+          "singleton_left": 345,
+          "singleton_right": 249,
+          "mixed_dr": 2024,
+          "mixed_dl": 2537,
+          "mixed_ur": 2106,
+          "mixed_ul": 2738
+        }
+      },
+      "L1": {
+        "total": 48,
+        "actual": {
+          "singleton_up": 8,
+          "singleton_down": 8,
+          "singleton_left": 8,
+          "singleton_right": 8,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 8,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 505,
+          "singleton_down": 479,
+          "singleton_left": 487,
+          "singleton_right": 447,
+          "mixed_dr": 2170,
+          "mixed_dl": 2208,
+          "mixed_ur": 1894,
+          "mixed_ul": 1756
+        }
+      },
+      "L2": {
+        "total": 48,
+        "actual": {
+          "singleton_up": 8,
+          "singleton_down": 8,
+          "singleton_left": 8,
+          "singleton_right": 8,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 8,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 455,
+          "singleton_down": 473,
+          "singleton_left": 525,
+          "singleton_right": 450,
+          "mixed_dr": 1777,
+          "mixed_dl": 2367,
+          "mixed_ur": 1662,
+          "mixed_ul": 2293
+        }
+      },
+      "L3": {
+        "total": 48,
+        "actual": {
+          "singleton_up": 8,
+          "singleton_down": 8,
+          "singleton_left": 8,
+          "singleton_right": 8,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 8,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 531,
+          "singleton_down": 495,
+          "singleton_left": 530,
+          "singleton_right": 510,
+          "mixed_dr": 1735,
+          "mixed_dl": 1865,
+          "mixed_ur": 1956,
+          "mixed_ul": 2156
+        }
+      },
+      "L4": {
+        "total": 48,
+        "actual": {
+          "singleton_up": 8,
+          "singleton_down": 8,
+          "singleton_left": 8,
+          "singleton_right": 8,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 8,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 571,
+          "singleton_down": 652,
+          "singleton_left": 561,
+          "singleton_right": 632,
+          "mixed_dr": 1729,
+          "mixed_dl": 1920,
+          "mixed_ur": 1582,
+          "mixed_ul": 1581
+        }
+      }
+    },
+    "test": {
+      "L0": {
+        "total": 64,
+        "actual": {
+          "singleton_up": 12,
+          "singleton_down": 12,
+          "singleton_left": 12,
+          "singleton_right": 12,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 12,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 293,
+          "singleton_down": 307,
+          "singleton_left": 297,
+          "singleton_right": 317,
+          "mixed_dr": 2541,
+          "mixed_dl": 2255,
+          "mixed_ur": 2309,
+          "mixed_ul": 2315
+        }
+      },
+      "L1": {
+        "total": 48,
+        "actual": {
+          "singleton_up": 8,
+          "singleton_down": 8,
+          "singleton_left": 8,
+          "singleton_right": 8,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 8,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 533,
+          "singleton_down": 513,
+          "singleton_left": 482,
+          "singleton_right": 437,
+          "mixed_dr": 2078,
+          "mixed_dl": 2055,
+          "mixed_ur": 2038,
+          "mixed_ul": 1820
+        }
+      },
+      "L2": {
+        "total": 48,
+        "actual": {
+          "singleton_up": 8,
+          "singleton_down": 8,
+          "singleton_left": 8,
+          "singleton_right": 8,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 8,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 476,
+          "singleton_down": 478,
+          "singleton_left": 419,
+          "singleton_right": 496,
+          "mixed_dr": 2061,
+          "mixed_dl": 1919,
+          "mixed_ur": 2192,
+          "mixed_ul": 1971
+        }
+      },
+      "L3": {
+        "total": 48,
+        "actual": {
+          "singleton_up": 8,
+          "singleton_down": 8,
+          "singleton_left": 8,
+          "singleton_right": 8,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 8,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 504,
+          "singleton_down": 569,
+          "singleton_left": 536,
+          "singleton_right": 547,
+          "mixed_dr": 2016,
+          "mixed_dl": 1954,
+          "mixed_ur": 2083,
+          "mixed_ul": 1563
+        }
+      },
+      "L4": {
+        "total": 48,
+        "actual": {
+          "singleton_up": 8,
+          "singleton_down": 8,
+          "singleton_left": 8,
+          "singleton_right": 8,
+          "mixed_dr": 4,
+          "mixed_dl": 4,
+          "mixed_ur": 4,
+          "mixed_ul": 4
+        },
+        "target": {
+          "singleton": 8,
+          "mixed": 4
+        },
+        "shortfall": {},
+        "candidates": {
+          "singleton_up": 538,
+          "singleton_down": 696,
+          "singleton_left": 538,
+          "singleton_right": 593,
+          "mixed_dr": 1951,
+          "mixed_dl": 2047,
+          "mixed_ur": 1527,
+          "mixed_ul": 1333
+        }
+      }
+    }
+  },
+  "action_occurrences": {
+    "train": {
+      "L0": {
+        "down": 96,
+        "left": 96,
+        "right": 96,
+        "up": 96
+      },
+      "L1": {
+        "down": 48,
+        "left": 48,
+        "right": 48,
+        "up": 48
+      },
+      "L2": {
+        "down": 48,
+        "left": 48,
+        "right": 48,
+        "up": 48
+      },
+      "L3": {
+        "down": 48,
+        "left": 48,
+        "right": 48,
+        "up": 48
+      },
+      "L4": {
+        "down": 48,
+        "left": 48,
+        "right": 48,
+        "up": 48
+      }
+    },
+    "val": {
+      "L0": {
+        "down": 20,
+        "left": 20,
+        "right": 20,
+        "up": 20
+      },
+      "L1": {
+        "down": 16,
+        "left": 16,
+        "right": 16,
+        "up": 16
+      },
+      "L2": {
+        "down": 16,
+        "left": 16,
+        "right": 16,
+        "up": 16
+      },
+      "L3": {
+        "down": 16,
+        "left": 16,
+        "right": 16,
+        "up": 16
+      },
+      "L4": {
+        "down": 16,
+        "left": 16,
+        "right": 16,
+        "up": 16
+      }
+    },
+    "test": {
+      "L0": {
+        "down": 20,
+        "left": 20,
+        "right": 20,
+        "up": 20
+      },
+      "L1": {
+        "down": 16,
+        "left": 16,
+        "right": 16,
+        "up": 16
+      },
+      "L2": {
+        "down": 16,
+        "left": 16,
+        "right": 16,
+        "up": 16
+      },
+      "L3": {
+        "down": 16,
+        "left": 16,
+        "right": 16,
+        "up": 16
+      },
+      "L4": {
+        "down": 16,
+        "left": 16,
+        "right": 16,
+        "up": 16
+      }
+    }
+  },
+  "totals": {
+    "train": 960,
+    "val": 256,
+    "test": 256,
+    "all": 1472
+  }
+}

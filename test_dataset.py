@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
+from pathlib import Path
 
 from dataset import (
-    MapRecord, build_eval_states, content_hash, load_records, optimal_actions,
-    save_records, split_for_hash, state_positions,
+    MapRecord, StateDataset, StateRecord, action_class, build_eval_states,
+    content_hash, load_records, load_states, optimal_actions, save_records,
+    save_states, split_for_hash, state_positions,
 )
 from env.maze import ACTIONS, generate
 
@@ -61,6 +64,46 @@ def test_state_positions_respects_min_dist():
     pos = state_positions(maze, 5, random.Random(0), min_dist=4)
     assert pos
     assert all(maze.distance(p) >= 4 for p in pos)
+
+
+def test_action_class():
+    assert action_class([]) == "none"
+    assert action_class(["up"]) == "singleton_up"
+    assert action_class(["down"]) == "singleton_down"
+    assert action_class(["down", "right"]) == "mixed_dr"
+    assert action_class(["right", "down"]) == "mixed_dr"
+    assert action_class(["up", "down"]) == "mixed_other"
+    assert action_class(["up", "down", "left"]) == "other"
+
+
+def test_state_record_roundtrip(tmp_path):
+    rec = StateRecord(
+        id="st-1", map_id="L0-1", level="L0", pos=(3, 4),
+        state="pos=(3,4) goal=(5,4)\nwalls: none",
+        optimal_actions=("right",), action_class="singleton_right",
+        distance=2, manhattan=2, hash="abc",
+    )
+    path = tmp_path / "states.jsonl"
+    assert save_states([rec], path) == 1
+    assert load_states(path)[0] == rec
+
+
+def test_balanced_state_files():
+    path = Path("data/states/test.jsonl")
+    if not path.exists():
+        return
+    ds = StateDataset.load(path)
+    l0 = ds.filter(levels=("L0",))
+    assert len(l0) == 64
+    counts = Counter(r.action_class for r in l0)
+    assert counts["singleton_up"] == 12
+    assert counts["singleton_down"] == 12
+    assert counts["singleton_left"] == 12
+    assert counts["singleton_right"] == 12
+    assert counts["mixed_dr"] == 4
+    assert counts["mixed_dl"] == 4
+    assert counts["mixed_ur"] == 4
+    assert counts["mixed_ul"] == 4
 
 
 def test_build_eval_states():

@@ -142,6 +142,51 @@ class MapRecord:
         )
 
 
+@dataclass(frozen=True)
+class StateRecord:
+    """地图上的一个单步状态：map_id + pos，以及 BFS 最优动作。"""
+
+    id: str
+    map_id: str
+    level: str
+    pos: tuple[int, int]
+    state: str
+    optimal_actions: tuple[str, ...]
+    action_class: str
+    distance: int
+    manhattan: int
+    hash: str
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "map_id": self.map_id,
+            "level": self.level,
+            "pos": list(self.pos),
+            "state": self.state,
+            "optimal_actions": list(self.optimal_actions),
+            "action_class": self.action_class,
+            "distance": self.distance,
+            "manhattan": self.manhattan,
+            "hash": self.hash,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "StateRecord":
+        return cls(
+            id=d["id"],
+            map_id=d["map_id"],
+            level=d["level"],
+            pos=(int(d["pos"][0]), int(d["pos"][1])),
+            state=d["state"],
+            optimal_actions=tuple(sorted(d["optimal_actions"])),
+            action_class=d.get("action_class") or action_class(d["optimal_actions"]),
+            distance=int(d["distance"]),
+            manhattan=int(d["manhattan"]),
+            hash=d["hash"],
+        )
+
+
 # ---------------------------------------------------------------- I/O
 
 
@@ -164,6 +209,28 @@ def load_records(path: str | Path) -> list[MapRecord]:
             line = line.strip()
             if line:
                 out.append(MapRecord.from_dict(json.loads(line)))
+    return out
+
+
+def save_states(states: Iterable[StateRecord], path: str | Path) -> int:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
+    with path.open("w", encoding="utf-8", newline="\n") as f:
+        for rec in states:
+            f.write(json.dumps(rec.to_dict(), ensure_ascii=False,
+                               separators=(",", ":")) + "\n")
+            n += 1
+    return n
+
+
+def load_states(path: str | Path) -> list[StateRecord]:
+    out = []
+    with Path(path).open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                out.append(StateRecord.from_dict(json.loads(line)))
     return out
 
 
@@ -228,6 +295,42 @@ class MapDataset:
         return dict(sorted(counts.items()))
 
 
+class StateDataset:
+    def __init__(self, records: list[StateRecord]):
+        self.records = list(records)
+
+    @classmethod
+    def load(cls, path: str | Path) -> "StateDataset":
+        return cls(load_states(path))
+
+    def __len__(self) -> int:
+        return len(self.records)
+
+    def __iter__(self) -> Iterator[StateRecord]:
+        return iter(self.records)
+
+    def __getitem__(self, i) -> StateRecord:
+        return self.records[i]
+
+    def filter(self, *, levels: Iterable[str] | None = None,
+               action_classes: Iterable[str] | None = None) -> "StateDataset":
+        out = self.records
+        if levels is not None:
+            allowed = tuple(levels)
+            out = [r for r in out if r.level in allowed]
+        if action_classes is not None:
+            allowed = tuple(action_classes)
+            out = [r for r in out if r.action_class in allowed]
+        return StateDataset(out)
+
+    def counts(self, key: str = "level") -> dict[str, int]:
+        counts: dict[str, int] = {}
+        for r in self.records:
+            value = getattr(r, key)
+            counts[value] = counts.get(value, 0) + 1
+        return dict(sorted(counts.items()))
+
+
 # ---------------------------------------------------------------- 工具
 
 
@@ -240,6 +343,38 @@ def optimal_actions(maze: Maze, pos: tuple[int, int]) -> list[str]:
         if maze.is_free(*nxt) and maze.distance(nxt) == d - 1:
             out.append(name)
     return out
+
+
+SINGLETON_CLASSES = (
+    "singleton_up", "singleton_down", "singleton_left", "singleton_right",
+)
+MIXED_CLASSES = ("mixed_dr", "mixed_dl", "mixed_ur", "mixed_ul")
+ACTION_CLASSES = SINGLETON_CLASSES + MIXED_CLASSES + ("mixed_other", "other", "none")
+
+_PAIR_CLASS = {
+    frozenset(("down", "right")): "mixed_dr",
+    frozenset(("down", "left")): "mixed_dl",
+    frozenset(("up", "right")): "mixed_ur",
+    frozenset(("up", "left")): "mixed_ul",
+}
+
+
+def action_class(actions: Iterable[str]) -> str:
+    """把 optimal_actions 归一成可配额的类别。"""
+    acts = frozenset(actions)
+    if not acts:
+        return "none"
+    if len(acts) == 1:
+        return "singleton_" + next(iter(acts))
+    if len(acts) == 2:
+        return _PAIR_CLASS.get(acts, "mixed_other")
+    return "other"
+
+
+def state_hash(map_hash: str, pos: tuple[int, int]) -> str:
+    return hashlib.sha256(
+        f"{map_hash}:{int(pos[0])},{int(pos[1])}".encode()
+    ).hexdigest()
 
 
 def state_positions(maze: Maze, k: int, rng, *, min_dist: int = 3) -> list[tuple[int, int]]:
@@ -279,8 +414,11 @@ def build_eval_states(records: list[MapRecord], k: int, seed: int = 0) -> list[d
 
 
 __all__ = [
-    "SPLITS", "MapRecord", "MapDataset", "build_eval_states",
-    "canonical_payload", "content_hash", "load_json", "load_records",
-    "optimal_actions", "save_json", "save_records", "split_for_hash",
-    "state_positions",
+    "SPLITS", "MapRecord", "MapDataset", "StateRecord", "StateDataset",
+    "ACTION_CLASSES", "MIXED_CLASSES", "SINGLETON_CLASSES",
+    "action_class", "build_eval_states", "canonical_payload", "content_hash",
+    "load_json", "load_records", "load_states", "optimal_actions",
+    "save_json", "save_records", "save_states", "split_for_hash",
+    "state_hash", "state_positions",
 ]
+
