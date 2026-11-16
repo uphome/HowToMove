@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from prompts import REL_FEWSHOT, build_messages
+from prompts import REL_FEWSHOT, REL_FEWSHOT_L1, build_messages
 
 
 def test_default_messages_have_no_system_or_fewshot():
@@ -19,3 +19,11 @@ def test_rel_fewshot_message_structure():
     assert '"direction": "down"' in msgs[2]["content"]
     assert "delta=(-3,0)" in msgs[-3]["content"]
     assert '"direction": "left"' in msgs[-2]["content"]
+
+
+def test_rel_l1_fewshot_adds_wall_examples():
+    msgs = build_messages("state", fewshot="rel_l1")
+    assert len(msgs) == 1 + 2 * len(REL_FEWSHOT_L1) + 1
+    assert len(REL_FEWSHOT_L1) == len(REL_FEWSHOT) + 2
+    assert any("walls_rel: (+1,+2)" in m["content"] for m in msgs if m["role"] == "user")
+    assert any("walls_rel: (-2,-1)" in m["content"] for m in msgs if m["role"] == "user")

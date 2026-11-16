@@ -399,8 +399,9 @@ def main() -> int:
     ap.add_argument("--max-logp-delta", type=float, default=0.5)
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--obs-style", default="minimal")
-    ap.add_argument("--fewshot", default="none", choices=["none", "rel"],
-                    help="few-shot 示例；当前只支持 rel")
+    ap.add_argument("--fewshot", default="none",
+                    choices=["none", "rel", "rel_l1"],
+                    help="few-shot 示例；rel_l1 额外包含带墙示例")
     ap.add_argument("--eval-every", type=int, default=5)
     ap.add_argument("--target-optimal", type=float, default=0.90,
                     help="val optimal 达到该值后提前停止；<=0 关闭")
@@ -423,8 +424,8 @@ def main() -> int:
     if not levels:
         ap.error("--levels is empty")
     fewshot = None if args.fewshot == "none" else args.fewshot
-    if fewshot == "rel" and args.obs_style != "rel":
-        ap.error("--fewshot rel 需要同时使用 --obs-style rel")
+    if fewshot in ("rel", "rel_l1") and args.obs_style != "rel":
+        ap.error("--fewshot rel/rel_l1 需要同时使用 --obs-style rel")
 
     data_dir = Path(args.data)
     save_dir = Path(args.save_dir)

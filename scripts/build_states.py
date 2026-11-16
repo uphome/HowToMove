@@ -60,9 +60,9 @@ QUOTAS = {
         "test": {"singleton": 12, "mixed": 4},
     },
     "L1": {
-        "train": {"singleton": 32, "mixed": 8},
-        "val": {"singleton": 8, "mixed": 4},
-        "test": {"singleton": 8, "mixed": 4},
+        "train": {"singleton": 64, "mixed": 16},
+        "val": {"singleton": 12, "mixed": 4},
+        "test": {"singleton": 12, "mixed": 4},
     },
     "L2": {
         "train": {"singleton": 32, "mixed": 8},

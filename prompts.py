@@ -34,6 +34,7 @@ REL_SYSTEM = (
     "current cell: origin=you, x increases right, y increases down. "
     "goal: delta=(dx,dy) is the exit relative to you. "
     "bounds: left/right/up/down are steps to the four edges. "
+    "walls_rel lists walls relative to you. "
     "Always call the move tool with exactly one direction."
 )
 
@@ -64,18 +65,31 @@ REL_FEWSHOT = [
      "walls_rel: none", "left"),
 ]
 
+# L1 额外给两条带墙示例（来自 L1 balanced train 的真实状态）。
+REL_FEWSHOT_L1 = REL_FEWSHOT + [
+    ("map 12x12, x=right y=down, origin=you\n"
+     "goal: delta=(+0,+6)\n"
+     "bounds: left=1 right=10 up=3 down=8\n"
+     "walls_rel: (+1,+2) (+1,+4) (+1,+5) (+1,+6) (+1,+7) (+1,+8)", "down"),
+    ("map 12x12, x=right y=down, origin=you\n"
+     "goal: delta=(-7,+1)\n"
+     "bounds: left=9 right=2 up=3 down=8\n"
+     "walls_rel: (-2,-1) (-2,+1) (-2,-2) (-2,-3)", "left"),
+]
+
 
 def build_messages(state_text: str, system: str | None = None,
                    fewshot: str | None = None) -> list[dict]:
-    if fewshot == "rel":
+    if fewshot in ("rel", "rel_l1"):
         sys_text = REL_SYSTEM
     else:
         sys_text = SYSTEM if system is None else system
     messages = []
     if sys_text:
         messages.append({"role": "system", "content": sys_text})
-    if fewshot == "rel":
-        for example_state, direction in REL_FEWSHOT:
+    if fewshot in ("rel", "rel_l1"):
+        examples = REL_FEWSHOT_L1 if fewshot == "rel_l1" else REL_FEWSHOT
+        for example_state, direction in examples:
             messages.append({"role": "user", "content": example_state})
             messages.append({"role": "assistant",
                              "content": _tool_call_text(direction)})
@@ -98,6 +112,6 @@ def render_prompt(tokenizer, state_text: str, enable_thinking: bool = False,
 
 
 __all__ = [
-    "TOOLS", "SYSTEM", "REL_SYSTEM", "REL_FEWSHOT",
+    "TOOLS", "SYSTEM", "REL_SYSTEM", "REL_FEWSHOT", "REL_FEWSHOT_L1",
     "build_messages", "render_prompt",
 ]

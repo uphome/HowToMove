@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "created_at": "2026-11-16T15:46:26",
+  "created_at": "2026-11-16T21:16:51",
   "builder": "scripts/build_states.py",
   "generator": {
     "source": "data/maps/*.jsonl",
@@ -24,15 +24,15 @@
     },
     "L1": {
       "train": {
-        "singleton": 32,
-        "mixed": 8
+        "singleton": 64,
+        "mixed": 16
       },
       "val": {
-        "singleton": 8,
+        "singleton": 12,
         "mixed": 4
       },
       "test": {
-        "singleton": 8,
+        "singleton": 12,
         "mixed": 4
       }
     },
@@ -81,16 +81,16 @@
   },
   "files": {
     "train.jsonl": {
-      "count": 960,
-      "sha256": "b11c2889d38afda3181c3521794d45082dcf7036062d7aafef0ec2a12a804726"
+      "count": 1120,
+      "sha256": "6a62a6d82a0cea981ce8f5469953b7e6cff6abb96208b06529edac167a13315b"
     },
     "val.jsonl": {
-      "count": 256,
-      "sha256": "2fd757b23ad0ff57ce8260bf530a6bd0ce82ccff22639d87ba245629d3c08ca4"
+      "count": 272,
+      "sha256": "988cf0dbd081f5cf3bff89933cf9f3130fa990db2d29cbe920e5cfb9034e9be8"
     },
     "test.jsonl": {
-      "count": 256,
-      "sha256": "ac1a9f60e872556ecebc3fae0cdd4910f3114617469905b5620539bb745363a7"
+      "count": 272,
+      "sha256": "efcd48df527cce4b7b49a2395e0ae5ad059f1ca00fec77b6c1c41aace0f3e1da"
     }
   },
   "counts": {
@@ -124,20 +124,20 @@
         }
       },
       "L1": {
-        "total": 160,
+        "total": 320,
         "actual": {
-          "singleton_up": 32,
-          "singleton_down": 32,
-          "singleton_left": 32,
-          "singleton_right": 32,
-          "mixed_dr": 8,
-          "mixed_dl": 8,
-          "mixed_ur": 8,
-          "mixed_ul": 8
+          "singleton_up": 64,
+          "singleton_down": 64,
+          "singleton_left": 64,
+          "singleton_right": 64,
+          "mixed_dr": 16,
+          "mixed_dl": 16,
+          "mixed_ur": 16,
+          "mixed_ul": 16
         },
         "target": {
-          "singleton": 32,
-          "mixed": 8
+          "singleton": 64,
+          "mixed": 16
         },
         "shortfall": {},
         "candidates": {
@@ -266,19 +266,19 @@
         }
       },
       "L1": {
-        "total": 48,
+        "total": 64,
         "actual": {
-          "singleton_up": 8,
-          "singleton_down": 8,
-          "singleton_left": 8,
-          "singleton_right": 8,
+          "singleton_up": 12,
+          "singleton_down": 12,
+          "singleton_left": 12,
+          "singleton_right": 12,
           "mixed_dr": 4,
           "mixed_dl": 4,
           "mixed_ur": 4,
           "mixed_ul": 4
         },
         "target": {
-          "singleton": 8,
+          "singleton": 12,
           "mixed": 4
         },
         "shortfall": {},
@@ -408,19 +408,19 @@
         }
       },
       "L1": {
-        "total": 48,
+        "total": 64,
         "actual": {
-          "singleton_up": 8,
-          "singleton_down": 8,
-          "singleton_left": 8,
-          "singleton_right": 8,
+          "singleton_up": 12,
+          "singleton_down": 12,
+          "singleton_left": 12,
+          "singleton_right": 12,
           "mixed_dr": 4,
           "mixed_dl": 4,
           "mixed_ur": 4,
           "mixed_ul": 4
         },
         "target": {
-          "singleton": 8,
+          "singleton": 12,
           "mixed": 4
         },
         "shortfall": {},
@@ -530,10 +530,10 @@
         "up": 96
       },
       "L1": {
-        "down": 48,
-        "left": 48,
-        "right": 48,
-        "up": 48
+        "down": 96,
+        "left": 96,
+        "right": 96,
+        "up": 96
       },
       "L2": {
         "down": 48,
@@ -562,10 +562,10 @@
         "up": 20
       },
       "L1": {
-        "down": 16,
-        "left": 16,
-        "right": 16,
-        "up": 16
+        "down": 20,
+        "left": 20,
+        "right": 20,
+        "up": 20
       },
       "L2": {
         "down": 16,
@@ -594,10 +594,10 @@
         "up": 20
       },
       "L1": {
-        "down": 16,
-        "left": 16,
-        "right": 16,
-        "up": 16
+        "down": 20,
+        "left": 20,
+        "right": 20,
+        "up": 20
       },
       "L2": {
         "down": 16,
@@ -620,9 +620,9 @@
     }
   },
   "totals": {
-    "train": 960,
-    "val": 256,
-    "test": 256,
-    "all": 1472
+    "train": 1120,
+    "val": 272,
+    "test": 272,
+    "all": 1664
   }
 }
