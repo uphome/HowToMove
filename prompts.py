@@ -29,21 +29,66 @@ TOOLS = [{
 # 观测本身就是全部上下文（出口 + 障碍坐标 + 当前位置）。
 SYSTEM = ""
 
+REL_SYSTEM = (
+    "You are solving a 12x12 grid maze. Coordinates are relative to your "
+    "current cell: origin=you, x increases right, y increases down. "
+    "goal: delta=(dx,dy) is the exit relative to you. "
+    "bounds: left/right/up/down are steps to the four edges. "
+    "Always call the move tool with exactly one direction."
+)
 
-def build_messages(state_text: str, system: str | None = None) -> list[dict]:
-    sys_text = SYSTEM if system is None else system
+
+def _tool_call_text(direction: str) -> str:
+    return ('<tool_call>\n'
+            '{"name": "move", "arguments": {"direction": "%s"}}\n'
+            '</tool_call>' % direction)
+
+
+# 四个 cardinal 例子，明确教 dx/dy 的符号与动作映射。
+REL_FEWSHOT = [
+    ("map 12x12, x=right y=down, origin=you\n"
+     "goal: delta=(0,+3)\n"
+     "bounds: left=3 right=8 up=4 down=7\n"
+     "walls_rel: none", "down"),
+    ("map 12x12, x=right y=down, origin=you\n"
+     "goal: delta=(0,-3)\n"
+     "bounds: left=3 right=8 up=4 down=7\n"
+     "walls_rel: none", "up"),
+    ("map 12x12, x=right y=down, origin=you\n"
+     "goal: delta=(+3,0)\n"
+     "bounds: left=3 right=8 up=4 down=7\n"
+     "walls_rel: none", "right"),
+    ("map 12x12, x=right y=down, origin=you\n"
+     "goal: delta=(-3,0)\n"
+     "bounds: left=3 right=8 up=4 down=7\n"
+     "walls_rel: none", "left"),
+]
+
+
+def build_messages(state_text: str, system: str | None = None,
+                   fewshot: str | None = None) -> list[dict]:
+    if fewshot == "rel":
+        sys_text = REL_SYSTEM
+    else:
+        sys_text = SYSTEM if system is None else system
     messages = []
     if sys_text:
         messages.append({"role": "system", "content": sys_text})
+    if fewshot == "rel":
+        for example_state, direction in REL_FEWSHOT:
+            messages.append({"role": "user", "content": example_state})
+            messages.append({"role": "assistant",
+                             "content": _tool_call_text(direction)})
     messages.append({"role": "user", "content": state_text})
     return messages
 
 
 def render_prompt(tokenizer, state_text: str, enable_thinking: bool = False,
-                  system: str | None = None) -> tuple[str, list[int]]:
+                  system: str | None = None,
+                  fewshot: str | None = None) -> tuple[str, list[int]]:
     """返回 (prompt 文本, token ids)。"""
     text = tokenizer.apply_chat_template(
-        build_messages(state_text, system),
+        build_messages(state_text, system, fewshot=fewshot),
         tokenize=False,
         add_generation_prompt=True,
         tools=TOOLS,
@@ -52,4 +97,7 @@ def render_prompt(tokenizer, state_text: str, enable_thinking: bool = False,
     return text, tokenizer.encode(text)
 
 
-__all__ = ["TOOLS", "SYSTEM", "build_messages", "render_prompt"]
+__all__ = [
+    "TOOLS", "SYSTEM", "REL_SYSTEM", "REL_FEWSHOT",
+    "build_messages", "render_prompt",
+]

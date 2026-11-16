@@ -110,7 +110,65 @@ exit: 7 left and 2 down
 
 基座模型仍然对 64/64 个 balanced test 状态全部输出 `right`
 （natural 60/60 也全是 right）。说明问题不只是“负号/数字”，
-而是模型完全没有把相对描述接到动作空间上；当前阶段必须 SFT 或换空间编码。
+而是模型完全没有把相对描述接到动作空间上。
+
+---
+
+## 5. Few-shot 相对编码
+
+在 `prompts.py` 里加入 4 条 few-shot：
+
+- `goal delta=(0,+3)` → `down`
+- `goal delta=(0,-3)` → `up`
+- `goal delta=(+3,0)` → `right`
+- `goal delta=(-3,0)` → `left`
+
+消息结构：
+
+```text
+system: 相对坐标规则
+user:   示例状态 1
+assistant: <tool_call>...down...</tool_call>
+...
+user:   当前状态
+```
+
+prompt 约 594 tokens，仍在 1024 以内。
+
+### zero-shot（只加 few-shot，不训练）
+
+| 集合 | optimal | action counts |
+|---|---:|---|
+| balanced test | 73.44% | up 24 / left 16 / right 23 / down 1 |
+| natural test | 86.67% | up 22 / left 14 / right 24 |
+
+模型终于不再常量 `right`。
+
+### few-shot + 10 updates
+
+| 指标 | baseline | update 10 |
+|---|---:|---:|
+| balanced val optimal | 76.56% | 96.88% |
+| **balanced test optimal** | **73.44%** | **100.00%** |
+| natural test optimal | 86.67% | 93.33% |
+| test singleton up/down/left/right | 100 / 8.3 / 83.3 / 83.3 | **100 / 100 / 100 / 100** |
+| test action counts | up24/left16/right23/down1 | left20/right18/down14/up12 |
+| degenerate @10 | — | 93.75% |
+
+### 三组对比
+
+| 组 | balanced test | natural | down singleton |
+|---|---:|---:|---:|
+| absolute | 89.06% | 96.67% | 100% |
+| relative，无 few-shot | 31.25% | 55.00% | 0% |
+| **relative + few-shot** | **100.00%** | **93.33%** | **100%** |
+
+结论：
+
+- signed-delta 相对格式本身不是问题；
+- 0.6B 需要 few-shot 才能把相对坐标接到动作空间；
+- 一旦接上，GRPO 可以非常快地学满 balanced L0（但 64 条 eval 仍偏小，
+  且最后退化率 93.75%，说明 L0 已经饱和）。
 
 ---
 

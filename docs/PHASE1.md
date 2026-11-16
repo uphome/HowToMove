@@ -72,11 +72,24 @@ walls_rel: none
 
 10 update 的 A/B 结果见 `reports/relative_obs_ab.md`：
 
-- absolute：balanced test 65.62% → 89.06%
-- relative：balanced test 31.25% → 31.25%，模型退化成常量 `right`
+| 组 | balanced test | natural | down singleton |
+|---|---:|---:|---:|
+| absolute | 89.06% | 96.67% | 100% |
+| relative（无 few-shot） | 31.25% | 55.00% | 0% |
+| **relative + few-shot** | **100.00%** | **93.33%** | **100%** |
 
-结论：当前 signed-delta 相对格式对 Qwen3-0.6B 太难，不能直接 GRPO；
-下一步应尝试方向词 / 局部 7×7 / SFT 冷启动。
+结论：
+
+- 裸 signed-delta 相对格式模型读不懂，会退化成常量 `right`；
+- 在 prompt 里加 4 条 cardinal few-shot 后，zero-shot 就能输出多方向；
+- 再训练 10 update，balanced L0 达到 100%、四个方向 singleton 全部 100%；
+- 但 64 条 eval 偏小，且退化率 93.75%，L0 已经饱和；下一步应进入 L1 或加更难状态。
+
+命令：
+
+```bash
+python scripts/train_phase1.py --levels L0 --obs-style rel --fewshot rel ...
+```
 
 ### natural eval
 

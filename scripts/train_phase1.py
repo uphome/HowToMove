@@ -190,8 +190,9 @@ def sample_train_items(n: int, items: list[StateItem],
     return rng.choices(items, k=n)
 
 
-def prompt_ids_for(tokenizer, state_text: str) -> list[int]:
-    _, ids = render_prompt(tokenizer, state_text)
+def prompt_ids_for(tokenizer, state_text: str,
+                   fewshot: str | None = None) -> list[int]:
+    _, ids = render_prompt(tokenizer, state_text, fewshot=fewshot)
     return ids
 
 
@@ -283,13 +284,15 @@ def summarize(rows: list[dict]) -> dict:
 
 
 def evaluate(engine, tokenizer, states: list[StateItem], *,
-             max_tokens: int, g: int) -> tuple[dict, list[dict]]:
+             max_tokens: int, g: int,
+             fewshot: str | None = None) -> tuple[dict, list[dict]]:
     rows: list[dict] = []
     t0 = time.perf_counter()
     sampling = Sampling(max_tokens=max_tokens, temperature=0.0)
     for i in range(0, len(states), g):
         batch = states[i:i + g]
-        prompts = [prompt_ids_for(tokenizer, s.state) for s in batch]
+        prompts = [prompt_ids_for(tokenizer, s.state, fewshot=fewshot)
+                   for s in batch]
         outs = engine.generate_batch(prompts, sampling)
         for st, out in zip(batch, outs):
             text = tokenizer.decode(out.token_ids, skip_special_tokens=True)
@@ -396,6 +399,8 @@ def main() -> int:
     ap.add_argument("--max-logp-delta", type=float, default=0.5)
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--obs-style", default="minimal")
+    ap.add_argument("--fewshot", default="none", choices=["none", "rel"],
+                    help="few-shot 示例；当前只支持 rel")
     ap.add_argument("--eval-every", type=int, default=5)
     ap.add_argument("--target-optimal", type=float, default=0.90,
                     help="val optimal 达到该值后提前停止；<=0 关闭")
@@ -417,6 +422,9 @@ def main() -> int:
         ap.error(f"unknown level(s): {bad}; expected subset of {LEVELS}")
     if not levels:
         ap.error("--levels is empty")
+    fewshot = None if args.fewshot == "none" else args.fewshot
+    if fewshot == "rel" and args.obs_style != "rel":
+        ap.error("--fewshot rel 需要同时使用 --obs-style rel")
 
     data_dir = Path(args.data)
     save_dir = Path(args.save_dir)
@@ -479,6 +487,7 @@ def main() -> int:
             "total_updates": args.updates,
             "levels": list(levels),
             "obs_style": args.obs_style,
+            "fewshot": args.fewshot,
             "g": args.g,
             "temperature": args.temperature,
             "train_states": len(train_items),
@@ -488,11 +497,14 @@ def main() -> int:
         }
 
         val_ev, _ = evaluate(engine, tokenizer, val_items,
-                             max_tokens=args.max_tokens, g=args.g)
+                             max_tokens=args.max_tokens, g=args.g,
+                             fewshot=fewshot)
         test_ev, _ = evaluate(engine, tokenizer, test_items,
-                              max_tokens=args.max_tokens, g=args.g)
+                              max_tokens=args.max_tokens, g=args.g,
+                              fewshot=fewshot)
         nat_ev = (evaluate(engine, tokenizer, natural_items,
-                           max_tokens=args.max_tokens, g=args.g)[0]
+                           max_tokens=args.max_tokens, g=args.g,
+                           fewshot=fewshot)[0]
                   if natural_items else None)
         base_metrics = {
             **base_rows,
@@ -538,7 +550,7 @@ def main() -> int:
                 skipped_this = 0
 
                 for si, st in enumerate(states):
-                    ids = prompt_ids_for(tokenizer, st.state)
+                    ids = prompt_ids_for(tokenizer, st.state, fewshot=fewshot)
                     t0 = time.perf_counter()
                     outs = engine.generate_batch(
                         [ids] * args.g, train_sampling)
@@ -653,12 +665,14 @@ def main() -> int:
                 if args.eval_every > 0 and (
                         u % args.eval_every == 0 or u == args.updates):
                     val_ev, _ = evaluate(engine, tokenizer, val_items,
-                                         max_tokens=args.max_tokens, g=args.g)
+                                         max_tokens=args.max_tokens, g=args.g,
+                                         fewshot=fewshot)
                     test_ev, _ = evaluate(engine, tokenizer, test_items,
-                                          max_tokens=args.max_tokens, g=args.g)
+                                          max_tokens=args.max_tokens, g=args.g,
+                                          fewshot=fewshot)
                     nat_ev = (evaluate(engine, tokenizer, natural_items,
                                        max_tokens=args.max_tokens,
-                                       g=args.g)[0]
+                                       g=args.g, fewshot=fewshot)[0]
                               if natural_items else None)
                     metrics.update(_prefix_metrics(val_ev, "eval"))
                     metrics.update(_prefix_metrics(test_ev, "test"))
