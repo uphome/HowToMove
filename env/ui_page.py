@@ -219,6 +219,10 @@ PAGE = r"""<!doctype html>
           <select id="eps"><option value="">（跟随最新）</option></select>
           <button id="follow">跟随最新</button>
         </div>
+        <div class="row" style="margin-top:7px">
+          <input id="eps-filter" placeholder="筛选 episode，如 u5s3（显示 g0~g7）"
+                 style="flex:1;min-width:0">
+        </div>
         <div class="kv" id="ep-summary" style="margin-top:10px"></div>
       </div>
       <div class="card">
@@ -289,6 +293,7 @@ let traceKey = '';
 let traceFrames = [];
 let selectedTraceTurn = null;
 let epsSig = '';
+let episodeList = [];
 
 function fmtNum(v, d=2){
   if (v === undefined || v === null || v === '') return '—';
@@ -929,6 +934,19 @@ document.querySelector('#trace tbody').addEventListener('click', ev => {
   renderTraceTable();
 });
 
+function renderEpsOptions(){
+  const sel = document.getElementById('eps');
+  const cur = sel.value;
+  const filter = (document.getElementById('eps-filter').value || '').trim().toLowerCase();
+  const list = episodeList.filter(e =>
+    !filter || String(e.id).toLowerCase().includes(filter));
+  sel.innerHTML = '<option value="">（跟随最新）</option>' + list.slice(0, 1000).map(e => {
+    const mark = e.success === true ? 'OK' : e.success === false ? 'X' : '-';
+    return `<option value="${e.id}">${mark} ${e.id} · ${e.level || ''} · t${e.turn ?? '?'}</option>`;
+  }).join('');
+  if (cur && list.some(e => e.id === cur)) sel.value = cur;
+}
+
 async function refreshEps(){
   try {
     const r = await api('/api/episodes');
@@ -936,13 +954,8 @@ async function refreshEps(){
     const sig = list.map(e => `${e.id}:${e.turn}:${e.success}:${e.turns}`).join('|');
     if (sig === epsSig) return;
     epsSig = sig;
-    const sel = document.getElementById('eps');
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">（跟随最新）</option>' + list.slice(0, 40).map(e => {
-      const mark = e.success === true ? 'OK' : e.success === false ? 'X' : '-';
-      return `<option value="${e.id}">${mark} ${e.id} · ${e.level || ''} · t${e.turn ?? '?'}</option>`;
-    }).join('');
-    if (cur) sel.value = cur;
+    episodeList = list;
+    renderEpsOptions();
   } catch (err) { /* UI 服务可能刚重启 */ }
 }
 
@@ -969,6 +982,7 @@ document.getElementById('eps').onchange = async (ev) => {
   await loadTrace(id);
 };
 document.getElementById('follow').onclick = () => followLatest();
+document.getElementById('eps-filter').oninput = renderEpsOptions;
 function followLatest(){
   pinned = false;
   traceKey = '';

@@ -74,6 +74,8 @@ python scripts/eval_llm.py --split test_id --limit 10 \
 
 - 左侧迷宫实时显示 agent、最短路、当前位置和本步奖励；
 - 轨迹下拉框可切换最近 episode；选中后暂停跟随；
+- 下方「筛选 episode」输入 `u5s3` 可只显示该状态的 `g0~g7`，
+  多开几个浏览器窗口/标签页分别 pin 不同样本即可并排对比；
 - 当前 episode 汇总：level / seed / turn / shortest / detour / success /
   total reward / steps / reason；
 - 当前状态：位置、距离、步数、本步奖励、结束原因等；
@@ -102,7 +104,8 @@ python scripts/eval_llm.py --split test_id --limit 10 \
 服务端保留上限：
 
 - 训练历史：500 条 update；
-- episode：256 条（单步实验每个状态 G 条采样，8 状态 × 8 采样 = 64/update）；
+- episode：1024 条（单步实验每个状态 G 条采样，16 状态 × 8 采样 = 128/update，
+  保留最近 8 个 update）；
 - 每条 episode：64 帧（30 步训练 + done 足够）。
 
 这些都在内存里，UI 服务重启后清空；训练指标/轨迹的原始数据仍会由
