@@ -128,9 +128,10 @@ class GRPOTrainer:
         _, stats = grpo_loss(*packed, clip_eps=self.cfg.clip_eps,
                              beta=self.cfg.beta)
         stats.grad_norm = float(grad_norm)
-        total = sum(c[4].numel() for c in collected)
+        # 分母只算真实 completion token（padding 的 mask 恒为 0，不应计入
+        # drop 比例；否则短轨迹多时 drop 会被 padding 稀释）。
         kept = sum(float(c[4].sum()) for c in collected)
-        stats.drop_frac = 1.0 - kept / max(total, 1.0)
+        stats.drop_frac = 1.0 - kept / max(total_tokens, 1.0)
         return stats
 
     # ---- 存档 ----

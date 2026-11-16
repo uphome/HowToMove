@@ -70,13 +70,17 @@ def grpo_loss(
 
     with torch.no_grad():
         clipped = (ratio < 1 - clip_eps) | (ratio > 1 + clip_eps)
+        valid = mask > 0.5
+        r_valid = ratio[valid]
         stats = LossStats(
             loss=float(loss.detach()),
             pg=float(((pg * mask).sum() / n).detach()),
             kl=float(((kl * mask).sum() / n).detach()),
             ratio_mean=float((ratio * mask).sum() / n),
-            ratio_min=float(ratio.min()),
-            ratio_max=float(ratio.max()),
+            # min/max 只看参与 loss 的 token；否则 padding / 被剔除的
+            # 数值离群 token 会把 ratio 区间拉到 0 ~ 巨大值，误导 UI。
+            ratio_min=float(r_valid.min()) if r_valid.numel() else 0.0,
+            ratio_max=float(r_valid.max()) if r_valid.numel() else 0.0,
             clip_frac=float((clipped.float() * mask).sum() / n),
             tokens=int(mask.sum()),
         )
