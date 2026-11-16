@@ -3,7 +3,7 @@
 目标：不依赖 SFT，用单步 GRPO 验证 Qwen3-0.6B 能否学会最基础的
 「当前位置/终点 → 移动方向」接地能力。第一阶段只跑 **L0 空地**。
 
-- 阶段报告：`reports/L0.md`
+- 阶段报告：`reports/L0.md`、`reports/L1.md`
 - 后续实验协议：`docs/EXPERIMENT_PROTOCOL.md`
 - 相对观测 A/B：`reports/relative_obs_ab.md`
 
