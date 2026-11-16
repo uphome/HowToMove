@@ -61,6 +61,15 @@ python scripts/eval_llm.py --split test_id --limit 10 \
 数据来自 `TrainViz.update(**rec_metrics)`，每个 update 一条；同一 update
 重复推送会覆盖而不是追加。
 
+### 单步指标（train_phase1）
+
+`train_phase1.py` 接入后，训练看板会额外出现「单步指标」：
+
+- optimal / side / farther / blocked / invalid；
+- valid rate、unique actions、degenerate rate；
+- 固定 eval 的 optimal / valid / farther / blocked 曲线；
+- 每个状态 G 条采样分别作为独立 episode，供多个浏览器窗口并排回看。
+
 ### 推理轨迹
 
 - 左侧迷宫实时显示 agent、最短路、当前位置和本步奖励；
@@ -93,7 +102,7 @@ python scripts/eval_llm.py --split test_id --limit 10 \
 服务端保留上限：
 
 - 训练历史：500 条 update；
-- episode：64 条；
+- episode：256 条（单步实验每个状态 G 条采样，8 状态 × 8 采样 = 64/update）；
 - 每条 episode：64 帧（30 步训练 + done 足够）。
 
 这些都在内存里，UI 服务重启后清空；训练指标/轨迹的原始数据仍会由

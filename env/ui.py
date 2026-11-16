@@ -102,7 +102,7 @@ class VizHub:
     两者都有上限，长期训练不会无限吃内存。
     """
 
-    def __init__(self, queue_size: int = 8, max_episodes: int = 64,
+    def __init__(self, queue_size: int = 8, max_episodes: int = 256,
                  max_turns: int = 64, max_train: int = 500):
         self._lock = threading.Lock()
         self._subs: set[queue.Queue] = set()

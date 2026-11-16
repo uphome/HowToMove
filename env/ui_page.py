@@ -154,6 +154,20 @@ PAGE = r"""<!doctype html>
         <h2>最新指标 <span class="dim" id="train-updated"></span></h2>
         <div class="kpi-grid" id="train"></div>
       </div>
+      <div class="card" id="single-step-card" style="display:none">
+        <h2>单步指标 <span class="dim">train_phase1</span></h2>
+        <div class="kpi-grid" id="single-step-kpis"></div>
+        <div class="chart-grid" style="margin-top:9px">
+          <div class="chart">
+            <div class="chart-head"><span>outcome rates</span><span class="legend" id="legend-outcome"></span></div>
+            <canvas id="chart-outcome" width="700" height="125"></canvas>
+          </div>
+          <div class="chart">
+            <div class="chart-head"><span>fixed eval</span><span class="legend" id="legend-eval"></span></div>
+            <canvas id="chart-eval" width="700" height="125"></canvas>
+          </div>
+        </div>
+      </div>
       <div class="card">
         <h2>训练曲线 <span class="dim">按 update</span></h2>
         <div class="chart-grid">
@@ -283,6 +297,10 @@ function fmtNum(v, d=2){
   return String(v);
 }
 function pct(a,b){ return b ? `${Math.round(100*a/b)}%` : '—'; }
+function ratePct(v){
+  return (typeof v === 'number' && Number.isFinite(v))
+    ? `${(v * 100).toFixed(1)}%` : '—';
+}
 function tone(v){ return typeof v === 'number' ? (v > 0 ? 'good' : v < 0 ? 'bad' : '') : ''; }
 
 function drawSpark(){
@@ -378,6 +396,12 @@ function renderTraining(){
       `<div class="kpi ${c||''}"><div class="k">${k}</div><div class="v">${v}</div></div>`
     ).join('');
   }
+  const hasSingle = (t && (t.optimal !== undefined || t.eval_optimal_rate !== undefined))
+    || trainHistory.some(r => r.optimal !== undefined || r.eval_optimal_rate !== undefined);
+  const ssCard = document.getElementById('single-step-card');
+  ssCard.style.display = hasSingle ? '' : 'none';
+  if (hasSingle) renderSingleStep();
+
   const upd = document.getElementById('train-updated');
   upd.textContent = (t && t.ts)
     ? new Date(t.ts * 1000).toLocaleTimeString('zh-CN', {hour12:false}) : '';
@@ -387,6 +411,31 @@ function renderTraining(){
   }
   renderTrainCharts();
   renderTrainTable();
+}
+
+function renderSingleStep(){
+  const t = latestTrain || {};
+  const el = document.getElementById('single-step-kpis');
+  const ac = t.action_counts || {};
+  const actStr = ['up','down','left','right','invalid']
+    .filter(k => ac[k]).map(k => `${k}:${ac[k]}`).join(' ');
+  const cards = [
+    ['optimal', `${fmtNum(t.optimal,0)}${t.episodes ? ` · ${pct(t.optimal,t.episodes)}` : ''}`, 'good'],
+    ['side', fmtNum(t.side,0)],
+    ['farther', fmtNum(t.farther,0), t.farther > 0 ? 'bad' : ''],
+    ['blocked', fmtNum(t.blocked,0), t.blocked > 0 ? 'warn' : ''],
+    ['invalid', fmtNum(t.invalid,0), t.invalid > 0 ? 'bad' : (t.invalid === 0 ? 'good' : '')],
+    ['valid', (t.valid !== undefined && t.episodes) ? pct(t.valid,t.episodes) : '—'],
+    ['unique actions', fmtNum(t.unique_actions,2)],
+    ['degenerate', `${fmtNum(t.degenerate,0)}${t.states ? ` · ${pct(t.degenerate,t.states)}` : ''}`, t.degenerate > 0 ? 'warn' : ''],
+    ['eval optimal', ratePct(t.eval_optimal_rate)],
+    ['eval valid', ratePct(t.eval_valid_rate)],
+    ['eval farther', ratePct(t.eval_farther_rate)],
+    ['actions', actStr || '—'],
+  ];
+  el.innerHTML = cards.map(([k,v,c]) =>
+    `<div class="kpi ${c||''}"><div class="k">${k}</div><div class="v">${v}</div></div>`
+  ).join('');
 }
 
 function clearChart(id){
@@ -488,7 +537,7 @@ function drawLineChart(id, series, opts={}){
 function renderTrainCharts(){
   const hist = trainHistory.filter(r => r.update !== undefined)
     .sort((a,b) => a.update - b.update);
-  const ids = ['loss','reward','success','errors','ratio','grad'];
+  const ids = ['loss','reward','success','errors','ratio','grad','outcome','eval'];
   if (!hist.length){
     ids.forEach(id => clearChart('chart-' + id));
     ids.forEach(id => setLegend('legend-' + id, []));
@@ -496,6 +545,7 @@ function renderTrainCharts(){
   }
   const take = key => hist.map(r => typeof r[key] === 'number' ? r[key] : null);
   const labels = [hist[0].update, hist[hist.length-1].update];
+  const hasSingle = hist.some(r => r.optimal !== undefined || r.eval_optimal_rate !== undefined);
   const charts = [
     ['loss', [
       {name:'loss', color:'#f06464', values:take('loss')},
@@ -520,6 +570,26 @@ function renderTrainCharts(){
       {name:'grad norm', color:'#f5be3c', values:take('grad_norm')},
     ], {labels}],
   ];
+  if (hasSingle){
+    charts.push(['outcome', [
+      {name:'optimal', color:'#38be78', values:take('optimal_rate')},
+      {name:'side', color:'#8b94a3', values:take('side_rate')},
+      {name:'farther', color:'#f06464', values:take('farther_rate')},
+      {name:'blocked', color:'#f5be3c', values:take('blocked_rate')},
+      {name:'invalid', color:'#a88ce4', values:take('invalid_rate')},
+    ], {zeroLine:true, oneLine:true, labels}]);
+    charts.push(['eval', [
+      {name:'eval optimal', color:'#38be78', values:take('eval_optimal_rate')},
+      {name:'eval valid', color:'#7aa2f7', values:take('eval_valid_rate')},
+      {name:'eval farther', color:'#f06464', values:take('eval_farther_rate')},
+      {name:'eval blocked', color:'#f5be3c', values:take('eval_blocked_rate')},
+    ], {zeroLine:true, oneLine:true, labels}]);
+  } else {
+    clearChart('chart-outcome');
+    clearChart('chart-eval');
+    setLegend('legend-outcome', []);
+    setLegend('legend-eval', []);
+  }
   for (const [id, series, opts] of charts){
     drawLineChart('chart-' + id, series, opts);
     setLegend('legend-' + id, series);
