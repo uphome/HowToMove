@@ -53,7 +53,7 @@ FINISHED = "finished"      # EOS / 达上限，KV 物理块已归还
 #   finished  → （终点，不可再迁移）
 _VALID_TRANSITIONS = {
     WAITING: (PREFILLING,),
-    PREFILLING: (DECODING,),
+    PREFILLING: (DECODING, FINISHED),   # prefill 的首个 token 可能直接 EOS
     DECODING: (DECODING, FINISHED),
     FINISHED: (),
 }
@@ -76,7 +76,7 @@ class Request:
         request_id: int,
         input_ids: torch.Tensor,     # (1, S) prompt tokens（与 generate() 接口形状一致）
         max_new_tokens: int,         # 最多生成多少个新 token
-        eos_token_id: int = 151645,  # 遇到该 token 提前结束（151645 = Qwen3 的 <|im_end|>）
+        eos_token_id: int | tuple[int, ...] = 151645,  # 支持多 EOS（Qwen3: 151645 / 151643）
         kv_cache: PagedKVCache | None = None,  # 由 Scheduler.add() 注入，用户一般不直接传
         arrival_step: int = 0,       # 到达时调度器的步数（后续做公平调度/超时用）
     ):
@@ -89,7 +89,7 @@ class Request:
 
         # 生成过程中的可变状态
         self.output_ids: list[int] = []   # 已生成的 token 序列（逐步 append，尾部即最新）
-        self.output_logprobs: list[float] = []   # 与 output_ids 一一对应
+        self.output_logprobs: list[float] = []  # 与 output_ids 一一对应的原始分布 logprob
         self.num_generated: int = 0       # 已生成 token 数（与 len(output_ids) 同步维护）
         self.state: str = WAITING         # 初始状态：刚创建，等在队列里
 
@@ -126,21 +126,19 @@ class Request:
         """生成是否结束（三种情况任一即结束）：
           1. 状态已是 finished（防重复判定）
           2. 达到 max_new_tokens 上限
-          3. 采样出 eos_token_id（支持 int 或集合：Qwen3 有 151645 <|im_end|>
-             和 151643 <|endoftext|> 两个结束符，漏掉后者会让请求空转到上限）
+          3. 采样出 eos_token_id
 
         由 Scheduler 在每步收尾时调用；为 true 则请求出批、
         finish() 归还 KV 物理块。注意 eos 判定只看"最后一个 token"，
         所以 output_ids 非空才检查。
         """
-        if self.state == FINISHED or self.num_generated >= self.max_new_tokens:
-            return True
-        if not self.output_ids:
-            return False
-        eos = self.eos_token_id
-        if isinstance(eos, (list, tuple, set, frozenset)):
-            return self.output_ids[-1] in eos
-        return self.output_ids[-1] == eos
+        eos_ids = (self.eos_token_id if isinstance(self.eos_token_id, (tuple, list, set))
+                   else (self.eos_token_id,))
+        return (
+            self.state == FINISHED
+            or self.num_generated >= self.max_new_tokens
+            or (self.output_ids and self.output_ids[-1] in eos_ids)
+        )
 
     # ============================================================
     # 状态迁移（唯一的改状态入口，全部经过合法性校验）
@@ -181,15 +179,18 @@ class Request:
                 self.kv_cache.free()
                 self.kv_cache = None
 
-    def append(self, token: int, logprob: float = 0.0):
-        """记录一个新生成的 token 及其原始分布下的对数概率（采样步的收尾动作）。
+    def append(self, token: int, logprob: float | None = None):
+        """记录一个新生成的 token（采样步的收尾动作）。
 
-        只追加 token 与计数，不判定是否结束——结束判定统一
+        只追加 token/计数/原始分布 logprob，不判定是否结束——结束判定统一
         在 is_finished() 里由调度器做，保持单一职责。
-        logprob 供 GRPO 的 old_logps 使用（训练侧 detach、不复算）。
+
+        logprob 取**采样变换之前**的 log_softmax，训练侧 GRPO 的
+        old_logps 依赖它；若调用方不关心则传 None（列表保持为空）。
         """
         self.output_ids.append(int(token))
-        self.output_logprobs.append(float(logprob))
+        if logprob is not None:
+            self.output_logprobs.append(float(logprob))
         self.num_generated += 1
 
     # ============================================================

@@ -1,8 +1,8 @@
 """项目路径与运行环境入口。
 
 任何需要引擎的模块先 `import paths`，之后 `from qwen3 import ...`、
-`import server`、`from engine_rl import ...` 都能直接工作 —— 引擎内部
-一行 import 都不用改（vendored fork 保持原包结构）。
+`from engine_rl import ...` 都能直接工作 —— 引擎内部 import 一行都不用改
+（vendored core 保持原包结构，不再带 server/bench 外围脚本）。
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 ENGINE_ROOT = Path(os.environ.get("AGENTICRL_ENGINE", PROJECT_ROOT / "engine"))
-MODEL_PATH = Path(os.environ.get("AGENTICRL_MODEL", r"E:\codeall\Qwen3-0.6B"))
+MODEL_PATH = Path(os.environ.get("AGENTICRL_MODEL", "/data/hjt1/Qwen3-0.6B"))
 OUT_DIR = PROJECT_ROOT / "out"
 REPORTS_DIR = PROJECT_ROOT / "reports"
 

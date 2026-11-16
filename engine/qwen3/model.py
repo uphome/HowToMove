@@ -24,8 +24,12 @@ class Qwen3Model(nn.Module):
             [Qwen3DecoderLayer(config, i) for i in range(config.num_hidden_layers)]
         )
         self.norm = RMSNorm(config.hidden_size, config.rms_norm_eps)
-        self.rotary_emb = RotaryEmbedding(config.head_dim, config.rope_theta)
-        # 训练用：逐层重算激活，把 B=8 的 ~2.8GB 激活压到 ~300MB
+        self.rotary_emb = RotaryEmbedding(
+            config.head_dim, config.rope_theta,
+            max_seq_len=getattr(config, "max_position_embeddings", 4096),
+        )
+        # 训练用：逐层重算激活，把 B=8 的激活从 GB 级压到百 MB 级。
+        # 推理路径不设置，保持零额外开销。
         self.grad_checkpoint = False
 
     def forward(self, input_ids: torch.Tensor,
@@ -189,16 +193,19 @@ class Qwen3Model(nn.Module):
         return self.norm(hidden_states)
 
     def forward_decode(self, input_ids: torch.Tensor,
-                       position_embeddings: tuple[torch.Tensor, torch.Tensor],
+                       position_ids: torch.Tensor,
                        row_ids: torch.Tensor,
                        caches: list) -> torch.Tensor:
         """decode 步的"捕获友好"前向：纯 GPU 计算，零 Python 状态操作
 
         与 forward() 的 decode 分支等价，但**所有动态/状态部分由调用方负责**：
           - input_ids: (B, 1) 已含本步新 token（调用方 copy_ 进固定张量）
-          - position_embeddings: (cos, sin) 已按本步 start_pos 算好（调用方传）
+          - position_ids: (B, 1) 本步各请求的绝对位置（调用方传）
           - row_ids: (B,) 常驻 2D 块表行号（调用方组装）
           - caches:   list[PagedKVCache]（长度 == B）
+
+        RoPE cos/sin 在函数内部通过预计算表按 position_ids 查表得到，
+        因此查表操作也可以被 CUDA Graph 捕获。
 
         本函数内不做：reserve_next（页分配）、advance_seq_len（状态推进）、
         position_ids 构造、row_ids 组装——这些都有 Python 循环/分配/状态，
@@ -208,8 +215,9 @@ class Qwen3Model(nn.Module):
           - 层循环是 Python for，但每层只调固定形状的 GPU 算子（形状 B 恒定）
           - 无 torch.empty / tensor 构造（全部中间量由算子内部分配，预热后
             内存池稳定；唯一新增输出是每层的 hidden_states，形状固定）
-          - row_ids / position_embeddings 都是外部传入的固定张量
+          - row_ids / position_ids 都是外部传入的固定张量
         """
+        position_embeddings = self.rotary_emb(position_ids)
         hidden_states = self.embed_tokens(input_ids)
         for i, layer in enumerate(self.layers):
             hidden_states = layer(hidden_states, None, position_embeddings,
@@ -235,20 +243,21 @@ class Qwen3ForCausalLM(nn.Module):
         input_lens: prefill 批各请求的有效长度（右 pad 后必须传），decode 不需要
         last_positions: (batch,) 每请求要出 logits 的位置。给定时只对每个请求
             的该位置做 lm_head，返回 (batch, 1, vocab_size)。
-            推理只需要最后一个位置 → 把 prefill 的 (B,S,V) 降到 (B,1,V)。
-            S=256/V=151936/bf16 时是 622MB → 2.4MB，4GB 卡的关键优化。
+            推理只需要最后一个位置 → 把 prefill 的 (B,S,V) 降到 (B,1,V)，
+            这是 4GB 卡上跑长 prompt 的关键优化。
         returns: logits (batch, seq_len, vocab_size) 或 (batch, 1, vocab_size)
         """
         hidden_states = self.model(input_ids, kv_cache=kv_cache,
                                    input_lens=input_lens)
         if last_positions is None:
             return self.lm_head(hidden_states)
-        rows = torch.arange(hidden_states.shape[0], device=hidden_states.device)
+        rows = torch.arange(hidden_states.shape[0],
+                            device=hidden_states.device)
         picked = hidden_states[rows, last_positions]        # (B, hidden)
         return self.lm_head(picked).unsqueeze(1)            # (B, 1, vocab)
 
     def forward_decode(self, input_ids: torch.Tensor,
-                       position_embeddings: tuple[torch.Tensor, torch.Tensor],
+                       position_ids: torch.Tensor,
                        row_ids: torch.Tensor,
                        caches: list) -> torch.Tensor:
         """decode 步捕获友好的完整前向（backbone + lm_head）——供 CUDA Graph 捕获
@@ -257,5 +266,5 @@ class Qwen3ForCausalLM(nn.Module):
         reserve/advance/position/row_ids 全由调用方负责。返回 (B, 1, vocab) logits。
         """
         hidden_states = self.model.forward_decode(
-            input_ids, position_embeddings, row_ids, caches)
+            input_ids, position_ids, row_ids, caches)
         return self.lm_head(hidden_states)

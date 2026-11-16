@@ -18,9 +18,10 @@ from typing import Callable, Iterable
 import torch
 import torch.nn as nn
 
+# LLMcpp main 把 q/k/v 融合成 qkv_proj、gate/up 融合成 gate_up_proj
+# （见 engine/qwen3/attention.py、mlp.py），LoRA 目标随之调整。
 DEFAULT_TARGETS = (
-    "q_proj", "k_proj", "v_proj", "o_proj",
-    "gate_proj", "up_proj", "down_proj",
+    "qkv_proj", "o_proj", "gate_up_proj", "down_proj",
 )
 
 

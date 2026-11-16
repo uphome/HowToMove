@@ -95,18 +95,22 @@ class Scheduler:
         """前向 + 采样完成后的逐请求收尾。
 
         next_tokens:   (B, 1) 批内每个请求采样出的下一个 token
-        next_logprobs: (B, 1) 对应 token 在原始分布下的对数概率（可选）
+        next_logprobs: (B, 1) 或 (B,) 对应的原始分布 logprob（可选）。
+                       RL 训练需要它作为 GRPO 的 old_logps。
         """
         for i, req in enumerate(batch.requests):
-            logprob = 0.0
-            if next_logprobs is not None:
-                logprob = float(next_logprobs[i].item())
-            req.append(next_tokens[i].item(), logprob)
+            lp = None if next_logprobs is None else next_logprobs[i].item()
+            req.append(next_tokens[i].item(), lp)
 
             if batch.mode == "prefill":
-                # prefill 完成：进入自回归，等待下一批 decode
-                req.enter_decoding()
-                self.running.append(req)
+                # prefill 步已经采样出第一个 token；若它正好是 EOS 或
+                # max_new_tokens=1，必须直接收尾，不能多跑一步 decode。
+                if req.is_finished():
+                    req.finish()
+                    self.finished.append(req)
+                else:
+                    req.enter_decoding()
+                    self.running.append(req)
             else:
                 # decode 步：结束后判定出批并归还 KV 块
                 if req.is_finished():

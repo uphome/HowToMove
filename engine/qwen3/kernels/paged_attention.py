@@ -299,6 +299,8 @@ def update_kv_batch_kernel(
     block_table_2d_ptr,  # (max_requests, max_pages) int32 GPU 常驻 2D 块表
     row_ids_ptr,         # (B,) int32 本批各请求的行号
     layer_idx,           # 当前层号（运行时标量）
+    stride_kn_b, stride_kn_h, stride_kn_d,
+    stride_vn_b, stride_vn_h, stride_vn_d,
     stride_kb_blk, stride_kb_lyr, stride_kb_h, stride_kb_p, stride_kb_d,
     stride_vb_blk, stride_vb_lyr, stride_vb_h, stride_vb_p, stride_vb_d,
     num_kv_heads: tl.constexpr,
@@ -328,10 +330,13 @@ def update_kv_batch_kernel(
     mask_d = offs_d < head_dim
 
     # k_new (B, Hkv, D) → 本 program 的 (D,)
-    k_in = tl.load(k_new_ptr + b * num_kv_heads * head_dim + hkv * head_dim + offs_d,
-                   mask=mask_d, other=0.0)
-    v_in = tl.load(v_new_ptr + b * num_kv_heads * head_dim + hkv * head_dim + offs_d,
-                   mask=mask_d, other=0.0)
+    # 必须用真实 stride：fused qkv_proj 的 k/v 是 qkv 张量的切片，
+    # b 维 stride 不等于 Hkv*head_dim（直接按连续布局取会读到 b=0 的数据，
+    # 表现为 batch 里只有第一条请求正确）。
+    k_in = tl.load(k_new_ptr + b * stride_kn_b + hkv * stride_kn_h
+                   + offs_d * stride_kn_d, mask=mask_d, other=0.0)
+    v_in = tl.load(v_new_ptr + b * stride_vn_b + hkv * stride_vn_h
+                   + offs_d * stride_vn_d, mask=mask_d, other=0.0)
 
     # k_buffer 布局: (num_blocks, num_layers, num_kv_heads, block_size, head_dim)
     k_off = (phys * stride_kb_blk + layer_idx * stride_kb_lyr
@@ -347,7 +352,9 @@ def update_kv_batch_triton(k_new, v_new, k_buffer, v_buffer, seq_lens,
                            block_table_2d, row_ids, layer_idx):
     """Triton 批量写 K/V 的 host wrapper
 
-    k_new, v_new: (B, num_kv_heads, head_dim) bf16（已 squeeze 掉 S=1 维）
+    k_new, v_new: (B, num_kv_heads, head_dim) bf16（已 squeeze 掉 S=1 维）。
+        允许非连续：fused qkv_proj 的切片 batch 维 stride 通常大于
+        num_kv_heads * head_dim，kernel 按传入 stride 寻址。
     返回: None（就地写入 pool 的 k_buffer / v_buffer）
     """
     B, num_kv_heads, head_dim = k_new.shape
@@ -358,6 +365,8 @@ def update_kv_batch_triton(k_new, v_new, k_buffer, v_buffer, seq_lens,
     update_kv_batch_kernel[grid](
         k_new, v_new, k_buffer, v_buffer, seq_lens, block_table_2d, row_ids,
         layer_idx,
+        k_new.stride(0), k_new.stride(1), k_new.stride(2),
+        v_new.stride(0), v_new.stride(1), v_new.stride(2),
         k_buffer.stride(0), k_buffer.stride(1), k_buffer.stride(2),
         k_buffer.stride(3), k_buffer.stride(4),
         v_buffer.stride(0), v_buffer.stride(1), v_buffer.stride(2),
