@@ -1,14 +1,19 @@
-"""阶段一实验：单步 GRPO，能不能自己学会「delta → 方向」？
+"""阶段一实验：单步 GRPO，能不能自己学会「状态 → 方向」？
 
 不依赖 SFT。每次更新：
-    采样 K 个状态 → 每个状态 G 条单步轨迹 → 组内标准化 → GRPO 更新
+    从冻结数据集采样 K 个状态 → 每个状态 G 条单步采样 → 组内标准化 → GRPO
 
-关键观察指标：
-    - 第 0 步 ratio 是否 ≈ 1（训推一致性，T3）
-    - 组内退化比例（全一样 → 无梯度）
-    - 固定 eval 集上的 optimal 率随更新变化
+与旧版的区别：
+  - 训练状态来自 data/maps/train.jsonl，不再每次临时 generate；
+  - eval 固定为 data/eval_states.jsonl（不足时从 test_id 地图补齐），
+    默认 64 条，结果可跨 run 比较；
+  - 指标拆成 optimal / side / farther / blocked / invalid，不再把走远算成好；
+  - 逐 update JSONL + 定期 checkpoint + best checkpoint；
+  - 可接训练 UI：每个状态的 G 条采样生成独立 episode，多个浏览器窗口
+    可以分别 pin 不同样本并排查看。
 
-    python scripts/train_phase1.py --updates 20 --states 4 --g 8
+    python scripts/train_phase1.py --levels L0 --updates 100 --states 8 --g 8 \
+        --ui-url http://127.0.0.1:7861
 """
 
 from __future__ import annotations
@@ -19,6 +24,8 @@ import random
 import statistics
 import sys
 import time
+from collections import Counter
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,164 +35,683 @@ import paths  # noqa: E402,F401
 
 import torch  # noqa: E402
 
+from dataset import MapDataset, MapRecord, optimal_actions, state_positions  # noqa: E402
 from engine_rl import RolloutEngine, Sampling, load_model  # noqa: E402
 from env.maze import (  # noqa: E402
-    ACTIONS, LEVELS, REWARD_COLLISION, REWARD_DISTANCE, REWARD_FORMAT,
-    REWARD_STEP, REWARD_TERMINAL, generate,
+    ACTIONS,
+    LEVELS,
+    REWARD_COLLISION,
+    REWARD_DISTANCE,
+    REWARD_FORMAT,
+    REWARD_STEP,
+    REWARD_TERMINAL,
+    Maze,
+    manhattan,
 )
 from env.render import render_state  # noqa: E402
+from env.ui import TrainViz, build_frame  # noqa: E402
 from grpo.adapter import LoRAAdapter, tie_embeddings  # noqa: E402
-from grpo.train import GRPOTrainer, Sample, TrainConfig, group_advantages  # noqa: E402
+from grpo.train import (  # noqa: E402
+    GRPOTrainer,
+    Sample,
+    TrainConfig,
+    group_advantages,
+)
 from prompts import render_prompt  # noqa: E402
 from rollout import parse_action  # noqa: E402
 
-def one_step_reward(maze, pos, action):
-    if action is None:
-        return REWARD_FORMAT + REWARD_STEP, "invalid"
-    dx, dy = ACTIONS[action]
-    nxt = (pos[0] + dx, pos[1] + dy)
-    if not maze.is_free(*nxt):
-        return REWARD_COLLISION + REWARD_STEP, "blocked"
-    delta = maze.distance(pos) - maze.distance(nxt)
-    r = REWARD_DISTANCE * delta + REWARD_STEP
-    if nxt == maze.goal:
-        return r + REWARD_TERMINAL, "goal"
-    return r, "move" if delta else "side"
+
+# ---------------------------------------------------------------- 数据
 
 
-def sample_states(n: int, rng: random.Random, offset: int = 0):
+@dataclass
+class EvalState:
+    id: str
+    map_id: str
+    level: str
+    maze: Maze
+    pos: tuple[int, int]
+    state: str
+    optimal: frozenset[str]
+    distance: int
+    manhattan: int
+
+
+@dataclass
+class TrainState:
+    id: str
+    map_id: str
+    level: str
+    maze: Maze
+    pos: tuple[int, int]
+    state: str
+    optimal: frozenset[str]
+
+
+def _read_jsonl(path: Path) -> list[dict]:
     out = []
-    i = offset
-    while len(out) < n:
-        level = LEVELS[i % len(LEVELS)]
-        maze = generate(level=level, seed=rng.randrange(10**6) + i)
-        i += 1
-        cand = [(x, y) for y in range(maze.height) for x in range(maze.width)
-                if maze.is_free(x, y) and maze.distance((x, y)) >= 3]
-        if cand:
-            out.append((maze, rng.choice(cand)))
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                out.append(json.loads(line))
     return out
 
 
+def _map_index(data_dir: Path, split: str) -> dict[str, MapRecord]:
+    ds = MapDataset.load(data_dir / "maps" / f"{split}.jsonl")
+    return {r.id: r for r in ds.records}
+
+
+def _make_eval_state(rec: MapRecord, pos: tuple[int, int], ident: str,
+                     obs_style: str) -> EvalState:
+    maze = rec.to_maze()
+    return EvalState(
+        id=ident,
+        map_id=rec.id,
+        level=rec.level,
+        maze=maze,
+        pos=pos,
+        state=render_state(maze, pos, style=obs_style),
+        optimal=frozenset(optimal_actions(maze, pos)),
+        distance=maze.distance(pos),
+        manhattan=manhattan(pos, maze.goal),
+    )
+
+
+def build_eval_set(data_dir: Path, levels: tuple[str, ...], limit: int,
+                   seed: int, obs_style: str,
+                   eval_split: str = "test_id") -> list[EvalState]:
+    maps = _map_index(data_dir, eval_split)
+    rows = _read_jsonl(data_dir / "eval_states.jsonl")
+    out: list[EvalState] = []
+    used: set[tuple[str, tuple[int, int]]] = set()
+
+    for row in sorted(rows, key=lambda r: str(r.get("id", ""))):
+        if len(out) >= limit:
+            break
+        if row.get("level") not in levels:
+            continue
+        rec = maps.get(str(row.get("map_id", "")))
+        if rec is None:
+            continue
+        pos = tuple(int(x) for x in row["pos"])
+        key = (rec.id, pos)
+        if key in used:
+            continue
+        maze = rec.to_maze()
+        if not maze.is_free(*pos):
+            continue
+        out.append(_make_eval_state(rec, pos, str(row.get("id", f"es-{len(out):04d}")),
+                                    obs_style))
+        used.add(key)
+
+    if len(out) < limit:
+        rng = random.Random(seed)
+        recs = [r for r in maps.values() if r.level in levels]
+        recs.sort(key=lambda r: r.id)
+        rng.shuffle(recs)
+        for rec in recs:
+            if len(out) >= limit:
+                break
+            maze = rec.to_maze()
+            for pos in state_positions(maze, 8, rng, min_dist=3):
+                if len(out) >= limit:
+                    break
+                key = (rec.id, pos)
+                if key in used:
+                    continue
+                out.append(_make_eval_state(
+                    rec, pos, f"es-extra-{len(out):04d}", obs_style))
+                used.add(key)
+
+    if not out:
+        raise RuntimeError(
+            f"cannot build eval set: data={data_dir} levels={levels} "
+            f"eval_split={eval_split}")
+    return out[:limit]
+
+
+def save_eval_set(states: list[EvalState], path: Path) -> None:
+    rows = [{
+        "id": s.id,
+        "map_id": s.map_id,
+        "level": s.level,
+        "pos": list(s.pos),
+        "state": s.state,
+        "optimal_actions": sorted(s.optimal),
+        "distance": s.distance,
+        "manhattan": s.manhattan,
+    } for s in states]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(rows, ensure_ascii=False, indent=2),
+                    encoding="utf-8")
+
+
+def load_eval_set(path: Path, data_dir: Path, obs_style: str,
+                  eval_split: str = "test_id") -> list[EvalState]:
+    maps = _map_index(data_dir, eval_split)
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    out: list[EvalState] = []
+    for row in rows:
+        rec = maps.get(str(row.get("map_id", "")))
+        if rec is None:
+            continue
+        pos = tuple(int(x) for x in row["pos"])
+        maze = rec.to_maze()
+        if not maze.is_free(*pos):
+            continue
+        out.append(_make_eval_state(rec, pos, str(row.get("id", "")),
+                                    obs_style))
+    return out
+
+
+def load_or_build_eval_set(path: Path, data_dir: Path,
+                           levels: tuple[str, ...], limit: int, seed: int,
+                           obs_style: str,
+                           eval_split: str = "test_id") -> list[EvalState]:
+    if path.exists():
+        try:
+            states = load_eval_set(path, data_dir, obs_style, eval_split)
+            if len(states) >= limit:
+                return states[:limit]
+            print(f"eval set {path} 只有 {len(states)} 条，重新构建")
+        except Exception as exc:  # 文件损坏 / 数据集换了
+            print(f"读取 eval set 失败（{exc}），重新构建")
+    states = build_eval_set(data_dir, levels, limit, seed, obs_style,
+                            eval_split)
+    save_eval_set(states, path)
+    return states
+
+
+def sample_train_states(n: int, records: list[MapRecord], rng: random.Random,
+                        obs_style: str) -> list[TrainState]:
+    if not records:
+        raise RuntimeError("empty training record pool")
+    cache: dict[str, Maze] = {}
+    used: set[tuple[str, tuple[int, int]]] = set()
+    out: list[TrainState] = []
+    attempts = 0
+    max_attempts = max(200, n * 80)
+    while len(out) < n and attempts < max_attempts:
+        attempts += 1
+        rec = rng.choice(records)
+        maze = cache.get(rec.id)
+        if maze is None:
+            maze = rec.to_maze()
+            cache[rec.id] = maze
+        candidates = state_positions(maze, 1, rng, min_dist=3)
+        if not candidates:
+            continue
+        pos = candidates[0]
+        key = (rec.id, pos)
+        if key in used:
+            continue
+        used.add(key)
+        out.append(TrainState(
+            id=f"{rec.id}:{pos[0]},{pos[1]}",
+            map_id=rec.id,
+            level=rec.level,
+            maze=maze,
+            pos=pos,
+            state=render_state(maze, pos, style=obs_style),
+            optimal=frozenset(optimal_actions(maze, pos)),
+        ))
+    if len(out) < n:
+        print(f"警告：只采样到 {len(out)} / {n} 个训练状态")
+    return out
+
+
+def prompt_ids_for(tokenizer, state_text: str) -> list[int]:
+    _, ids = render_prompt(tokenizer, state_text)
+    return ids
+
+
+# ---------------------------------------------------------------- 单步
+
+
+def classify_step(maze: Maze, pos: tuple[int, int], action: str | None):
+    """返回 (kind, reward, next_pos)。
+
+    kind:
+      optimal  距离减 1
+      side     距离不变
+      farther  距离变大
+      blocked  撞墙/越界
+      invalid  工具调用格式非法
+    """
+    if action is None:
+        return "invalid", REWARD_FORMAT + REWARD_STEP, pos
+    dx, dy = ACTIONS[action]
+    nxt = (pos[0] + dx, pos[1] + dy)
+    if not maze.is_free(*nxt):
+        return "blocked", REWARD_COLLISION + REWARD_STEP, pos
+    delta = maze.distance(pos) - maze.distance(nxt)
+    reward = REWARD_DISTANCE * delta + REWARD_STEP
+    if nxt == maze.goal:
+        return "optimal", reward + REWARD_TERMINAL, nxt
+    if delta > 0:
+        return "optimal", reward, nxt
+    if delta == 0:
+        return "side", reward, nxt
+    return "farther", reward, nxt
+
+
+def summarize(rows: list[dict]) -> dict:
+    n = len(rows)
+    counts = Counter(r["kind"] for r in rows)
+    valid = n - counts.get("invalid", 0)
+    actions = Counter((r.get("action") or "invalid") for r in rows)
+
+    def rate(x: int) -> float:
+        return x / n if n else 0.0
+
+    return {
+        "n": n,
+        "valid": valid,
+        "optimal": counts.get("optimal", 0),
+        "side": counts.get("side", 0),
+        "farther": counts.get("farther", 0),
+        "blocked": counts.get("blocked", 0),
+        "invalid": counts.get("invalid", 0),
+        "valid_rate": rate(valid),
+        "optimal_rate": rate(counts.get("optimal", 0)),
+        "side_rate": rate(counts.get("side", 0)),
+        "farther_rate": rate(counts.get("farther", 0)),
+        "blocked_rate": rate(counts.get("blocked", 0)),
+        "invalid_rate": rate(counts.get("invalid", 0)),
+        "mean_reward": statistics.mean([r["reward"] for r in rows]) if rows else 0.0,
+        "action_counts": dict(actions),
+    }
+
+
+def evaluate(engine, tokenizer, states: list[EvalState], *,
+             max_tokens: int, g: int) -> tuple[dict, list[dict]]:
+    rows: list[dict] = []
+    t0 = time.perf_counter()
+    sampling = Sampling(max_tokens=max_tokens, temperature=0.0)
+    for i in range(0, len(states), g):
+        batch = states[i:i + g]
+        prompts = [prompt_ids_for(tokenizer, s.state) for s in batch]
+        outs = engine.generate_batch(prompts, sampling)
+        for st, out in zip(batch, outs):
+            text = tokenizer.decode(out.token_ids, skip_special_tokens=True)
+            action = parse_action(text)
+            kind, reward, _ = classify_step(st.maze, st.pos, action)
+            optimal = action is not None and action in st.optimal
+            if optimal:
+                kind = "optimal"
+            rows.append({
+                "id": st.id,
+                "map_id": st.map_id,
+                "level": st.level,
+                "action": action,
+                "kind": kind,
+                "optimal": optimal,
+                "reward": reward,
+                "distance": st.distance,
+            })
+    summary = summarize(rows)
+    summary["elapsed_s"] = time.perf_counter() - t0
+    return summary, rows
+
+
+# ---------------------------------------------------------------- 训练
+
+
+def _fmt(v, digits=3):
+    return "—" if v is None else f"{v:.{digits}f}"
+
+
+def _eval_metrics(ev: dict) -> dict:
+    keys = (
+        "n", "valid", "optimal", "side", "farther", "blocked", "invalid",
+        "valid_rate", "optimal_rate", "side_rate", "farther_rate",
+        "blocked_rate", "invalid_rate", "mean_reward", "action_counts",
+        "elapsed_s",
+    )
+    return {f"eval_{k}": ev[k] for k in keys if k in ev}
+
+
+def _sample_frame(st: TrainState, sample_index: int, text: str, action,
+                  reward: float, kind: str, optimal: bool, token_ids: list[int],
+                  logprob: float, latency: float, finish: str,
+                  group_size: int, unique_actions: int,
+                  action_counts: dict, group_std: float, update: int) -> dict:
+    return build_frame(
+        st.maze, st.pos, path=[st.pos], mode="live",
+        info={
+            "action": action,
+            "reward": round(reward, 4),
+            "kind": kind,
+            "optimal": optimal,
+            "success": optimal,
+            "total_reward": round(reward, 4),
+            "steps": 1,
+            "reason": kind,
+            "group_size": group_size,
+            "unique_actions": unique_actions,
+            "action_counts": action_counts,
+            "group_std": round(group_std, 4),
+        },
+        llm={
+            "text": text,
+            "action": action,
+            "tokens": len(token_ids),
+            "logprob": logprob,
+            "latency": round(latency, 4),
+            "finish": finish,
+        },
+        prompt=st.state,
+        episode=f"u{update}s{sample_index // group_size}g{sample_index % group_size}",
+        turn=1,
+    )
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description="single-step GRPO on maze states")
     ap.add_argument("--model", default=str(paths.MODEL_PATH))
+    ap.add_argument("--data", default="data")
+    ap.add_argument("--split", default="train")
+    ap.add_argument("--eval-split", default="test_id")
+    ap.add_argument("--levels", default="L0",
+                    help="逗号分隔，如 L0 或 L0,L1")
     ap.add_argument("--updates", type=int, default=20)
-    ap.add_argument("--states", type=int, default=4, help="每次更新的状态数")
+    ap.add_argument("--states", type=int, default=8, help="每次更新的状态数")
     ap.add_argument("--g", type=int, default=8)
     ap.add_argument("--temperature", type=float, default=1.2)
+    ap.add_argument("--top-k", type=int, default=0)
+    ap.add_argument("--top-p", type=float, default=1.0)
     ap.add_argument("--max-tokens", type=int, default=40)
+    ap.add_argument("--max-seq-len", type=int, default=1024)
+    ap.add_argument("--kv-ratio", type=float, default=0.5)
     ap.add_argument("--lr", type=float, default=1e-4)
     ap.add_argument("--clip", type=float, default=0.2)
     ap.add_argument("--beta", type=float, default=0.0)
+    ap.add_argument("--max-logp-delta", type=float, default=0.5)
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--obs-style", default="minimal")
-    ap.add_argument("--eval-states", type=int, default=16)
+    ap.add_argument("--eval-states", type=int, default=64)
+    ap.add_argument("--eval-seed", type=int, default=1234)
     ap.add_argument("--eval-every", type=int, default=10)
+    ap.add_argument("--target-optimal", type=float, default=0.95,
+                    help="eval optimal 达到该值后提前停止；<=0 关闭")
+    ap.add_argument("--eval-set", default="",
+                    help="固定 eval JSON；默认 out/phase1_eval_<levels>_<n>.json")
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--save-dir", default="out/phase1")
     ap.add_argument("--save", default="out/lora_phase1.pt")
     ap.add_argument("--json", default="out/phase1_log.json")
+    ap.add_argument("--jsonl", default="out/phase1.jsonl")
+    ap.add_argument("--ui-url", default=None)
+    ap.add_argument("--ui-host", default="127.0.0.1")
+    ap.add_argument("--ui-port", type=int, default=7862)
+    ap.add_argument("--no-ui", action="store_true")
+    ap.add_argument("--no-grad-checkpoint", action="store_true")
     args = ap.parse_args()
 
-    rng = random.Random(args.seed)
-    eval_states = sample_states(args.eval_states, random.Random(1234))
+    levels = tuple(x.strip().upper() for x in args.levels.split(",") if x.strip())
+    bad = [x for x in levels if x not in LEVELS]
+    if bad:
+        ap.error(f"unknown level(s): {bad}; expected subset of {LEVELS}")
+    if not levels:
+        ap.error("--levels is empty")
 
+    data_dir = Path(args.data)
+    save_dir = Path(args.save_dir)
+    save_dir.mkdir(parents=True, exist_ok=True)
+    Path(args.json).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.jsonl).parent.mkdir(parents=True, exist_ok=True)
+
+    train_ds = MapDataset.load(data_dir / "maps" / f"{args.split}.jsonl")
+    train_records = [r for r in train_ds.records if r.level in levels]
+    if not train_records:
+        raise RuntimeError(f"no training maps for levels={levels}")
+
+    eval_tag = "-".join(levels)
+    eval_path = Path(args.eval_set) if args.eval_set else (
+        Path("out") / f"phase1_eval_{eval_tag}_{args.eval_states}.json")
+    eval_states = load_or_build_eval_set(
+        eval_path, data_dir, levels, args.eval_states, args.eval_seed,
+        args.obs_style, args.eval_split,
+    )
+
+    viz = None
+    if not args.no_ui:
+        viz = TrainViz(args.ui_url, host=args.ui_host, port=args.ui_port,
+                       serve=args.ui_url is None)
+        print(f"UI: {viz.url}")
+
+    print(f"levels={levels}  train_maps={len(train_records)}  "
+          f"eval={len(eval_states)}  eval_set={eval_path}")
     print(f"加载模型 {args.model}")
     model, tokenizer, device = load_model(args.model)
     model.eval()
     tie_embeddings(model)
 
-    def prompt_ids(maze, pos):
-        state = render_state(maze, pos, style=args.obs_style)
-        _, ids = render_prompt(tokenizer, state)
-        return ids
+    engine = None
+    try:
+        engine = RolloutEngine(
+            model, tokenizer, max_batch=args.g,
+            max_seq_len=args.max_seq_len, kv_ratio=args.kv_ratio,
+            device=device,
+        )
+        adapter = LoRAAdapter(model, r=args.lora_r, alpha=2 * args.lora_r)
+        n_train = sum(p.numel() for p in adapter.trainable_parameters())
+        print(f"LoRA params: {n_train/1e6:.2f}M  (r={args.lora_r})")
+        trainer = GRPOTrainer(adapter, TrainConfig(
+            lr=args.lr, clip_eps=args.clip, beta=args.beta,
+            grad_checkpoint=not args.no_grad_checkpoint,
+            max_logp_delta=args.max_logp_delta,
+        ))
 
-    def evaluate(engine):
-        acts, rewards, kinds = [], [], []
-        for i in range(0, len(eval_states), args.g):
-            batch = eval_states[i:i + args.g]
-            prompts = [prompt_ids(m, p) for m, p in batch]
-            outs = engine.generate_batch(prompts, Sampling(
-                max_tokens=args.max_tokens, temperature=0.0))
-            for (m, p), o in zip(batch, outs):
-                a = parse_action(tokenizer.decode(o.token_ids, skip_special_tokens=True))
-                r, k = one_step_reward(m, p, a)
-                acts.append(a); rewards.append(r); kinds.append(k)
-        return {
-            "valid": sum(a is not None for a in acts) / len(acts),
-            "good": sum(k in ("move", "goal") for k in kinds) / len(kinds),
-            "blocked": sum(k == "blocked" for k in kinds) / len(kinds),
-            "invalid": sum(k == "invalid" for k in kinds) / len(kinds),
-            "reward": statistics.mean(rewards),
+        train_sampling = Sampling(
+            max_tokens=args.max_tokens, temperature=args.temperature,
+            top_k=args.top_k, top_p=args.top_p,
+        )
+
+        hist: list[dict] = []
+        base_rows = {
+            "update": 0,
+            "total_updates": args.updates,
+            "levels": list(levels),
+            "obs_style": args.obs_style,
+            "g": args.g,
+            "temperature": args.temperature,
         }
 
-    engine = RolloutEngine(model, tokenizer, max_batch=args.g,
-                           max_seq_len=768, kv_ratio=0.5, device=device)
-    adapter = LoRAAdapter(model, r=args.lora_r, alpha=2 * args.lora_r)
-    n_train = sum(p.numel() for p in adapter.trainable_parameters())
-    print(f"LoRA params: {n_train/1e6:.2f}M  (r={args.lora_r})")
-    trainer = GRPOTrainer(adapter, TrainConfig(
-        lr=args.lr, clip_eps=args.clip, beta=args.beta))
+        base_ev, _ = evaluate(engine, tokenizer, eval_states,
+                              max_tokens=args.max_tokens, g=args.g)
+        base_metrics = {**base_rows, **_eval_metrics(base_ev)}
+        hist.append(base_metrics)
+        print(f"[eval @0] valid={base_ev['valid_rate']:.2%} "
+              f"optimal={base_ev['optimal_rate']:.2%} "
+              f"farther={base_ev['farther_rate']:.2%} "
+              f"invalid={base_ev['invalid_rate']:.2%} "
+              f"reward={base_ev['mean_reward']:+.3f}")
+        if viz is not None:
+            viz.update(**base_metrics)
 
-    base = evaluate(engine)
-    print(f"[eval @0] {base}")
-    hist = [{"update": 0, **base}]
+        jsonl_fp = Path(args.jsonl).open("w", encoding="utf-8")
+        jsonl_fp.write(json.dumps(base_metrics, ensure_ascii=False) + "\n")
+        jsonl_fp.flush()
 
-    t_start = time.time()
-    skipped = 0
-    for u in range(1, args.updates + 1):
-        states = sample_states(args.states, rng, offset=10**5 + u * 100)
-        samples: list[Sample] = []
-        group_std = []
-        for maze, pos in states:
-            ids = prompt_ids(maze, pos)
-            outs = engine.generate_batch(
-                [ids] * args.g,
-                Sampling(max_tokens=args.max_tokens, temperature=args.temperature))
-            rewards, rows = [], []
-            for o in outs:
-                a = parse_action(tokenizer.decode(o.token_ids,
-                                                  skip_special_tokens=True))
-                r, _ = one_step_reward(maze, pos, a)
-                rewards.append(r)
-                rows.append(o)
-            advs, degen = group_advantages(rewards)
-            group_std.append(statistics.pstdev(rewards))
-            if degen:
-                skipped += 1
-                continue
-            for o, adv in zip(rows, advs):
-                if not o.token_ids:
-                    continue
-                samples.append(Sample(ids, list(o.token_ids),
-                                      list(o.logprobs), float(adv)))
+        best_optimal = base_ev["optimal_rate"]
+        t_start = time.time()
+        skipped_groups = 0
+        try:
+            for u in range(1, args.updates + 1):
+                # 确定性种子：不要用 tuple.__hash__（受 PYTHONHASHSEED 影响）
+                rng = random.Random(args.seed * 100003 + u)
+                states = sample_train_states(
+                    args.states, train_records, rng, args.obs_style)
+                samples: list[Sample] = []
+                all_rows: list[dict] = []
+                group_std: list[float] = []
+                group_unique: list[int] = []
+                group_count = 0
+                skipped_this = 0
 
-        if not samples:
-            print(f"[{u:3d}] 全组退化，跳过")
-            continue
+                for si, st in enumerate(states):
+                    ids = prompt_ids_for(tokenizer, st.state)
+                    t0 = time.perf_counter()
+                    outs = engine.generate_batch(
+                        [ids] * args.g, train_sampling)
+                    latency = time.perf_counter() - t0
+                    rewards: list[float] = []
+                    rows: list[dict] = []
+                    for gi, out in enumerate(outs):
+                        text = tokenizer.decode(out.token_ids,
+                                                skip_special_tokens=True)
+                        action = parse_action(text)
+                        kind, reward, _ = classify_step(st.maze, st.pos, action)
+                        optimal = action is not None and action in st.optimal
+                        if optimal:
+                            kind = "optimal"
+                        rewards.append(reward)
+                        rows.append({
+                            "action": action,
+                            "kind": kind,
+                            "optimal": optimal,
+                            "reward": reward,
+                        })
 
-        stats = trainer.update(samples)
-        line = (f"[{u:3d}] n={len(samples):2d} skip={skipped} "
-                f"loss={stats.loss:+.3f} pg={stats.pg:+.3f} kl={stats.kl:+.4f} "
-                f"ratio=[{stats.ratio_min:.4f},{stats.ratio_max:.4f}] "
-                f"clip={stats.clip_frac:.2f} drop={stats.drop_frac:.2f} "
-                f"gstd={statistics.mean(group_std):.2f} "
-                f"gnorm={stats.grad_norm:.3f}")
-        print(line)
-        if u % args.eval_every == 0 or u == args.updates:
-            ev = evaluate(engine)
-            print(f"      [eval @{u}] {ev}")
-            hist.append({"update": u, **ev})
+                    advs, degen = group_advantages(rewards)
+                    std = statistics.pstdev(rewards)
+                    unique = len({a for a in (r["action"] for r in rows)
+                                  if a in ACTIONS})
+                    action_counts = dict(Counter(
+                        (r["action"] or "invalid") for r in rows))
+                    group_count += 1
+                    group_std.append(std)
+                    group_unique.append(unique)
+                    all_rows.extend(rows)
 
-    dt = time.time() - t_start
-    print(f"\n总耗时 {dt/60:.1f} min，退化组 {skipped}")
-    Path(args.save).parent.mkdir(parents=True, exist_ok=True)
-    trainer.save(args.save)
-    Path(args.json).write_text(json.dumps(hist, indent=2, ensure_ascii=False),
-                               encoding="utf-8")
-    print(f"adapter → {args.save}\n日志 → {args.json}")
-    engine.close()
-    return 0
+                    if viz is not None:
+                        for gi, (out, r) in enumerate(zip(outs, rows)):
+                            viz.publish(_sample_frame(
+                                st, si * args.g + gi,
+                                tokenizer.decode(out.token_ids,
+                                                 skip_special_tokens=True),
+                                r["action"], r["reward"], r["kind"],
+                                r["optimal"], out.token_ids,
+                                out.mean_logprob, latency, out.finish_reason,
+                                args.g, unique, action_counts, std, u,
+                            ))
+
+                    if degen:
+                        skipped_groups += 1
+                        skipped_this += 1
+                        continue
+                    for out, adv in zip(outs, advs):
+                        if not out.token_ids:
+                            continue
+                        samples.append(Sample(
+                            ids, list(out.token_ids),
+                            list(out.logprobs), float(adv),
+                        ))
+
+                stats = trainer.update(samples) if samples else None
+                summary = summarize(all_rows)
+                metrics = {
+                    **base_rows,
+                    "update": u,
+                    "states": len(states),
+                    "episodes": len(all_rows),
+                    "samples": len(samples),
+                    "success": summary["optimal"],
+                    "optimal": summary["optimal"],
+                    "side": summary["side"],
+                    "farther": summary["farther"],
+                    "blocked": summary["blocked"],
+                    "invalid": summary["invalid"],
+                    "valid": summary["valid"],
+                    "valid_rate": summary["valid_rate"],
+                    "optimal_rate": summary["optimal_rate"],
+                    "side_rate": summary["side_rate"],
+                    "farther_rate": summary["farther_rate"],
+                    "blocked_rate": summary["blocked_rate"],
+                    "invalid_rate": summary["invalid_rate"],
+                    "mean_reward": summary["mean_reward"],
+                    "mean_steps": 1.0,
+                    "collisions": summary["blocked"],
+                    "format_errors": summary["invalid"],
+                    "degenerate": skipped_this,
+                    "degenerate_rate": (skipped_this / group_count
+                                        if group_count else 0.0),
+                    "unique_actions": (statistics.mean(group_unique)
+                                       if group_unique else 0.0),
+                    "group_std": (statistics.mean(group_std)
+                                  if group_std else 0.0),
+                    "action_counts": summary["action_counts"],
+                }
+                if stats is not None:
+                    metrics.update({
+                        "loss": stats.loss,
+                        "pg": stats.pg,
+                        "kl": stats.kl,
+                        "ratio_min": stats.ratio_min,
+                        "ratio_max": stats.ratio_max,
+                        "clip_frac": stats.clip_frac,
+                        "drop_frac": stats.drop_frac,
+                        "grad_norm": stats.grad_norm,
+                    })
+
+                stop_early = False
+                if args.eval_every > 0 and (
+                        u % args.eval_every == 0 or u == args.updates):
+                    ev, _ = evaluate(engine, tokenizer, eval_states,
+                                     max_tokens=args.max_tokens, g=args.g)
+                    metrics.update(_eval_metrics(ev))
+                    trainer.save(save_dir / f"ckpt_u{u:04d}.pt")
+                    if ev["optimal_rate"] > best_optimal:
+                        best_optimal = ev["optimal_rate"]
+                        trainer.save(save_dir / "best.pt")
+                    print(f"      [eval @{u}] valid={ev['valid_rate']:.2%} "
+                          f"optimal={ev['optimal_rate']:.2%} "
+                          f"farther={ev['farther_rate']:.2%} "
+                          f"invalid={ev['invalid_rate']:.2%} "
+                          f"reward={ev['mean_reward']:+.3f}")
+                    if (args.target_optimal > 0
+                            and ev["optimal_rate"] >= args.target_optimal):
+                        stop_early = True
+                        print(f"      target optimal={args.target_optimal:.0%} "
+                              f"已达到，提前停止")
+
+                hist.append(metrics)
+                jsonl_fp.write(json.dumps(metrics, ensure_ascii=False) + "\n")
+                jsonl_fp.flush()
+                if viz is not None:
+                    viz.update(**metrics)
+                print(f"[{u:3d}] states={len(states)} n={len(samples)} "
+                      f"skip={skipped_this} opt={summary['optimal_rate']:.2f} "
+                      f"farther={summary['farther_rate']:.2f} "
+                      f"deg={metrics['degenerate_rate']:.2f} "
+                      f"loss={_fmt(metrics.get('loss'))} "
+                      f"ratio=[{_fmt(metrics.get('ratio_min'), 3)},"
+                      f"{_fmt(metrics.get('ratio_max'), 3)}] "
+                      f"gnorm={_fmt(metrics.get('grad_norm'))}")
+                if stop_early:
+                    break
+        finally:
+            jsonl_fp.close()
+
+        dt = time.time() - t_start
+        print(f"\n总耗时 {dt/60:.1f} min，退化组 {skipped_groups}，"
+              f"best eval optimal={best_optimal:.2%}")
+        trainer.save(save_dir / "last.pt")
+        if args.save:
+            trainer.save(args.save)
+        Path(args.json).write_text(
+            json.dumps(hist, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"adapter → {save_dir/'last.pt'}")
+        print(f"日志 → {args.jsonl} / {args.json}")
+        return 0
+    finally:
+        if engine is not None:
+            engine.close()
+        if viz is not None:
+            viz.close()
 
 
 if __name__ == "__main__":
