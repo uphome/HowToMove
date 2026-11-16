@@ -67,8 +67,12 @@ python scripts/eval_llm.py --split test_id --limit 10 \
 
 - optimal / side / farther / blocked / invalid；
 - valid rate、unique actions、degenerate rate；
-- 固定 eval 的 optimal / valid / farther / blocked 曲线；
+- **val / balanced test / natural test** 三条 optimal 曲线；
 - 每个状态 G 条采样分别作为独立 episode，供多个浏览器窗口并排回看。
+
+train_phase1 现在使用 `data/states/` 的动作均衡状态集：
+`val` 做早停，`test` 做最终报告，`data/eval_states.jsonl` 作为
+natural eval。balanced test 会强制覆盖 down-only 等单方向状态。
 
 ### 推理轨迹
 

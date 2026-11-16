@@ -163,7 +163,7 @@ PAGE = r"""<!doctype html>
             <canvas id="chart-outcome" width="700" height="125"></canvas>
           </div>
           <div class="chart">
-            <div class="chart-head"><span>fixed eval</span><span class="legend" id="legend-eval"></span></div>
+            <div class="chart-head"><span>val / balanced / natural</span><span class="legend" id="legend-eval"></span></div>
             <canvas id="chart-eval" width="700" height="125"></canvas>
           </div>
         </div>
@@ -433,9 +433,12 @@ function renderSingleStep(){
     ['valid', (t.valid !== undefined && t.episodes) ? pct(t.valid,t.episodes) : '—'],
     ['unique actions', fmtNum(t.unique_actions,2)],
     ['degenerate', `${fmtNum(t.degenerate,0)}${t.states ? ` · ${pct(t.degenerate,t.states)}` : ''}`, t.degenerate > 0 ? 'warn' : ''],
-    ['eval optimal', ratePct(t.eval_optimal_rate)],
-    ['eval valid', ratePct(t.eval_valid_rate)],
-    ['eval farther', ratePct(t.eval_farther_rate)],
+    ['val optimal', ratePct(t.eval_optimal_rate)],
+    ['balanced test', ratePct(t.test_optimal_rate)],
+    ['natural test', ratePct(t.natural_optimal_rate)],
+    ['val farther', ratePct(t.eval_farther_rate)],
+    ['test farther', ratePct(t.test_farther_rate)],
+    ['natural farther', ratePct(t.natural_farther_rate)],
     ['actions', actStr || '—'],
   ];
   el.innerHTML = cards.map(([k,v,c]) =>
@@ -584,10 +587,9 @@ function renderTrainCharts(){
       {name:'invalid', color:'#a88ce4', values:take('invalid_rate')},
     ], {zeroLine:true, oneLine:true, labels}]);
     charts.push(['eval', [
-      {name:'eval optimal', color:'#38be78', values:take('eval_optimal_rate')},
-      {name:'eval valid', color:'#7aa2f7', values:take('eval_valid_rate')},
-      {name:'eval farther', color:'#f06464', values:take('eval_farther_rate')},
-      {name:'eval blocked', color:'#f5be3c', values:take('eval_blocked_rate')},
+      {name:'val optimal', color:'#38be78', values:take('eval_optimal_rate')},
+      {name:'balanced test', color:'#7aa2f7', values:take('test_optimal_rate')},
+      {name:'natural test', color:'#a88ce4', values:take('natural_optimal_rate')},
     ], {zeroLine:true, oneLine:true, labels}]);
   } else {
     clearChart('chart-outcome');
