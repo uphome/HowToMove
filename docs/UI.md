@@ -63,12 +63,15 @@ python scripts/eval_llm.py --split test_id --limit 10 \
 
 ### 单步指标（train_phase1）
 
-`train_phase1.py` 接入后，训练看板会额外出现「单步指标」：
+`train_phase1.py` 接入后，训练看板首屏只保留决策指标：
 
-- optimal / side / farther / blocked / invalid；
-- valid rate、unique actions、degenerate rate；
-- **val / balanced test / natural test** 三条 optimal 曲线；
-- 每个状态 G 条采样分别作为独立 episode，供多个浏览器窗口并排回看。
+- balanced test optimal、natural test optimal、val optimal；
+- degenerate rate、valid rate、down singleton accuracy；
+- up/down/left/right singleton accuracy 条形图；
+- val / balanced / natural 三条 optimal 曲线。
+
+loss / ratio / clip / drop / farther / blocked / unique actions 等
+放进折叠的「训练诊断 / 全部指标」。JSONL 仍然保留全部字段。
 
 train_phase1 现在使用 `data/states/` 的动作均衡状态集：
 `val` 做早停，`test` 做最终报告，`data/eval_states.jsonl` 作为

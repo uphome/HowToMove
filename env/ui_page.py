@@ -67,6 +67,14 @@ PAGE = r"""<!doctype html>
           text-overflow:ellipsis}
   .kpi.good .v{color:var(--goal)} .kpi.bad .v{color:var(--bad)}
   .kpi.warn .v{color:var(--warn)}
+  #direction-bars{display:flex;flex-direction:column;gap:7px}
+  .dir-row{display:grid;grid-template-columns:48px 1fr 96px;gap:8px;align-items:center}
+  .dir-name{font-size:11px;color:var(--dim);text-transform:uppercase}
+  .dir-track{height:9px;background:#1d2430;border-radius:999px;overflow:hidden}
+  .dir-fill{height:100%;border-radius:999px;background:var(--accent);transition:width .3s}
+  .dir-val{font-size:11px;text-align:right;color:var(--text)}
+  details.card summary{font-size:12px;color:var(--dim);cursor:pointer;outline:none}
+  details.card[open] summary{color:var(--text)}
   .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
   .chart{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
          padding:7px;min-width:0}
@@ -151,26 +159,24 @@ PAGE = r"""<!doctype html>
 
     <section class="pane active" id="pane-train">
       <div class="card">
-        <h2>最新指标 <span class="dim" id="train-updated"></span></h2>
-        <div class="kpi-grid" id="train"></div>
+        <h2>关键指标 <span class="dim" id="train-updated"></span></h2>
+        <div class="kpi-grid" id="key-kpis"></div>
       </div>
-      <div class="card" id="single-step-card" style="display:none">
-        <h2>单步指标 <span class="dim">train_phase1</span></h2>
-        <div class="kpi-grid" id="single-step-kpis"></div>
-        <div class="chart-grid" style="margin-top:9px">
-          <div class="chart">
-            <div class="chart-head"><span>outcome rates</span><span class="legend" id="legend-outcome"></span></div>
-            <canvas id="chart-outcome" width="700" height="125"></canvas>
-          </div>
-          <div class="chart">
-            <div class="chart-head"><span>val / balanced / natural</span><span class="legend" id="legend-eval"></span></div>
-            <canvas id="chart-eval" width="700" height="125"></canvas>
-          </div>
+      <div class="card" id="direction-card" style="display:none">
+        <h2>方向 singleton 准确率 <span class="dim" id="direction-meta"></span></h2>
+        <div id="direction-bars"></div>
+      </div>
+      <div class="card" id="main-eval-card" style="display:none">
+        <h2>optimal 曲线 <span class="dim">val / balanced / natural</span></h2>
+        <div class="chart">
+          <div class="chart-head"><span>optimal rate</span><span class="legend" id="legend-eval"></span></div>
+          <canvas id="chart-eval" width="700" height="150"></canvas>
         </div>
       </div>
-      <div class="card">
-        <h2>训练曲线 <span class="dim">按 update</span></h2>
-        <div class="chart-grid">
+      <details class="card">
+        <summary>训练诊断 / 全部指标</summary>
+        <div class="kpi-grid" id="train" style="margin-top:10px"></div>
+        <div class="chart-grid" style="margin-top:10px">
           <div class="chart">
             <div class="chart-head"><span>loss / pg</span><span class="legend" id="legend-loss"></span></div>
             <canvas id="chart-loss" width="700" height="125"></canvas>
@@ -195,11 +201,15 @@ PAGE = r"""<!doctype html>
             <div class="chart-head"><span>grad norm</span><span class="legend" id="legend-grad"></span></div>
             <canvas id="chart-grad" width="700" height="125"></canvas>
           </div>
+          <div class="chart">
+            <div class="chart-head"><span>单步 outcome</span><span class="legend" id="legend-outcome"></span></div>
+            <canvas id="chart-outcome" width="700" height="125"></canvas>
+          </div>
         </div>
-      </div>
-      <div class="card">
-        <h2>更新历史 <span class="dim">最近 30 次</span></h2>
-        <div class="table-wrap">
+      </details>
+      <details class="card">
+        <summary>更新历史 <span class="dim">最近 30 次</span></summary>
+        <div class="table-wrap" style="margin-top:10px">
           <table id="train-history">
             <thead><tr>
               <th>upd</th><th>eps</th><th>succ</th><th>reward</th><th>steps</th>
@@ -209,7 +219,7 @@ PAGE = r"""<!doctype html>
             <tbody></tbody>
           </table>
         </div>
-      </div>
+      </details>
     </section>
 
     <section class="pane" id="pane-infer">
@@ -369,43 +379,34 @@ function upsertTrain(t, ts){
   renderTraining();
 }
 
+function latestEvalRecord(){
+  for (let i = trainHistory.length - 1; i >= 0; i--){
+    const r = trainHistory[i];
+    if (r.test_singleton_accuracy !== undefined
+        || r.eval_singleton_accuracy !== undefined
+        || r.test_optimal_rate !== undefined
+        || r.eval_optimal_rate !== undefined) return r;
+  }
+  return latestTrain;
+}
+
 function renderTraining(){
   const t = latestTrain;
-  const el = document.getElementById('train');
-  if (!t){
-    el.innerHTML = '<div class="dim">等待训练指标…（运行 scripts/train_grpo.py 并连接本页）</div>';
-  } else {
-    const ratio = (t.ratio_min !== undefined && t.ratio_max !== undefined)
-      ? `${fmtNum(t.ratio_min,3)}~${fmtNum(t.ratio_max,3)}` : '—';
-    const progress = (t.total_updates !== undefined)
-      ? `${fmtNum(t.update,0)}/${t.total_updates}` : fmtNum(t.update,0);
-    const cards = [
-      ['update', progress],
-      ['episodes', fmtNum(t.episodes,0)],
-      ['success', `${fmtNum(t.success,0)}${t.episodes ? ` · ${pct(t.success,t.episodes)}` : ''}`, t.success > 0 ? 'good' : ''],
-      ['mean reward', fmtNum(t.mean_reward,2), tone(t.mean_reward)],
-      ['mean steps', fmtNum(t.mean_steps,1)],
-      ['collisions', fmtNum(t.collisions,0), t.collisions > 0 ? 'warn' : ''],
-      ['format errors', fmtNum(t.format_errors,0), t.format_errors > 0 ? 'bad' : 'good'],
-      ['degenerate', fmtNum(t.degenerate,0), t.degenerate > 0 ? 'warn' : ''],
-      ['samples', fmtNum(t.samples,0)],
-      ['loss', fmtNum(t.loss,4)],
-      ['pg', fmtNum(t.pg,4)],
-      ['kl', fmtNum(t.kl,4)],
-      ['ratio', ratio],
-      ['clip', fmtNum(t.clip_frac,3)],
-      ['drop', fmtNum(t.drop_frac,3)],
-      ['grad norm', fmtNum(t.grad_norm,3)],
-    ];
-    el.innerHTML = cards.map(([k,v,c]) =>
-      `<div class="kpi ${c||''}"><div class="k">${k}</div><div class="v">${v}</div></div>`
-    ).join('');
-  }
   const hasSingle = (t && (t.optimal !== undefined || t.eval_optimal_rate !== undefined))
     || trainHistory.some(r => r.optimal !== undefined || r.eval_optimal_rate !== undefined);
-  const ssCard = document.getElementById('single-step-card');
-  ssCard.style.display = hasSingle ? '' : 'none';
-  if (hasSingle) renderSingleStep();
+  const evalRec = latestEvalRecord();
+
+  renderKeyKpis(t, hasSingle, evalRec);
+  renderDiagnostics(t);
+
+  const dirAcc = evalRec && (evalRec.test_singleton_accuracy
+    || evalRec.eval_singleton_accuracy);
+  const dirCard = document.getElementById('direction-card');
+  dirCard.style.display = (hasSingle && dirAcc) ? '' : 'none';
+  if (hasSingle && dirAcc) renderDirectionBars(evalRec);
+
+  const evalCard = document.getElementById('main-eval-card');
+  evalCard.style.display = hasSingle ? '' : 'none';
 
   const upd = document.getElementById('train-updated');
   upd.textContent = (t && t.ts)
@@ -418,32 +419,99 @@ function renderTraining(){
   renderTrainTable();
 }
 
-function renderSingleStep(){
-  const t = latestTrain || {};
-  const el = document.getElementById('single-step-kpis');
+function renderKeyKpis(t, hasSingle, evalRec){
+  const el = document.getElementById('key-kpis');
+  if (!t){
+    el.innerHTML = '<div class="dim">等待训练指标…（运行 scripts/train_phase1.py 或 train_grpo.py）</div>';
+    return;
+  }
+  const cards = [];
+  if (hasSingle){
+    cards.push(['balanced test optimal', ratePct(evalRec && evalRec.test_optimal_rate),
+      (evalRec && evalRec.test_optimal_rate >= 0.9) ? 'good' : '']);
+    cards.push(['natural test optimal', ratePct(evalRec && evalRec.natural_optimal_rate), '']);
+    cards.push(['val optimal', ratePct(evalRec && evalRec.eval_optimal_rate), '']);
+    cards.push(['degenerate rate', ratePct(t.degenerate_rate),
+      t.degenerate_rate > 0.7 ? 'warn' : '']);
+    cards.push(['valid rate', ratePct(t.valid_rate), t.valid_rate < 0.99 ? 'bad' : 'good']);
+    const acc = (evalRec && (evalRec.test_singleton_accuracy
+      || evalRec.eval_singleton_accuracy)) || {};
+    cards.push(['down singleton', ratePct(acc.down), '']);
+  } else {
+    cards.push(['success', `${fmtNum(t.success,0)}${t.episodes ? ` · ${pct(t.success,t.episodes)}` : ''}`,
+      t.success > 0 ? 'good' : '']);
+    cards.push(['mean reward', fmtNum(t.mean_reward,2), tone(t.mean_reward)]);
+    cards.push(['mean steps', fmtNum(t.mean_steps,1)]);
+    cards.push(['collisions', fmtNum(t.collisions,0), t.collisions > 0 ? 'warn' : '']);
+    cards.push(['format errors', fmtNum(t.format_errors,0),
+      t.format_errors > 0 ? 'bad' : 'good']);
+    cards.push(['degenerate rate', ratePct(t.degenerate_rate),
+      t.degenerate_rate > 0.7 ? 'warn' : '']);
+  }
+  el.innerHTML = cards.map(([k,v,c]) =>
+    `<div class="kpi ${c||''}"><div class="k">${k}</div><div class="v">${v}</div></div>`
+  ).join('');
+}
+
+function renderDiagnostics(t){
+  const el = document.getElementById('train');
+  if (!t){
+    el.innerHTML = '<div class="dim">等待训练指标…</div>';
+    return;
+  }
+  const ratio = (t.ratio_min !== undefined && t.ratio_max !== undefined)
+    ? `${fmtNum(t.ratio_min,3)}~${fmtNum(t.ratio_max,3)}` : '—';
+  const progress = (t.total_updates !== undefined)
+    ? `${fmtNum(t.update,0)}/${t.total_updates}` : fmtNum(t.update,0);
   const ac = t.action_counts || {};
   const actStr = ['up','down','left','right','invalid']
     .filter(k => ac[k]).map(k => `${k}:${ac[k]}`).join(' ');
   const cards = [
-    ['optimal', `${fmtNum(t.optimal,0)}${t.episodes ? ` · ${pct(t.optimal,t.episodes)}` : ''}`, 'good'],
-    ['side', fmtNum(t.side,0)],
+    ['update', progress],
+    ['episodes', fmtNum(t.episodes,0)],
+    ['samples', fmtNum(t.samples,0)],
+    ['states', fmtNum(t.states,0)],
+    ['optimal', fmtNum(t.optimal,0)],
     ['farther', fmtNum(t.farther,0), t.farther > 0 ? 'bad' : ''],
     ['blocked', fmtNum(t.blocked,0), t.blocked > 0 ? 'warn' : ''],
-    ['invalid', fmtNum(t.invalid,0), t.invalid > 0 ? 'bad' : (t.invalid === 0 ? 'good' : '')],
-    ['valid', (t.valid !== undefined && t.episodes) ? pct(t.valid,t.episodes) : '—'],
+    ['invalid', fmtNum(t.invalid,0), t.invalid > 0 ? 'bad' : ''],
+    ['mean reward', fmtNum(t.mean_reward,2), tone(t.mean_reward)],
     ['unique actions', fmtNum(t.unique_actions,2)],
-    ['degenerate', `${fmtNum(t.degenerate,0)}${t.states ? ` · ${pct(t.degenerate,t.states)}` : ''}`, t.degenerate > 0 ? 'warn' : ''],
-    ['val optimal', ratePct(t.eval_optimal_rate)],
-    ['balanced test', ratePct(t.test_optimal_rate)],
-    ['natural test', ratePct(t.natural_optimal_rate)],
-    ['val farther', ratePct(t.eval_farther_rate)],
-    ['test farther', ratePct(t.test_farther_rate)],
-    ['natural farther', ratePct(t.natural_farther_rate)],
+    ['group std', fmtNum(t.group_std,3)],
+    ['mix opt', ratePct(t.mixed_optimal_rate)],
+    ['loss', fmtNum(t.loss,4)],
+    ['pg', fmtNum(t.pg,4)],
+    ['kl', fmtNum(t.kl,4)],
+    ['ratio', ratio],
+    ['clip', fmtNum(t.clip_frac,3)],
+    ['drop', fmtNum(t.drop_frac,3)],
+    ['grad norm', fmtNum(t.grad_norm,3)],
     ['actions', actStr || '—'],
   ];
   el.innerHTML = cards.map(([k,v,c]) =>
     `<div class="kpi ${c||''}"><div class="k">${k}</div><div class="v">${v}</div></div>`
   ).join('');
+}
+
+function renderDirectionBars(evalRec){
+  const acc = evalRec.test_singleton_accuracy || evalRec.eval_singleton_accuracy || {};
+  const ns = evalRec.test_singleton_n || evalRec.eval_singleton_n || {};
+  const src = evalRec.test_singleton_accuracy ? 'balanced test' : 'val';
+  document.getElementById('direction-meta').textContent =
+    `@${src} update ${evalRec.update ?? '—'}`;
+  const colors = {up:'#7aa2f7', down:'#fa8a28', left:'#a88ce4', right:'#38be78'};
+  const html = ['up','down','left','right'].map(d => {
+    const v = (typeof acc[d] === 'number') ? acc[d] : null;
+    const n = ns[d] !== undefined ? ns[d] : '—';
+    const width = v === null ? 0 : Math.round(v * 1000) / 10;
+    const text = v === null ? '—' : ratePct(v);
+    return `<div class="dir-row">
+      <span class="dir-name">${d}</span>
+      <div class="dir-track"><div class="dir-fill" style="width:${width}%;background:${colors[d]}"></div></div>
+      <span class="dir-val">${text} <span class="dim">(n=${n})</span></span>
+    </div>`;
+  }).join('');
+  document.getElementById('direction-bars').innerHTML = html;
 }
 
 function clearChart(id){

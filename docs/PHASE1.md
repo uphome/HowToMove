@@ -87,6 +87,8 @@ train/val/test 的 map 不重叠。
 - `test_optimal_rate`：balanced test（主报告）
 - `natural_optimal_rate`：natural eval（对比）
 - `optimal / side / farther / blocked / invalid`
+- `singleton_accuracy.up/down/left/right`：每个方向单最优状态的正确率
+- `mixed_optimal_rate`：斜对角双最优状态的正确率
 - `unique_actions`、`degenerate_rate`
 - `mean_reward`、`ratio_min/max`、`clip_frac`、`drop_frac`、`grad_norm`
 
@@ -150,11 +152,15 @@ u{update}s{state_index}g{sample_index}
 - 在「筛选 episode」输入 `u1s0`，只显示该状态的 8 条采样；
 - 对比同一状态下 8 条采样的 action、reward、logprob、latency。
 
-训练看板的「单步指标」卡片会同时显示：
+训练看板首屏显示：
 
-- val / balanced test / natural test 的 optimal 曲线；
-- 训练组内的 optimal / side / farther / blocked / invalid；
-- unique actions 和退化组比例。
+- balanced test / natural test / val 的 optimal；
+- degenerate rate、valid rate、down singleton accuracy；
+- 四个方向的 singleton accuracy 条形图；
+- val / balanced / natural 的 optimal 曲线。
+
+其他训练诊断（loss、ratio、clip、drop、farther、blocked 等）折叠在
+「训练诊断 / 全部指标」里。
 
 ---
 

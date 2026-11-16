@@ -234,6 +234,29 @@ def summarize(rows: list[dict]) -> dict:
     def rate(x: int) -> float:
         return x / n if n else 0.0
 
+    # 分方向统计 singleton 状态：这是判断“up/down/left/right 是否真的学会”
+    # 的核心指标，比 action_counts 更有意义（输出 down 不等于 down 正确）。
+    singleton_n = {d: 0 for d in ("up", "down", "left", "right")}
+    singleton_opt = {d: 0 for d in ("up", "down", "left", "right")}
+    mixed_n = 0
+    mixed_opt = 0
+    for r in rows:
+        cls = str(r.get("action_class") or "")
+        if cls.startswith("singleton_"):
+            direction = cls.split("_", 1)[1]
+            if direction in singleton_n:
+                singleton_n[direction] += 1
+                if r.get("optimal"):
+                    singleton_opt[direction] += 1
+        elif cls.startswith("mixed_"):
+            mixed_n += 1
+            if r.get("optimal"):
+                mixed_opt += 1
+    singleton_acc = {
+        d: (singleton_opt[d] / singleton_n[d] if singleton_n[d] else None)
+        for d in singleton_n
+    }
+
     return {
         "n": n,
         "valid": valid,
@@ -250,6 +273,12 @@ def summarize(rows: list[dict]) -> dict:
         "invalid_rate": rate(counts.get("invalid", 0)),
         "mean_reward": statistics.mean([r["reward"] for r in rows]) if rows else 0.0,
         "action_counts": dict(actions),
+        "singleton_n": singleton_n,
+        "singleton_optimal": singleton_opt,
+        "singleton_accuracy": singleton_acc,
+        "mixed_n": mixed_n,
+        "mixed_optimal": mixed_opt,
+        "mixed_optimal_rate": (mixed_opt / mixed_n if mixed_n else None),
     }
 
 
@@ -278,6 +307,7 @@ def evaluate(engine, tokenizer, states: list[StateItem], *,
                 "optimal": optimal,
                 "reward": reward,
                 "distance": st.distance,
+                "action_class": st.action_class,
             })
     summary = summarize(rows)
     summary["elapsed_s"] = time.perf_counter() - t0
@@ -296,7 +326,8 @@ def _prefix_metrics(ev: dict, prefix: str) -> dict:
         "n", "valid", "optimal", "side", "farther", "blocked", "invalid",
         "valid_rate", "optimal_rate", "side_rate", "farther_rate",
         "blocked_rate", "invalid_rate", "mean_reward", "action_counts",
-        "elapsed_s",
+        "singleton_n", "singleton_optimal", "singleton_accuracy",
+        "mixed_n", "mixed_optimal", "mixed_optimal_rate", "elapsed_s",
     )
     return {f"{prefix}_{k}": ev[k] for k in keys if k in ev}
 
@@ -528,6 +559,7 @@ def main() -> int:
                             "kind": kind,
                             "optimal": optimal,
                             "reward": reward,
+                            "action_class": st.action_class,
                         })
 
                     advs, degen = group_advantages(rewards)
@@ -598,6 +630,12 @@ def main() -> int:
                     "group_std": (statistics.mean(group_std)
                                   if group_std else 0.0),
                     "action_counts": summary["action_counts"],
+                    "singleton_n": summary["singleton_n"],
+                    "singleton_optimal": summary["singleton_optimal"],
+                    "singleton_accuracy": summary["singleton_accuracy"],
+                    "mixed_n": summary["mixed_n"],
+                    "mixed_optimal": summary["mixed_optimal"],
+                    "mixed_optimal_rate": summary["mixed_optimal_rate"],
                 }
                 if stats is not None:
                     metrics.update({
