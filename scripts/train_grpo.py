@@ -9,9 +9,11 @@
 
 每次更新：采样 K 张图 → 每张 G 条同步轨迹 → 组内标准化 → GRPO 更新。
 浏览器里可以：
-  - 实时看 G 条轨迹的动作、奖励、模型原始输出
-  - 在「轨迹」下拉里切换任意 episode（暂停跟随）
-  - 看训练指标（loss / ratio / kl / gnorm / 成功率）
+  - 「训练看板」：最新指标、loss/reward/success/collision/ratio/gnorm 曲线、
+    最近 30 次更新历史；
+  - 「推理轨迹」：实时迷宫、逐 turn 的 action/reward/logprob/tokens/latency，
+    点击任一步回看该步的模型原始输出和 prompt；
+  - 轨迹下拉里切换任意 episode（暂停跟随），用「跟随最新」恢复实时。
 """
 
 from __future__ import annotations
@@ -59,6 +61,8 @@ def main() -> int:
     ap.add_argument("--lora-r", type=int, default=16)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--ui-url", default=None)
+    ap.add_argument("--ui-host", default="127.0.0.1",
+                    help="自带 UI 时监听地址；远程访问可设 0.0.0.0")
     ap.add_argument("--ui-port", type=int, default=7862)
     ap.add_argument("--no-ui", action="store_true")
     ap.add_argument("--json", default="out/train_grpo.json")
@@ -70,7 +74,7 @@ def main() -> int:
 
     viz = None
     if not args.no_ui:
-        viz = TrainViz(args.ui_url, port=args.ui_port,
+        viz = TrainViz(args.ui_url, host=args.ui_host, port=args.ui_port,
                        serve=args.ui_url is None)
         print(f"UI: {viz.url}")
 
@@ -121,6 +125,7 @@ def main() -> int:
 
         rec_metrics = {
             "update": u,
+            "total_updates": args.updates,
             "episodes": len(returns),
             "mean_reward": round(statistics.mean(returns), 2),
             "success": successes,

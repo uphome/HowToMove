@@ -28,7 +28,7 @@ import paths  # noqa: E402,F401
 from dataset import MapDataset  # noqa: E402
 from engine_policy import EnginePolicy  # noqa: E402
 from engine_rl import RolloutEngine, Sampling, load_model  # noqa: E402
-from env.ui import VizClient  # noqa: E402
+from env.ui import VizClient, build_frame  # noqa: E402
 from env.maze import LEVELS  # noqa: E402
 from rollout import run_episode  # noqa: E402
 
@@ -89,6 +89,15 @@ def main() -> int:
             tag = f"{args.split}-{i}"
             traj = run_episode(maze, policy, ui=ui, episode=tag,
                                obs_style=args.obs_style, memory=args.memory)
+            if ui is not None:
+                ui.publish(build_frame(
+                    maze, traj.turns[-1].pos if traj.turns else maze.start,
+                    path=traj.path, mode="done",
+                    info={"success": traj.success,
+                          "total_reward": round(traj.total_reward, 2),
+                          "steps": traj.steps, "reason": "done"},
+                    episode=tag, turn=traj.steps,
+                ))
             collisions = sum(1 for t in traj.turns
                              if t.info.get("reason") == "collision")
             fmterr = sum(1 for t in traj.turns if t.action == "invalid")

@@ -6,7 +6,7 @@ import urllib.request
 import pytest
 
 from .maze import generate
-from .ui import UIServer, VizClient, build_frame
+from .ui import TrainViz, UIServer, VizClient, build_frame
 
 
 @pytest.fixture()
@@ -52,6 +52,52 @@ def test_page_and_health(ui):
     with urllib.request.urlopen(ui.url, timeout=3) as r:
         html = r.read().decode("utf-8")
     assert "<canvas" in html and "EventSource" in html
+    assert "训练看板" in html and "推理轨迹" in html
+
+
+def test_train_history_endpoint(ui):
+    ui.publish_train({"update": 1, "loss": 0.5, "mean_reward": -1.0})
+    ui.publish_train({"update": 1, "loss": 0.4, "mean_reward": 0.0})
+    ui.publish_train({"update": 2, "loss": 0.3})
+    out = _get(f"{ui.url}api/train")
+    assert [r["update"] for r in out["history"]] == [1, 2]
+    assert out["history"][0]["loss"] == 0.4       # 同一 update 覆盖，不重复
+    assert out["latest"]["update"] == 2
+
+
+def test_train_viz_update(ui):
+    viz = TrainViz(ui.url, quiet=True)
+    try:
+        viz.update(update=7, total_updates=20, episodes=4, success=2, loss=0.25)
+        out = _get(f"{ui.url}api/train")
+        assert out["latest"]["update"] == 7
+        assert out["latest"]["total_updates"] == 20
+        assert out["history"][-1]["success"] == 2
+    finally:
+        viz.close()
+
+
+def test_trace_endpoint(ui):
+    maze = generate(level="L0", seed=0)
+    for turn in (1, 2):
+        frame = build_frame(
+            maze, maze.start, mode="live", episode="ep-test", turn=turn,
+            info={"action": "right", "reward": 0.9},
+            llm={"text": '<tool_call>{"direction":"right"}</tool_call>',
+                 "action": "right", "logprob": -0.1, "tokens": 12},
+        )
+        _post(f"{ui.url}api/frame", frame)
+    out = _get(f"{ui.url}api/trace?id=ep-test")
+    assert out["episode"] == "ep-test"
+    assert [f["turn"] for f in out["frames"]] == [1, 2]
+    eps = _get(f"{ui.url}api/episodes")["episodes"]
+    assert eps[0]["id"] == "ep-test" and eps[0]["turns"] == 2
+
+
+def test_trace_unknown_is_404(ui):
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        _get(f"{ui.url}api/trace?id=missing")
+    assert exc.value.code == 404
 
 
 def test_maze_endpoint(ui):
