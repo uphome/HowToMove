@@ -11,7 +11,9 @@ Each turn is a compact exchange:
     tool: {"moved": ..., "pos": ..., "blocked": ..., "reason": ...}
     ...
 
-The tool result deliberately does not repeat the full map or observation.
+`MazeAgent.apply()` executes one assistant Step. `MazeAgent.run()` is the
+single-trajectory convenience loop; `AgentGroup` uses `apply()` with a
+batched policy.
 """
 
 from __future__ import annotations
@@ -58,6 +60,7 @@ class AgentRun:
     success: bool = False
     truncated: bool = False
     total_reward: float = 0.0
+    episode_id: str | None = None
 
     @property
     def steps(self) -> int:
@@ -67,6 +70,7 @@ class AgentRun:
         return {
             "level": self.maze.level,
             "seed": self.maze.seed,
+            "episode_id": self.episode_id,
             "steps": self.steps,
             "success": self.success,
             "truncated": self.truncated,
@@ -83,13 +87,14 @@ class MazeAgent:
     def __init__(
         self,
         maze: Maze,
-        policy,
+        policy=None,
         *,
         history_window: int = 12,
         memory: int = 3,
         revisit_penalty: float = 0.0,
         system: str | None = None,
         on_step: Callable[[dict], None] | None = None,
+        episode_id: str | None = None,
     ):
         if history_window < 1:
             raise ValueError("history_window must be >= 1")
@@ -97,6 +102,7 @@ class MazeAgent:
         self.policy = policy
         self.history_window = history_window
         self.on_step = on_step
+        self.episode_id = episode_id
         self.env = MazeEnv(maze, memory=memory,
                            revisit_penalty=revisit_penalty)
         self.path: list[tuple[int, int]] = [maze.start]
@@ -108,6 +114,10 @@ class MazeAgent:
              "content": system or build_agent_system(maze)},
             {"role": "user", "content": "Begin the maze."},
         ]
+
+    @property
+    def done(self) -> bool:
+        return self.env.done
 
     def messages(self) -> list[dict]:
         return self.base_messages + self.history
@@ -127,71 +137,85 @@ class MazeAgent:
             return "wall"
         return None
 
+    def apply(self, step) -> dict:
+        """Execute one assistant Step and append the assistant/tool exchange."""
+        if self.env.done:
+            raise RuntimeError("agent already finished")
+
+        prompt_messages = self.messages()
+        self.history.append({"role": "assistant", "content": step.text})
+        action = step.action if step.action in ACTIONS else None
+        before = self.env.pos
+        blocked_by = self._blocked_by(action)
+        result = self.env.step(action or "invalid")
+        self.path.append(result.pos)
+        self.total_reward += result.reward
+
+        reason = result.info.get("reason", "unknown")
+        if action is None:
+            reason_text = "Invalid tool call. The episode ended."
+        elif blocked_by == "wall":
+            reason_text = ("You hit a wall. "
+                           "Your position did not change.")
+        elif blocked_by == "boundary":
+            reason_text = ("You hit the map boundary. "
+                           "Your position did not change.")
+        elif reason == "goal":
+            reason_text = "You reached the goal."
+        elif reason == "truncated":
+            reason_text = "The step limit was reached."
+        else:
+            reason_text = f"You moved {action}."
+
+        payload = {
+            "moved": action,
+            "ok": action is not None and blocked_by is None,
+            "pos": list(result.pos),
+            "blocked": blocked_by is not None,
+            "blocked_by": blocked_by,
+            "done": bool(result.done),
+            "goal_delta": [
+                self.maze.goal[0] - result.pos[0],
+                self.maze.goal[1] - result.pos[1],
+            ],
+            "reason": reason_text,
+        }
+        self.history.append({
+            "role": "tool",
+            "name": "move",
+            "content": json.dumps(payload, ensure_ascii=False),
+        })
+        self._trim()
+
+        turn = {
+            "turn": len(self.turns) + 1,
+            "pos": list(result.pos),
+            "action": action,
+            "reward": round(result.reward, 4),
+            "done": bool(result.done),
+            "info": dict(result.info),
+            "tool_result": payload,
+            "assistant_text": step.text,
+            "prompt": prompt_messages,
+            "logprob": step.logprob,
+            "prompt_ids": step.prompt_ids,
+            "completion_tokens": step.tokens,
+            "token_logprobs": step.token_logprobs,
+        }
+        self.turns.append(turn)
+        if self.on_step is not None:
+            self.on_step(turn)
+        return turn
+
     def run(self) -> AgentRun:
+        if self.policy is None:
+            raise RuntimeError("MazeAgent.run requires a policy")
         while not self.env.done:
-            prompt_messages = self.messages()
-            step = self.policy.act(prompt_messages)
-            self.history.append({"role": "assistant", "content": step.text})
+            step = self.policy.act(self.messages())
+            self.apply(step)
+        return self.to_run()
 
-            action = step.action if step.action in ACTIONS else None
-            before = self.env.pos
-            blocked_by = self._blocked_by(action)
-            result = self.env.step(action or "invalid")
-            self.path.append(result.pos)
-            self.total_reward += result.reward
-
-            reason = result.info.get("reason", "unknown")
-            if action is None:
-                reason_text = "Invalid tool call. The episode ended."
-            elif blocked_by == "wall":
-                reason_text = ("You hit a wall. "
-                               "Your position did not change.")
-            elif blocked_by == "boundary":
-                reason_text = ("You hit the map boundary. "
-                               "Your position did not change.")
-            elif reason == "goal":
-                reason_text = "You reached the goal."
-            elif reason == "truncated":
-                reason_text = "The step limit was reached."
-            else:
-                reason_text = f"You moved {action}."
-
-            payload = {
-                "moved": action,
-                "ok": action is not None and blocked_by is None,
-                "pos": list(result.pos),
-                "blocked": blocked_by is not None,
-                "blocked_by": blocked_by,
-                "done": bool(result.done),
-                "goal_delta": [
-                    self.maze.goal[0] - result.pos[0],
-                    self.maze.goal[1] - result.pos[1],
-                ],
-                "reason": reason_text,
-            }
-            self.history.append({
-                "role": "tool",
-                "name": "move",
-                "content": json.dumps(payload, ensure_ascii=False),
-            })
-            self._trim()
-
-            turn = {
-                "turn": len(self.turns) + 1,
-                "pos": list(result.pos),
-                "action": action,
-                "reward": round(result.reward, 4),
-                "done": bool(result.done),
-                "info": dict(result.info),
-                "tool_result": payload,
-                "assistant_text": step.text,
-                "prompt": prompt_messages,
-                "logprob": step.logprob,
-            }
-            self.turns.append(turn)
-            if self.on_step is not None:
-                self.on_step(turn)
-
+    def to_run(self) -> AgentRun:
         success = self.env.terminated and self.env.pos == self.maze.goal
         return AgentRun(
             maze=self.maze,
@@ -200,6 +224,7 @@ class MazeAgent:
             success=success,
             truncated=self.env.truncated,
             total_reward=self.total_reward,
+            episode_id=self.episode_id,
         )
 
 

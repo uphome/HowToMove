@@ -171,7 +171,67 @@ python scripts/agent_play.py \
 
 ---
 
-## 7. 测试
+## 7. AgentGroup：同一地图 G 条轨迹
+
+`agent/group.py`：
+
+```python
+group = AgentGroup(
+    maze,
+    policy,
+    g=8,
+    history_window=12,
+    episode_prefix="u1/m0",
+)
+runs = group.run()
+```
+
+每个 agent 有独立：
+
+- env；
+- messages；
+- history；
+- path；
+- episode_id。
+
+每轮只收集未结束 agent 的 messages：
+
+```python
+steps = policy.act_batch([agent.messages() for agent in active])
+for agent, step in zip(active, steps):
+    agent.apply(step)
+```
+
+没有线程；8 条 prompt 一次进 `RolloutEngine.generate_batch`。
+
+实际 L0/G=2 验证：
+
+```text
+g0 t01 up
+g1 t01 up
+
+g0 t02 left
+g1 t02 right
+```
+
+第二轮两条轨迹已经有不同历史，但仍然共享同一个 batch。
+
+撞边界时：
+
+```json
+{
+  "blocked": true,
+  "blocked_by": "boundary",
+  "pos": [2, 0],
+  "reason": "You hit the map boundary. Your position did not change."
+}
+```
+
+`AgentGroup` 的返回顺序是 `g0 ... g7`，并保留 `episode_id` 供 GRPO 分组。
+
+---
+
+## 8. 测试
 
 `test_agent.py` 覆盖：
 

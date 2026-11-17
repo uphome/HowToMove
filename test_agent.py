@@ -2,9 +2,24 @@ from __future__ import annotations
 
 import json
 
-from agent import MazeAgent
+from agent import AgentGroup, MazeAgent
 from env.maze import Maze, bfs_field
 from rollout import Step, format_tool_call
+
+
+class BatchPolicy:
+    def __init__(self, batches):
+        self.batches = iter(batches)
+        self.calls = []
+
+    def act_batch(self, messages_batch):
+        self.calls.append(len(messages_batch))
+        actions = next(self.batches)
+        assert len(actions) == len(messages_batch)
+        return [
+            Step(text=format_tool_call(a) if a else "invalid", action=a)
+            for a in actions
+        ]
 
 
 class ScriptedPolicy:
@@ -94,3 +109,31 @@ def test_agent_history_window_keeps_recent_pairs():
         "system", "user", "assistant", "tool"
     ]
     assert len(policy.seen[-1]) == 4
+
+
+def test_agent_group_batches_active_trajectories():
+    # g0: right,right -> goal
+    # g1: invalid -> finishes first
+    policy = BatchPolicy([
+        ["right", None],
+        ["right"],
+    ])
+    group = AgentGroup(
+        make_maze(goal=(2, 0)),
+        policy,
+        g=2,
+        history_window=4,
+        episode_prefix="u1/m0",
+    )
+    runs = group.run()
+    assert [r.episode_id for r in runs] == ["u1/m0/g0", "u1/m0/g1"]
+    assert runs[0].success
+    assert not runs[1].success
+    assert policy.calls == [2, 1]
+    assert runs[0].steps == 2
+    assert runs[1].steps == 1
+    assert runs[0].messages[2]["role"] == "assistant"
+    assert runs[0].messages[3]["role"] == "tool"
+    assert runs[1].turns[0]["tool_result"]["reason"] == (
+        "Invalid tool call. The episode ended."
+    )
