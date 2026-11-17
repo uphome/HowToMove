@@ -151,10 +151,12 @@ class GRPOTrainer:
         self.updates = blob.get("updates", 0)
 
 
-def samples_from_trajectory(traj, advantage: float) -> list[Sample]:
+def samples_from_trajectory(traj, advantage: float,
+                            episode: str | None = None) -> list[Sample]:
     """把一条多步轨迹摊平成训练样本：每一步一个 (prompt, completion, old_logps)。
 
     advantage 是轨迹级标量，广播到该轨迹的所有 token（GRPO 的标准做法）。
+    episode 只用于多步训练的 sample 分组，不参与 loss。
     """
     out = []
     for t in getattr(traj, "turns", []):
@@ -167,7 +169,7 @@ def samples_from_trajectory(traj, advantage: float) -> list[Sample]:
             completion_ids=list(t.tokens),
             old_logps=[float(x) for x in t.token_logprobs],
             advantage=float(advantage),
-            meta={"turn": t.turn, "episode": None},
+            meta={"turn": t.turn, "episode": episode},
         ))
     return out
 

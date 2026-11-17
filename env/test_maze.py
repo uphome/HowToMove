@@ -13,6 +13,7 @@ from .maze import (
     LEVELS,
     REWARD_COLLISION,
     REWARD_FORMAT,
+    REWARD_REVISIT,
     REWARD_STEP,
     REWARD_TERMINAL,
     WALL,
@@ -179,10 +180,24 @@ def test_step_toward_goal():
 def test_step_away_from_goal():
     env = MazeEnv(make_known_maze())
     env.pos = (1, 2)
+    env.visited = {(1, 2)}
     r = env.step("left")
     assert env.pos == (0, 2)
     assert r.reward == pytest.approx(-1.0 + REWARD_STEP)
     assert r.info["delta"] == -1
+
+
+def test_revisit_penalty():
+    env = MazeEnv(make_known_maze())
+    r1 = env.step("right")
+    assert r1.reward == pytest.approx(1.0 + REWARD_STEP)
+    assert not r1.info.get("revisit", False)
+    r2 = env.step("left")
+    assert env.pos == (0, 2)
+    assert r2.info["revisit"] is True
+    assert r2.reward == pytest.approx(
+        -1.0 + REWARD_STEP + REWARD_REVISIT)
+    assert env.visited == {(0, 2), (1, 2)}
 
 
 def test_collision_wall():
@@ -248,11 +263,12 @@ def test_reset():
     assert env.pos == env.maze.start
     assert env.steps == 0
     assert env.last_actions == []
+    assert env.visited == {env.maze.start}
     assert not env.done
 
 
 def test_reward_is_potential_shaping():
-    """所有合法移动：reward == bfs_d(s) - bfs_d(s') - 0.1，delta ∈ {-1,0,1}。"""
+    """合法移动 = delta - 0.1，回到 old cell 再加 revisit 惩罚。"""
     maze = generate(level="L4", seed=7)
     env = MazeEnv(maze)
     for i in range(200):
@@ -264,6 +280,7 @@ def test_reward_is_potential_shaping():
         dx, dy = ACTIONS[action]
         nxt = (pos[0] + dx, pos[1] + dy)
         blocked = not maze.is_free(*nxt)
+        revisit = nxt in env.visited
         r = env.step(action)
         if blocked:
             assert r.reward == pytest.approx(REWARD_COLLISION + REWARD_STEP)
@@ -272,6 +289,8 @@ def test_reward_is_potential_shaping():
             delta = d0 - maze.distance(nxt)
             assert delta in (-1, 0, 1)
             expected = delta + REWARD_STEP
+            if revisit:
+                expected += REWARD_REVISIT
             if nxt == maze.goal:
                 expected += REWARD_TERMINAL
             assert r.reward == pytest.approx(expected)
@@ -342,7 +361,8 @@ def test_render_styles(style: str):
         assert "bounds:" in text
         assert "walls_rel:" in text
         assert "pos=(" not in text
-        assert "last=" not in text
+        assert "last=up,left" in text
+        assert "visited_rel: none" in text
         return
     assert "pos=(" in text
     assert "delta=(" in text
@@ -351,6 +371,15 @@ def test_render_styles(style: str):
     dx = maze.goal[0] - maze.start[0]
     dy = maze.goal[1] - maze.start[1]
     assert f"delta=({dx:+d},{dy:+d})" in text
+
+
+def test_render_rel_history():
+    maze = generate(level="L0", seed=0)
+    pos = (3, 9)
+    text = render_state(maze, pos, ["up", "right"],
+                        visited=[(3, 9), (2, 9)], style="rel")
+    assert "last=up,right" in text
+    assert "visited_rel: (-1,+0)" in text
 
 
 def test_render_rel_bounds_and_relative_walls():

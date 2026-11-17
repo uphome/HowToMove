@@ -35,6 +35,10 @@ REL_SYSTEM = (
     "goal: delta=(dx,dy) is the exit relative to you. "
     "bounds: left/right/up/down are steps to the four edges. "
     "walls_rel lists walls relative to you. "
+    "last lists recent actions; visited_rel lists recently visited cells "
+    "relative to you. "
+    "When both dx and dy are nonzero, do not default to left/right; "
+    "choose the vertical direction when it makes progress. "
     "Always call the move tool with exactly one direction."
 )
 
@@ -50,19 +54,40 @@ REL_FEWSHOT = [
     ("map 12x12, x=right y=down, origin=you\n"
      "goal: delta=(0,+3)\n"
      "bounds: left=3 right=8 up=4 down=7\n"
-     "walls_rel: none", "down"),
+     "walls_rel: none\n"
+     "last: none\n"
+     "visited_rel: none", "down"),
     ("map 12x12, x=right y=down, origin=you\n"
      "goal: delta=(0,-3)\n"
      "bounds: left=3 right=8 up=4 down=7\n"
-     "walls_rel: none", "up"),
+     "walls_rel: none\n"
+     "last: none\n"
+     "visited_rel: none", "up"),
     ("map 12x12, x=right y=down, origin=you\n"
      "goal: delta=(+3,0)\n"
      "bounds: left=3 right=8 up=4 down=7\n"
-     "walls_rel: none", "right"),
+     "walls_rel: none\n"
+     "last: none\n"
+     "visited_rel: none", "right"),
     ("map 12x12, x=right y=down, origin=you\n"
      "goal: delta=(-3,0)\n"
      "bounds: left=3 right=8 up=4 down=7\n"
-     "walls_rel: none", "left"),
+     "walls_rel: none\n"
+     "last: none\n"
+     "visited_rel: none", "left"),
+    # 对角线目标：避免模型看到 dx 非零就只选左右。
+    ("map 12x12, x=right y=down, origin=you\n"
+     "goal: delta=(+3,-2)\n"
+     "bounds: left=3 right=8 up=4 down=7\n"
+     "walls_rel: none\n"
+     "last: none\n"
+     "visited_rel: none", "up"),
+    ("map 12x12, x=right y=down, origin=you\n"
+     "goal: delta=(-3,+2)\n"
+     "bounds: left=3 right=8 up=4 down=7\n"
+     "walls_rel: none\n"
+     "last: none\n"
+     "visited_rel: none", "down"),
 ]
 
 # L1 额外给两条带墙示例（来自 L1 balanced train 的真实状态）：
@@ -71,11 +96,15 @@ REL_FEWSHOT_L1 = REL_FEWSHOT + [
     ("map 12x12, x=right y=down, origin=you\n"
      "goal: delta=(+0,+6)\n"
      "bounds: left=1 right=10 up=3 down=8\n"
-     "walls_rel: (+1,+2) (+1,+4) (+1,+5) (+1,+6) (+1,+7) (+1,+8)", "down"),
+     "walls_rel: (+1,+2) (+1,+4) (+1,+5) (+1,+6) (+1,+7) (+1,+8)\n"
+     "last: none\n"
+     "visited_rel: none", "down"),
     ("map 12x12, x=right y=down, origin=you\n"
      "goal: delta=(+3,-2)\n"
      "bounds: left=7 right=4 up=6 down=5\n"
-     "walls_rel: (+1,-1) (+2,-1) (+3,-1)", "up"),
+     "walls_rel: (+1,-1) (+2,-1) (+3,-1)\n"
+     "last: none\n"
+     "visited_rel: none", "up"),
 ]
 
 

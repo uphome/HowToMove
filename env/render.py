@@ -105,12 +105,16 @@ def _minimal_block(maze: Maze, pos: tuple[int, int]) -> str:
             f"walls: {cells or 'none'}")
 
 
-def _rel_block(maze: Maze, pos: tuple[int, int]) -> str:
+def _rel_block(maze: Maze, pos: tuple[int, int],
+               last_actions: list[str] | tuple[str, ...] = (),
+               visited: list[tuple[int, int]] | tuple[tuple[int, int], ...] = ()) -> str:
     """全局相对坐标：origin=当前 pos。
 
     - goal: goal - pos
     - walls_rel: wall - pos，按距离/方向排序
     - bounds: 到四条边的步数，避免丢失越界信息
+    - last: 最近动作
+    - visited_rel: 最近走过的格子，按相对坐标表示
     """
     dx = maze.goal[0] - pos[0]
     dy = maze.goal[1] - pos[1]
@@ -123,11 +127,20 @@ def _rel_block(maze: Maze, pos: tuple[int, int]) -> str:
         key=lambda d: (abs(d[0]) + abs(d[1]), d[1], d[0]),
     )
     cells = " ".join(f"({x:+d},{y:+d})" for x, y in walls)
+    # 只保留最近 12 个足迹，避免 30 步轨迹把 prompt 撑大。
+    trail = []
+    for x, y in list(visited)[-12:]:
+        rel = (x - pos[0], y - pos[1])
+        if rel != (0, 0):
+            trail.append(rel)
+    trail_cells = " ".join(f"({x:+d},{y:+d})" for x, y in trail)
     return "\n".join([
         f"map {maze.width}x{maze.height}, x=right y=down, origin=you",
         f"goal: delta=({dx:+d},{dy:+d})",
         f"bounds: left={left} right={right} up={up} down={down}",
         f"walls_rel: {cells or 'none'}",
+        _last_line(last_actions),
+        f"visited_rel: {trail_cells or 'none'}",
     ])
 
 
@@ -146,7 +159,7 @@ def render_state(
     if style == "minimal":
         return _minimal_block(maze, pos)
     if style == "rel":
-        return _rel_block(maze, pos)
+        return _rel_block(maze, pos, last_actions, visited)
 
     coord = _coord_line(maze, pos)
     tail = _last_line(last_actions)

@@ -19,7 +19,7 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Protocol
 
-from env.maze import ACTIONS, Maze, MazeEnv, manhattan
+from env.maze import ACTIONS, REWARD_REVISIT, Maze, MazeEnv, manhattan
 from env.render import render_observation
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -230,8 +230,9 @@ def run_episode(
     obs_style: str = "minimal",
     memory: int = 3,
     show_visited: bool = False,
+    revisit_penalty: float = REWARD_REVISIT,
 ) -> Trajectory:
-    env = MazeEnv(maze, memory=memory)
+    env = MazeEnv(maze, memory=memory, revisit_penalty=revisit_penalty)
     traj = Trajectory(maze=maze)
 
     if ui is not None:
@@ -305,6 +306,7 @@ def run_group(
     obs_style: str = "minimal",
     memory: int = 0,
     show_visited: bool = False,
+    revisit_penalty: float = REWARD_REVISIT,
     delay: float = 0.0,
 ) -> list[Trajectory]:
     """同步批量 rollout：G 条轨迹每轮一起生成一次。
@@ -312,7 +314,8 @@ def run_group(
     与 run_episode 的区别：所有存活轨迹共享一次 engine.generate_batch，
     这是把 G 路并发的延迟摊平的关键。返回 G 条 Trajectory。
     """
-    envs = [MazeEnv(maze, memory=memory) for _ in range(g)]
+    envs = [MazeEnv(maze, memory=memory,
+                    revisit_penalty=revisit_penalty) for _ in range(g)]
     trajs = [Trajectory(maze=maze) for _ in range(g)]
     tags = [f"{episode_prefix}/g{i}" for i in range(g)]
     from env.ui import build_frame

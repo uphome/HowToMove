@@ -17,8 +17,11 @@ def test_rel_fewshot_message_structure():
     )
     assert "delta=(0,+3)" in msgs[1]["content"]
     assert '"direction": "down"' in msgs[2]["content"]
-    assert "delta=(-3,0)" in msgs[-3]["content"]
-    assert '"direction": "left"' in msgs[-2]["content"]
+    user_text = "\n".join(m["content"] for m in msgs if m["role"] == "user")
+    assert "delta=(-3,0)" in user_text
+    assert "delta=(+3,-2)" in user_text
+    assert '"direction": "left"' in "\n".join(
+        m["content"] for m in msgs if m["role"] == "assistant")
 
 
 def test_rel_l1_fewshot_adds_wall_examples():

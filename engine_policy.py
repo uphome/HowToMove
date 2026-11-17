@@ -24,11 +24,13 @@ class EnginePolicy:
         sampling: Sampling | None = None,
         *,
         enable_thinking: bool = False,
+        fewshot: str | None = None,
     ):
         self.engine = engine
         self.tokenizer = tokenizer
         self.sampling = sampling or Sampling(max_tokens=48, temperature=1.0)
         self.enable_thinking = enable_thinking
+        self.fewshot = fewshot
         self.calls = 0
         self.total_latency = 0.0
         self.total_tokens = 0
@@ -39,7 +41,8 @@ class EnginePolicy:
     def act_batch(self, obs_list: list[Observation]) -> list[Step]:
         """一次前向服务整组轨迹（run_group 的核心）。"""
         prompts = [render_prompt(self.tokenizer, o.prompt,
-                                 self.enable_thinking)[1] for o in obs_list]
+                                 self.enable_thinking,
+                                 fewshot=self.fewshot)[1] for o in obs_list]
         t0 = time.perf_counter()
         samples = self.engine.generate_batch(prompts, self.sampling)
         latency = time.perf_counter() - t0

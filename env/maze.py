@@ -34,6 +34,8 @@ REWARD_COLLISION = -2.0
 REWARD_TERMINAL = 50.0
 REWARD_STEP = -0.1
 REWARD_DISTANCE = 1.0
+# 重复访问已经走过的格子；最优路径是简单路径，不应出现循环。
+REWARD_REVISIT = -0.5
 
 INF = 10**9
 LEVELS = ("L0", "L1", "L2", "L3", "L4")
@@ -348,12 +350,15 @@ class StepResult:
 class MazeEnv:
     """单条轨迹的可变状态：位置 / 步数 / 最近动作 / 是否结束。"""
 
-    def __init__(self, maze: Maze, memory: int = 3):
+    def __init__(self, maze: Maze, memory: int = 3,
+                 revisit_penalty: float = REWARD_REVISIT):
         self.maze = maze
         self.memory = memory
+        self.revisit_penalty = revisit_penalty
         self.pos = maze.start
         self.steps = 0
         self.last_actions: list[str] = []
+        self.visited: set[tuple[int, int]] = {maze.start}
         self.done = False
         self.terminated = False
         self.truncated = False
@@ -362,6 +367,7 @@ class MazeEnv:
         self.pos = self.maze.start
         self.steps = 0
         self.last_actions = []
+        self.visited = {self.maze.start}
         self.done = False
         self.terminated = False
         self.truncated = False
@@ -390,13 +396,18 @@ class MazeEnv:
 
         delta = maze.dist[y][x] - maze.dist[ny][nx]
         self.pos = (nx, ny)
+        revisit = self.pos in self.visited
+        if revisit:
+            reward += self.revisit_penalty
+        self.visited.add(self.pos)
         reward += REWARD_DISTANCE * delta
 
         if self.pos == maze.goal:
             reward += REWARD_TERMINAL
             return self._finish(reward, reason="goal")
 
-        return self._after_step(reward, reason="move", delta=delta)
+        return self._after_step(reward, reason="move", delta=delta,
+                                revisit=revisit)
 
     def _record(self, action: str) -> None:
         if self.memory <= 0:
