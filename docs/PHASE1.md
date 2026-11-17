@@ -4,6 +4,7 @@
 「当前位置/终点 → 移动方向」接地能力。第一阶段只跑 **L0 空地**。
 
 - 阶段报告：`reports/L0.md`、`reports/L1.md`、`reports/AGENT.md`、`reports/SFT_llm.md`、`reports/GRPO_L1.md`、`reports/GRPO_L2.md`
+- Agent 实现说明：`docs/AGENT.md`
 - 后续实验协议：`docs/EXPERIMENT_PROTOCOL.md`
 - 相对观测 A/B：`reports/relative_obs_ab.md`
 
