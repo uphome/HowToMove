@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "created_at": "2026-11-14T15:50:28",
+  "created_at": "2026-11-17T09:58:42",
   "builder": "scripts/build_dataset.py",
   "generator": {
     "file": "env/maze.py",
@@ -58,15 +58,15 @@
   "files": {
     "maps/train.jsonl": {
       "count": 3000,
-      "sha256": "929e529ad3b22c9759d7d7dd8a3824ebfd876b741e93b7816fa8ccbd9e9750d9"
+      "sha256": "c03bc418a686d892247283127d430a4dfa13bb6d36093af64bb33acf86d0b917"
     },
     "maps/val.jsonl": {
       "count": 400,
-      "sha256": "c5d4470e8c0f70d80a53efa71df747066180688f009c713b50ec79e8cff785dd"
+      "sha256": "715901e81335ff97f07fbcdda3f0a035ad3d42c60f213feccfe5788e0ca82f6c"
     },
     "maps/test_id.jsonl": {
       "count": 400,
-      "sha256": "966cfd5d136073e8aa2fa8177af2989e0a716b4cdb76219747274d91ec06207c"
+      "sha256": "c7072c48c0f37650c3e60fb5f26673c9562926c3042f9347176b1df4440da152"
     },
     "maps/test_hard.jsonl": {
       "count": 200,
@@ -74,11 +74,11 @@
     },
     "maps/test_ood.jsonl": {
       "count": 200,
-      "sha256": "91beb2a0b8748ceaa575afec0c3791de77cf93a85bfc66fe58b2fc744e47037f"
+      "sha256": "8f7c79766ec6d234253a7094e65dcfa9d5bc940e02dce391f890d23edb6c1837"
     },
     "eval_states.jsonl": {
       "count": 300,
-      "sha256": "ec5e61a8cf750f592a537f7fd8e3b0584038284399d33caa55a85941b70b1379"
+      "sha256": "fb787e009ea18becb08053e5d5c0406015cea22ab5de426046e528674655bf4f"
     }
   },
   "counts": {

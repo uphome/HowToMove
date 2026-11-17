@@ -94,6 +94,15 @@ def _vertical_wall(width: int, height: int, rng: random.Random) -> set[tuple[int
     return {(x, y) for y in range(y0, y1 + 1) if y != door}
 
 
+def _horizontal_wall(width: int, height: int, rng: random.Random) -> set[tuple[int, int]]:
+    """横墙 + 1 格门。"""
+    y = rng.randint(2, height - 3)
+    x0 = rng.randint(0, width - 3)
+    x1 = rng.randint(x0 + 2, width - 1)
+    door = rng.randint(x0, x1)
+    return {(x, y) for x in range(x0, x1 + 1) if x != door}
+
+
 def _l_wall(width: int, height: int, rng: random.Random) -> set[tuple[int, int]]:
     """L 型墙：一横一竖，四向随机。"""
     arm_x = rng.randint(2, 4)
@@ -158,7 +167,9 @@ def _u_wall(width: int, height: int, rng: random.Random) -> set[tuple[int, int]]
 
 
 _SHAPES = {
-    "L1": (_vertical_wall,),
+    # L1 是单面墙：方向必须随机覆盖竖墙和横墙，否则左右和上下
+    # 被墙阻挡的样本会系统性缺失。
+    "L1": (_vertical_wall, _horizontal_wall),
     "L2": (_l_wall,),
     "L3": (_u_wall,),
     "L4": (_vertical_wall, _l_wall, _u_wall),

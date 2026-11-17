@@ -65,16 +65,17 @@ REL_FEWSHOT = [
      "walls_rel: none", "left"),
 ]
 
-# L1 额外给两条带墙示例（来自 L1 balanced train 的真实状态）。
+# L1 额外给两条带墙示例（来自 L1 balanced train 的真实状态）：
+# 一条竖墙、一条横墙，避免 few-shot 再次把方向偏置成单一朝向。
 REL_FEWSHOT_L1 = REL_FEWSHOT + [
     ("map 12x12, x=right y=down, origin=you\n"
      "goal: delta=(+0,+6)\n"
      "bounds: left=1 right=10 up=3 down=8\n"
      "walls_rel: (+1,+2) (+1,+4) (+1,+5) (+1,+6) (+1,+7) (+1,+8)", "down"),
     ("map 12x12, x=right y=down, origin=you\n"
-     "goal: delta=(-7,+1)\n"
-     "bounds: left=9 right=2 up=3 down=8\n"
-     "walls_rel: (-2,-1) (-2,+1) (-2,-2) (-2,-3)", "left"),
+     "goal: delta=(+3,-2)\n"
+     "bounds: left=7 right=4 up=6 down=5\n"
+     "walls_rel: (+1,-1) (+2,-1) (+3,-1)", "up"),
 ]
 
 

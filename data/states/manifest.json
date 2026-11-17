@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "created_at": "2026-11-16T21:16:51",
+  "created_at": "2026-11-17T09:58:52",
   "builder": "scripts/build_states.py",
   "generator": {
     "source": "data/maps/*.jsonl",
@@ -82,15 +82,15 @@
   "files": {
     "train.jsonl": {
       "count": 1120,
-      "sha256": "6a62a6d82a0cea981ce8f5469953b7e6cff6abb96208b06529edac167a13315b"
+      "sha256": "01de037161da044f20e4f29c015e1e967b60fcd5fbb68943982077faa6f49a82"
     },
     "val.jsonl": {
       "count": 272,
-      "sha256": "988cf0dbd081f5cf3bff89933cf9f3130fa990db2d29cbe920e5cfb9034e9be8"
+      "sha256": "478456801ba00acceb6b4b0e25c33ee7465fcb1115e21ae4aa58cfbcd3aad6b7"
     },
     "test.jsonl": {
       "count": 272,
-      "sha256": "efcd48df527cce4b7b49a2395e0ae5ad059f1ca00fec77b6c1c41aace0f3e1da"
+      "sha256": "d7c6af8687137ab0337cea495a159cb35aaee9b887ea7bffc40cfbbcfc57c863"
     }
   },
   "counts": {
@@ -141,14 +141,14 @@
         },
         "shortfall": {},
         "candidates": {
-          "singleton_up": 3585,
-          "singleton_down": 3956,
-          "singleton_left": 3427,
-          "singleton_right": 3797,
-          "mixed_dr": 16806,
-          "mixed_dl": 15909,
-          "mixed_ur": 13757,
-          "mixed_ul": 13188
+          "singleton_up": 3657,
+          "singleton_down": 3608,
+          "singleton_left": 3473,
+          "singleton_right": 3917,
+          "mixed_dr": 16453,
+          "mixed_dl": 14799,
+          "mixed_ur": 15203,
+          "mixed_ul": 13408
         }
       },
       "L2": {
@@ -283,14 +283,14 @@
         },
         "shortfall": {},
         "candidates": {
-          "singleton_up": 505,
-          "singleton_down": 479,
-          "singleton_left": 487,
-          "singleton_right": 447,
-          "mixed_dr": 2170,
-          "mixed_dl": 2208,
-          "mixed_ur": 1894,
-          "mixed_ul": 1756
+          "singleton_up": 538,
+          "singleton_down": 453,
+          "singleton_left": 566,
+          "singleton_right": 424,
+          "mixed_dr": 1700,
+          "mixed_dl": 2124,
+          "mixed_ur": 2040,
+          "mixed_ul": 2039
         }
       },
       "L2": {
@@ -425,14 +425,14 @@
         },
         "shortfall": {},
         "candidates": {
-          "singleton_up": 533,
-          "singleton_down": 513,
-          "singleton_left": 482,
-          "singleton_right": 437,
-          "mixed_dr": 2078,
-          "mixed_dl": 2055,
-          "mixed_ur": 2038,
-          "mixed_ul": 1820
+          "singleton_up": 571,
+          "singleton_down": 442,
+          "singleton_left": 475,
+          "singleton_right": 491,
+          "mixed_dr": 1836,
+          "mixed_dl": 1974,
+          "mixed_ur": 2257,
+          "mixed_ul": 1912
         }
       },
       "L2": {

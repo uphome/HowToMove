@@ -74,6 +74,28 @@ def test_walls_present(level: str):
         assert maze.walls, f"{level} seed={seed} 没有墙"
 
 
+def test_l1_wall_orientation_is_randomized():
+    """L1 的单墙必须同时覆盖竖墙和横墙。
+
+    竖墙只影响左右移动，横墙只影响上下移动；如果只生成一种方向，
+    L1 的墙覆盖会系统性缺失。
+    """
+    counts = {"vertical": 0, "horizontal": 0}
+    for seed in range(100):
+        maze = generate(level="L1", seed=seed)
+        xs = {x for x, _ in maze.walls}
+        ys = {y for _, y in maze.walls}
+        assert len(xs) == 1 or len(ys) == 1, (
+            f"L1 seed={seed} 的墙不是一条直线: {sorted(maze.walls)}"
+        )
+        if len(xs) == 1:
+            counts["vertical"] += 1
+        else:
+            counts["horizontal"] += 1
+    assert counts["vertical"] > 0, counts
+    assert counts["horizontal"] > 0, counts
+
+
 def test_generate_deterministic():
     a = generate(level="L3", seed=1234)
     b = generate(level="L3", seed=1234)

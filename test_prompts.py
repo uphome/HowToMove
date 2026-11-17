@@ -26,4 +26,5 @@ def test_rel_l1_fewshot_adds_wall_examples():
     assert len(msgs) == 1 + 2 * len(REL_FEWSHOT_L1) + 1
     assert len(REL_FEWSHOT_L1) == len(REL_FEWSHOT) + 2
     assert any("walls_rel: (+1,+2)" in m["content"] for m in msgs if m["role"] == "user")
-    assert any("walls_rel: (-2,-1)" in m["content"] for m in msgs if m["role"] == "user")
+    assert any("walls_rel: (+1,-1) (+2,-1) (+3,-1)" in m["content"]
+               for m in msgs if m["role"] == "user")
