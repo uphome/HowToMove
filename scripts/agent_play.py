@@ -28,21 +28,14 @@ def main() -> int:
     ap.add_argument("--model", default=str(paths.MODEL_PATH))
     ap.add_argument("--level", default="L0", choices=LEVELS)
     ap.add_argument("--seed", type=int, default=7)
-    ap.add_argument("--obs-style", default="rel")
-    ap.add_argument("--fewshot", default="rel",
-                    choices=["none", "rel", "rel_l1"])
     ap.add_argument("--history-window", type=int, default=12)
     ap.add_argument("--memory", type=int, default=3)
-    ap.add_argument("--no-visited", action="store_false", dest="visited",
-                    help="不把 visited_rel 放进 tool result")
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--max-tokens", type=int, default=48)
     ap.add_argument("--max-seq-len", type=int, default=4096)
     ap.add_argument("--ui-url", default=None)
     ap.add_argument("--json", default=None)
     args = ap.parse_args()
-    if args.fewshot != "none" and args.obs_style != "rel":
-        ap.error("--fewshot 需要 --obs-style rel")
 
     maze = generate(level=args.level, seed=args.seed)
     print(f"maze={maze.level} seed={maze.seed} "
@@ -68,14 +61,17 @@ def main() -> int:
     )
 
     def on_step(turn: dict) -> None:
-        print(f"[{turn['turn']:2d}] {turn['action']:7s} "
+        result = turn["tool_result"]
+        action = turn["action"] or "invalid"
+        print(f"[{turn['turn']:2d}] {action:7s} "
               f"pos={tuple(turn['pos'])} reward={turn['reward']:+.2f} "
-              f"reason={turn['info'].get('reason')}")
+              f"blocked={result['blocked']} reason={result['reason']}")
         if ui is None:
             return
         info = {
-            "action": turn["action"],
+            "action": action,
             "reward": turn["reward"],
+            "tool_result": result,
             **turn["info"],
         }
         try:
@@ -96,11 +92,8 @@ def main() -> int:
 
     agent = MazeAgent(
         maze, policy,
-        obs_style=args.obs_style,
-        fewshot=None if args.fewshot == "none" else args.fewshot,
         history_window=args.history_window,
         memory=args.memory,
-        show_visited=args.visited,
         on_step=on_step,
     )
     run = agent.run()

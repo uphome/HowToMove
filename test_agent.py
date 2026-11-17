@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from agent import MazeAgent
 from env.maze import Maze, bfs_field
 from rollout import Step, format_tool_call
@@ -16,8 +18,7 @@ class ScriptedPolicy:
         return Step(text=format_tool_call(direction), action=direction)
 
 
-def make_maze(goal=(2, 0), max_steps=5):
-    walls = frozenset()
+def make_maze(goal=(2, 0), walls=frozenset(), max_steps=5):
     dist = bfs_field(5, 5, walls, goal)
     return Maze(
         width=5, height=5, walls=walls, start=(0, 0), goal=goal,
@@ -25,12 +26,23 @@ def make_maze(goal=(2, 0), max_steps=5):
     )
 
 
+def test_agent_system_contains_static_map():
+    run = MazeAgent(
+        make_maze(), ScriptedPolicy(["right", "right"]),
+        history_window=4,
+    ).run()
+    system = run.messages[0]["content"]
+    assert "Start: (0, 0)" in system
+    assert "Goal: (2, 0)" in system
+    assert "Walls: none" in system
+    assert run.messages[1]["content"] == "Begin the maze."
+
+
 def test_agent_records_assistant_tool_history():
     policy = ScriptedPolicy(["right", "right"])
     run = MazeAgent(
         make_maze(), policy,
-        obs_style="minimal", fewshot=None, history_window=4,
-        show_visited=False,
+        history_window=4,
     ).run()
     assert run.success
     assert run.steps == 2
@@ -39,20 +51,42 @@ def test_agent_records_assistant_tool_history():
     ]
     assert run.messages[2]["role"] == "assistant"
     assert '"direction": "right"' in run.messages[2]["content"]
-    assert '"moved": "right"' in run.messages[3]["content"]
+    tool = json.loads(run.messages[3]["content"])
+    assert tool["moved"] == "right"
+    assert tool["pos"] == [1, 0]
+    assert tool["blocked"] is False
+    assert tool["reason"] == "You moved right."
     assert run.turns[0]["action"] == "right"
     assert run.turns[1]["pos"] == [2, 0]
+    assert run.turns[-1]["tool_result"]["reason"] == "You reached the goal."
+    assert run.turns[-1]["tool_result"]["done"] is True
     assert len(policy.seen) == 2
     assert policy.seen[1][-2]["role"] == "assistant"
     assert policy.seen[1][-1]["role"] == "tool"
+
+
+def test_agent_wall_collision_keeps_position_and_explains_reason():
+    run = MazeAgent(
+        make_maze(goal=(2, 0), walls=frozenset({(1, 0)}), max_steps=1),
+        ScriptedPolicy(["right"]),
+        history_window=4,
+    ).run()
+    assert not run.success
+    assert run.turns[0]["pos"] == [0, 0]
+    result = run.turns[0]["tool_result"]
+    assert result["blocked"] is True
+    assert result["blocked_by"] == "wall"
+    assert result["pos"] == [0, 0]
+    assert result["reason"] == (
+        "You hit a wall. Your position did not change."
+    )
 
 
 def test_agent_history_window_keeps_recent_pairs():
     policy = ScriptedPolicy(["right", "right", "right"])
     run = MazeAgent(
         make_maze(goal=(3, 0)), policy,
-        obs_style="minimal", fewshot=None, history_window=1,
-        show_visited=False,
+        history_window=1,
     ).run()
     assert run.success
     assert run.steps == 3

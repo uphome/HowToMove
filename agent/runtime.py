@@ -1,16 +1,17 @@
-"""A small tool-calling maze agent with explicit conversation history.
+"""A tool-calling maze agent with the static map in the system prompt.
 
-Each turn is a real assistant/tool exchange:
+The system prompt contains the complete static map:
 
-    system
-    user: initial observation
+    start, goal, walls, coordinate convention, and move-tool contract.
+
+Each turn is a compact exchange:
+
+    user: Begin the maze.
     assistant: <tool_call>move(...)</tool_call>
-    tool: {"moved": ..., "reward": ..., "observation": ...}
-    assistant: <tool_call>move(...)</tool_call>
+    tool: {"moved": ..., "pos": ..., "blocked": ..., "reason": ...}
     ...
 
-The environment result is returned through the `tool` role, and the next
-assistant call sees the full recent conversation.
+The tool result deliberately does not repeat the full map or observation.
 """
 
 from __future__ import annotations
@@ -20,16 +21,33 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from env.maze import ACTIONS, Maze, MazeEnv
-from env.render import render_observation
-from prompts import REL_FEWSHOT, REL_FEWSHOT_L1, REL_SYSTEM
 
 
-AGENT_SYSTEM = (
-    REL_SYSTEM
-    + " After every move, the move tool returns a JSON tool result containing "
-      "the new observation, reward, done, and reason. Use that result to decide "
-      "the next move."
-)
+def build_agent_system(maze: Maze) -> str:
+    walls = " ".join(
+        f"({x},{y})" for x, y in sorted(maze.walls, key=lambda p: (p[1], p[0]))
+    ) or "none"
+    return (
+        f"You are an agent solving a {maze.width}x{maze.height} maze.\n"
+        "Coordinates: x increases to the right, y increases downward.\n"
+        f"Start: {maze.start}\n"
+        f"Goal: {maze.goal}\n"
+        f"Walls: {walls}\n\n"
+        "You control one cell. Each turn, call the move tool with exactly one "
+        "direction: up, down, left, or right.\n\n"
+        "The move tool returns a compact JSON result:\n"
+        "- moved: the direction you attempted\n"
+        "- ok: whether the move succeeded\n"
+        "- pos: your position after the move\n"
+        "- blocked: whether the move was blocked\n"
+        "- blocked_by: wall, boundary, or null\n"
+        "- done: whether the episode ended\n"
+        "- goal_delta: goal - pos\n"
+        "- reason: a short explanation\n\n"
+        "If you hit a wall or the map boundary, your position does not change.\n"
+        "If done=true, stop calling move.\n"
+        "Always call move. Never reply in plain text."
+    )
 
 
 @dataclass
@@ -55,33 +73,10 @@ class AgentRun:
             "total_reward": round(self.total_reward, 3),
             "shortest": self.maze.path_length,
             "format_errors": sum(1 for t in self.turns
-                                 if t["action"] == "invalid"),
+                                 if t["action"] is None),
             "collisions": sum(1 for t in self.turns
-                              if t["info"].get("reason") == "collision"),
+                              if t["tool_result"]["blocked"]),
         }
-
-
-def _fewshot_messages(kind: str | None) -> list[dict]:
-    if not kind or kind == "none":
-        return []
-    if kind == "rel":
-        examples = REL_FEWSHOT
-    elif kind == "rel_l1":
-        examples = REL_FEWSHOT_L1
-    else:
-        raise ValueError(f"unknown fewshot kind: {kind}")
-    out = []
-    for state, direction in examples:
-        out.append({"role": "user", "content": state})
-        out.append({
-            "role": "assistant",
-            "content": (
-                '<tool_call>\n'
-                '{"name": "move", "arguments": {"direction": "%s"}}\n'
-                '</tool_call>' % direction
-            ),
-        })
-    return out
 
 
 class MazeAgent:
@@ -90,24 +85,17 @@ class MazeAgent:
         maze: Maze,
         policy,
         *,
-        obs_style: str = "rel",
-        fewshot: str | None = "rel_l1",
         history_window: int = 12,
         memory: int = 3,
-        show_visited: bool = True,
         revisit_penalty: float = 0.0,
-        system: str = AGENT_SYSTEM,
+        system: str | None = None,
         on_step: Callable[[dict], None] | None = None,
     ):
         if history_window < 1:
             raise ValueError("history_window must be >= 1")
         self.maze = maze
         self.policy = policy
-        self.obs_style = obs_style
         self.history_window = history_window
-        self.memory = memory
-        self.show_visited = show_visited
-        self.revisit_penalty = revisit_penalty
         self.on_step = on_step
         self.env = MazeEnv(maze, memory=memory,
                            revisit_penalty=revisit_penalty)
@@ -115,26 +103,29 @@ class MazeAgent:
         self.history: list[dict] = []
         self.turns: list[dict] = []
         self.total_reward = 0.0
-        self.base_messages = (
-            [{"role": "system", "content": system}]
-            + _fewshot_messages(fewshot)
-            + [{"role": "user", "content": self._observation()}]
-        )
-
-    def _observation(self) -> str:
-        visited = tuple(self.path[:-1]) if self.show_visited else ()
-        return render_observation(
-            self.maze, self.env.pos, self.env.last_actions,
-            style=self.obs_style, visited=visited,
-        )
+        self.base_messages = [
+            {"role": "system",
+             "content": system or build_agent_system(maze)},
+            {"role": "user", "content": "Begin the maze."},
+        ]
 
     def messages(self) -> list[dict]:
         return self.base_messages + self.history
 
     def _trim(self) -> None:
-        # history is assistant/tool pairs
         while len(self.history) > 2 * self.history_window:
             del self.history[:2]
+
+    def _blocked_by(self, action: str | None) -> str | None:
+        if action not in ACTIONS:
+            return None
+        dx, dy = ACTIONS[action]
+        nx, ny = self.env.pos[0] + dx, self.env.pos[1] + dy
+        if not (0 <= nx < self.maze.width and 0 <= ny < self.maze.height):
+            return "boundary"
+        if (nx, ny) in self.maze.walls:
+            return "wall"
+        return None
 
     def run(self) -> AgentRun:
         while not self.env.done:
@@ -142,28 +133,46 @@ class MazeAgent:
             step = self.policy.act(prompt_messages)
             self.history.append({"role": "assistant", "content": step.text})
 
-            action = step.action if step.action in ACTIONS else "invalid"
+            action = step.action if step.action in ACTIONS else None
             before = self.env.pos
-            result = self.env.step(action)
+            blocked_by = self._blocked_by(action)
+            result = self.env.step(action or "invalid")
             self.path.append(result.pos)
             self.total_reward += result.reward
-            observation = self._observation()
+
             reason = result.info.get("reason", "unknown")
+            if action is None:
+                reason_text = "Invalid tool call. The episode ended."
+            elif blocked_by == "wall":
+                reason_text = ("You hit a wall. "
+                               "Your position did not change.")
+            elif blocked_by == "boundary":
+                reason_text = ("You hit the map boundary. "
+                               "Your position did not change.")
+            elif reason == "goal":
+                reason_text = "You reached the goal."
+            elif reason == "truncated":
+                reason_text = "The step limit was reached."
+            else:
+                reason_text = f"You moved {action}."
+
             payload = {
-                "ok": action in ACTIONS and reason != "collision",
                 "moved": action,
-                "from": list(before),
+                "ok": action is not None and blocked_by is None,
                 "pos": list(result.pos),
-                "reward": round(result.reward, 4),
+                "blocked": blocked_by is not None,
+                "blocked_by": blocked_by,
                 "done": bool(result.done),
-                "reason": reason,
-                "observation": observation,
+                "goal_delta": [
+                    self.maze.goal[0] - result.pos[0],
+                    self.maze.goal[1] - result.pos[1],
+                ],
+                "reason": reason_text,
             }
-            tool_text = json.dumps(payload, ensure_ascii=False)
             self.history.append({
                 "role": "tool",
                 "name": "move",
-                "content": tool_text,
+                "content": json.dumps(payload, ensure_ascii=False),
             })
             self._trim()
 
@@ -194,4 +203,4 @@ class MazeAgent:
         )
 
 
-__all__ = ["AGENT_SYSTEM", "AgentRun", "MazeAgent"]
+__all__ = ["AgentRun", "MazeAgent", "build_agent_system"]
