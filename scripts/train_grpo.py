@@ -41,7 +41,7 @@ from grpo.multistep import MultiStepGRPOTrainer  # noqa: E402
 from grpo.train import (  # noqa: E402
     TrainConfig, group_advantages, samples_from_trajectory,
 )
-from rollout import run_episode, run_group  # noqa: E402
+from rollout import run_episode, run_group, run_maps_batch  # noqa: E402
 
 
 def parse_levels(raw: str) -> tuple[str, ...]:
@@ -123,17 +123,31 @@ def summarize_eval(rows: list[dict]) -> dict:
 
 def evaluate_maps(policy: EnginePolicy, maps: list, *,
                   obs_style: str, memory: int, show_visited: bool = False,
-                  revisit_penalty: float = 0.0,
+                  revisit_penalty: float = 0.0, batch_size: int = 1,
                   split: str = "val") -> tuple[dict, list[dict]]:
     """在固定地图上跑 greedy rollout，返回汇总和逐图结果。"""
+    mazes = [rec.to_maze() for rec in maps]
+    if batch_size > 1:
+        trajs = []
+        for start in range(0, len(mazes), batch_size):
+            chunk = mazes[start:start + batch_size]
+            trajs.extend(run_maps_batch(
+                chunk, policy, obs_style=obs_style, memory=memory,
+                show_visited=show_visited, revisit_penalty=revisit_penalty,
+                episode_prefix=f"eval-{split}-{start // batch_size}",
+            ))
+    else:
+        trajs = [
+            run_episode(
+                maze, policy, episode=f"eval-{split}-{i}",
+                obs_style=obs_style, memory=memory,
+                show_visited=show_visited, revisit_penalty=revisit_penalty,
+            )
+            for i, maze in enumerate(mazes, 1)
+        ]
+
     rows = []
-    for i, rec in enumerate(maps, 1):
-        maze = rec.to_maze()
-        traj = run_episode(
-            maze, policy, episode=f"eval-{split}-{i}",
-            obs_style=obs_style, memory=memory,
-            show_visited=show_visited, revisit_penalty=revisit_penalty,
-        )
+    for i, (rec, maze, traj) in enumerate(zip(maps, mazes, trajs), 1):
         collisions = sum(1 for t in traj.turns
                          if t.info.get("reason") == "collision")
         fmterr = sum(1 for t in traj.turns if t.action == "invalid")
@@ -214,6 +228,8 @@ def main() -> int:
                     help="每级固定 val 图数量；0 表示不评估")
     ap.add_argument("--test-limit", type=int, default=10,
                     help="每级固定 test 图数量；0 表示不评估")
+    ap.add_argument("--eval-batch", type=int, default=1,
+                    help="评估时一次并行跑多少张地图")
     ap.add_argument("--ui-url", default=None)
     ap.add_argument("--ui-host", default="127.0.0.1",
                     help="自带 UI 时监听地址；远程访问可设 0.0.0.0")
@@ -256,7 +272,8 @@ def main() -> int:
     model.eval()
     tie_embeddings(model)
 
-    engine = RolloutEngine(model, tokenizer, max_batch=args.g,
+    engine = RolloutEngine(model, tokenizer,
+                           max_batch=max(args.g, args.eval_batch),
                            max_seq_len=args.max_seq_len, kv_ratio=0.5,
                            device=device)
     train_sampling = Sampling(max_tokens=args.max_tokens,
@@ -288,7 +305,8 @@ def main() -> int:
         val_metrics, _ = evaluate_maps(
             eval_policy, val_maps, obs_style=args.obs_style,
             memory=args.memory, show_visited=args.visited,
-            revisit_penalty=args.revisit_penalty, split="val")
+            revisit_penalty=args.revisit_penalty,
+            batch_size=args.eval_batch, split="val")
         val_history.append({"update": 0, **val_metrics})
         best_val = val_metrics["success_rate"]
         Path(args.best_save).parent.mkdir(parents=True, exist_ok=True)
@@ -377,7 +395,8 @@ def main() -> int:
                 val_metrics, _ = evaluate_maps(
                     eval_policy, val_maps, obs_style=args.obs_style,
                     memory=args.memory, show_visited=args.visited,
-                    revisit_penalty=args.revisit_penalty, split="val")
+                    revisit_penalty=args.revisit_penalty,
+            batch_size=args.eval_batch, split="val")
                 val_history.append({"update": u, **val_metrics})
                 rec_metrics["val"] = val_metrics
                 _cuda_cleanup()
@@ -400,7 +419,8 @@ def main() -> int:
             test_metrics, _ = evaluate_maps(
                 eval_policy, test_maps, obs_style=args.obs_style,
                 memory=args.memory, show_visited=args.visited,
-                revisit_penalty=args.revisit_penalty, split="test")
+                revisit_penalty=args.revisit_penalty,
+                batch_size=args.eval_batch, split="test")
     finally:
         dt = time.time() - t_start
         print(f"\n总耗时 {dt/60:.1f} min")
@@ -424,6 +444,7 @@ def main() -> int:
                 "seed": args.seed,
                 "val_limit": args.val_limit,
                 "test_limit": args.test_limit,
+                "eval_batch": args.eval_batch,
             },
             "train": hist,
             "val": val_history,

@@ -386,6 +386,75 @@ def run_group(
     return trajs
 
 
+def run_maps_batch(
+    mazes: list[Maze],
+    policy: "Policy",
+    *,
+    obs_style: str = "minimal",
+    memory: int = 0,
+    show_visited: bool = False,
+    revisit_penalty: float = REWARD_REVISIT,
+    episode_prefix: str = "eval",
+) -> list[Trajectory]:
+    """同时跑多张地图的评估轨迹。
+
+    每张地图 1 条轨迹；每一步把所有未结束地图的当前观测拼成一个
+    batch 调 policy.act_batch。不同地图可以有不同的终止步数。
+    """
+    if not mazes:
+        return []
+    envs = [MazeEnv(maze, memory=memory, revisit_penalty=revisit_penalty)
+            for maze in mazes]
+    trajs = [Trajectory(maze=maze) for maze in mazes]
+    tags = [f"{episode_prefix}/m{i}" for i in range(len(mazes))]
+
+    while True:
+        active = [i for i, env in enumerate(envs) if not env.done]
+        if not active:
+            break
+        obs_list = []
+        for i in active:
+            env = envs[i]
+            visited = tuple(trajs[i].path[:-1]) if show_visited else ()
+            prompt = render_observation(
+                mazes[i], env.pos, env.last_actions,
+                style=obs_style, visited=visited,
+            )
+            obs_list.append(Observation(
+                prompt, mazes[i], env.pos, list(env.last_actions),
+                len(trajs[i].turns) + 1,
+            ))
+
+        batch_fn = getattr(policy, "act_batch", None)
+        steps = batch_fn(obs_list) if batch_fn else [policy.act(o) for o in obs_list]
+
+        for i, obs, step in zip(active, obs_list, steps):
+            env = envs[i]
+            traj = trajs[i]
+            applied = step.action if step.action in ACTIONS else "invalid"
+            result = env.step(applied)
+            traj.total_reward += result.reward
+            traj.turns.append(Turn(
+                turn=len(traj.turns) + 1,
+                prompt=obs.prompt,
+                text=step.text,
+                action=applied,
+                reward=result.reward,
+                done=result.done,
+                info=result.info,
+                logprob=step.logprob,
+                pos=result.pos,
+                prompt_ids=step.prompt_ids,
+                tokens=step.tokens,
+                token_logprobs=step.token_logprobs,
+            ))
+
+    for i, env in enumerate(envs):
+        trajs[i].success = env.terminated and env.pos == mazes[i].goal
+        trajs[i].truncated = env.truncated
+    return trajs
+
+
 def main() -> None:
     from env.maze import LEVELS, generate
 
