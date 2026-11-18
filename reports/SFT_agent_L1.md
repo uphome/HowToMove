@@ -120,23 +120,10 @@ recovery/task:     2；recovery=8 实验为 8
 seed:              7
 ```
 
-Loss 曲线（浅色为 per-step，粗线为 50-step centered moving average）：
+Loss 曲线（最终 source maps + recovery=8；浅色为 per-step，
+粗线为 50-step centered moving average）：
 
-无 recovery：
-
-![L1 no recovery loss](curves/sft_agent_l1_600_loss.png)
-
-recovery=2：
-
-![L1 recovery loss](curves/sft_agent_l1_600_recovery_loss.png)
-
-source maps + recovery=2：
-
-![L1 source maps loss](curves/sft_agent_l1_600_maps_loss.png)
-
-source maps + recovery=8：
-
-![L1 source maps recovery=8 loss](curves/sft_agent_l1_600_maps_r8_loss.png)
+![L1 final source maps recovery=8 loss](curves/sft_agent_l1_600_maps_r8_loss.png)
 
 ---
 

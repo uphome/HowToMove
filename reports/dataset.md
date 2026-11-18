@@ -1,6 +1,9 @@
-# 数据集报告
+# 数据集报告（v1 map-only，历史）
 
 > 日期：2026-11-14 ｜ 版本 v1 ｜ 状态：**已生成并通过门禁**
+>
+> 当前 Agent 使用的 layout/task 数据集见
+> [`reports/DATASET_layout_tasks.md`](DATASET_layout_tasks.md)。
 
 ---
 
