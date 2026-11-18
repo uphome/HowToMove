@@ -125,10 +125,23 @@ test: up=342, down=346, left=365, right=648
 | L1 val | 0/100 | 75/100 | 100 | 0 |
 | L1 test | 0/100 | 78/100 | 100 | 0 |
 
+GRPO 继续训练后的结果：
+
+| 模型 | val | test |
+|---|---:|---:|
+| L1 SFT | 75/100 | 78/100 |
+| L1 SFT + GRPO | **87/100** | **88/100** |
+
 base model 完整指标见：
 
 ```text
 reports/AGENT_BASELINE.md
+```
+
+GRPO 详情见：
+
+```text
+reports/GRPO_AGENT_v3_L1.md
 ```
 
 ---

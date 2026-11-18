@@ -3,6 +3,9 @@
 > 日期：2026-11-18 ｜ checkpoint：L1 v3 e2
 > 数据：map-only v3，L1 train maps
 > 脚本：`scripts/grpo_signal_agent.py`
+>
+> 后续 GRPO 训练结果见
+> [`reports/GRPO_AGENT_v3_L1.md`](GRPO_AGENT_v3_L1.md)。
 
 ---
 
