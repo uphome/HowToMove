@@ -79,6 +79,109 @@ Task → BFS shortest path → SFT turn samples
 
 每次训练时由 `agent/sft_data.py` 根据 task 和随机 tie-break 生成。
 
+### 2.4 训练时恢复样本（不落盘）
+
+Layout/Task 数据集本身不包含撞墙恢复动作。SFT 训练时可以通过
+`--recovery-per-task N` 动态生成恢复样本：
+
+```text
+最优路径状态
+→ 注入一个确定会撞墙/撞边界的动作
+→ 生成 blocked=true 的 tool result
+→ target 是该状态下的正确最优动作
+```
+
+示例：
+
+```text
+assistant: move(up)
+tool: {"moved":"up","ok":false,"blocked":true,
+       "blocked_by":"wall","reason":"You hit a wall..."}
+
+assistant: move(right)   ← 训练目标
+```
+
+恢复样本：
+
+- 只用于 train split；
+- 不写入 `data/tasks/`；
+- 不加入 val/test；
+- 由 `agent/sft_data.py` 在构建 SFT items 时生成；
+- 每个 task 最多注入 N 个恢复状态。
+
+当前 L1 实验的 SFT turn 数：
+
+```text
+无 recovery:        7103
+recovery=2:         8247
+source maps + r=2:  7819
+source maps + r=8:  9154
+```
+
+#### 2.4.1 可复现性
+
+恢复样本虽然不落盘，但**不是无种子的随机生成**。每个 task 使用：
+
+```python
+task_seed = (int(rec.hash[:16], 16) ^ (seed * 1000003)) & 0xFFFFFFFF
+rng = random.Random(task_seed)
+```
+
+以下内容均由这个 RNG 决定：
+
+- 最短路径的随机 tie-break；
+- 哪些路径状态注入恢复样本；
+- 使用哪个撞墙方向。
+
+task 选择先按 task hash 排序，再取前 N 个，因此也不依赖文件遍历顺序。
+
+固定配置下，相同 seed 生成相同样本。下面的 fingerprint 对每个
+SFT item 的 `map_id`、`turn`、`action`、`prompt_ids`、`completion_ids`
+依次做 sha256，再取前 24 位。
+
+使用当前 `data/tasks/train` 的 600 个 L1 task、`recovery_per_task=2`、
+`history_window=12`、`max_seq_len=4096` 做验证：
+
+```text
+seed=7 第一次:
+  items=8247
+  fingerprint=72f5bf5f3379c5ee6e38c89a
+
+seed=7 第二次:
+  items=8247
+  fingerprint=72f5bf5f3379c5ee6e38c89a
+
+seed=8:
+  items=8242
+  fingerprint=81bd2220b7e438c3ca787c86
+```
+
+因此：
+
+```text
+相同 seed + 相同 task 数据 + 相同代码/配置
+→ 恢复样本相同
+```
+
+但以下变化会改变生成结果：
+
+- 修改 `--seed`；
+- 修改 `--recovery-per-task`；
+- 修改训练 task 集合或 `train_source`；
+- 修改 `agent/sft_data.py` 的分桶/路径/恢复逻辑；
+- 修改 prompt 模板或 tokenizer 版本。
+
+所以它是“固定代码版本下可复现”，不是跨代码版本永久不变。
+如需跨版本审计，建议在训练 JSON/checkpoint 中额外保存：
+
+```text
+sft_items_sha256
+recovery_per_task
+seed
+train_source
+dataset_manifest_sha256
+```
+
 ---
 
 ## 3. Split 规则
