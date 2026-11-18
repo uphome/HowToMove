@@ -65,6 +65,57 @@ Loss 曲线（浅色 per-step，粗线为 50-step moving average）：
 
 ![L0 v3 loss](curves/sft_agent_v3_l0_loss.png)
 
+### 3.1 为什么 epoch 切换时 loss 会上升
+
+当前训练按 **精确 prompt 长度** 分桶：
+
+```text
+L0:
+  prompt buckets: 178
+  prompt range:   367..1424
+  batch 内：同一 prompt 长度
+  bucket 内：随机 shuffle
+  bucket 顺序：短 → 长
+```
+
+训练共 2400 step，每个 epoch 1200 step：
+
+```text
+epoch 1: step 1..1200
+epoch 2: step 1201..2400
+```
+
+到 step 1201 时，数据顺序从 epoch 1 的最后一批长 prompt，
+重新回到 epoch 2 的最短 prompt bucket。
+
+这不是模型在 step 1201 突然退化，而是：
+
+```text
+最后 10 step 的平均 loss ≈ 0.000003
+epoch 2 开头 10 step 平均 loss ≈ 0.0423
+```
+
+但两个 epoch 的整体 loss 仍然在下降：
+
+```text
+epoch 1 mean loss: 0.0263
+epoch 2 mean loss: 0.0218
+```
+
+所以 step 1201 附近的抬升是：
+
+```text
+数据分布 + bucket 顺序重置
+```
+
+不是训练发散。若希望曲线在 epoch 边界更连续，可以后续单独实验：
+
+```text
+每个 epoch 随机打乱 bucket 顺序
+```
+
+而不是只按 prompt 长度从短到长处理。
+
 ---
 
 ## 4. 评估
