@@ -5,7 +5,13 @@ import random
 from collections import Counter
 
 from agent import AgentGroup, MazeAgent
-from agent.sft_data import direction_between, random_shortest_path
+from agent.sft_data import (
+    _blocked_payload,
+    _collision_messages,
+    blocked_directions,
+    direction_between,
+    random_shortest_path,
+)
 from env.maze import Maze, bfs_field
 from rollout import Step, format_tool_call
 
@@ -159,3 +165,28 @@ def test_random_shortest_path_is_valid_and_mixes_first_action():
         first_actions[direction_between(path[0], path[1])] += 1
     assert first_actions["right"] > 0
     assert first_actions["down"] > 0
+
+
+def test_collision_sft_prompt_matches_runtime_tool_result():
+    maze = make_maze(goal=(2, 0), walls=frozenset({(1, 0)}))
+    blocked = blocked_directions(maze, maze.start)
+    assert ("right", "wall") in blocked
+    assert ("left", "boundary") in blocked
+
+    payload = _blocked_payload(maze, maze.start, "right", "wall")
+    assert payload["pos"] == [0, 0]
+    assert payload["blocked"] is True
+    assert payload["blocked_by"] == "wall"
+    assert payload["goal_delta"] == [2, 0]
+    assert payload["reason"] == (
+        "You hit a wall. Your position did not change."
+    )
+
+    agent = MazeAgent(maze, history_window=4)
+    messages = _collision_messages(agent, "right", payload)
+    assert messages[0]["role"] == "system"
+    assert messages[1]["role"] == "user"
+    assert messages[-2]["role"] == "assistant"
+    assert '"direction": "right"' in messages[-2]["content"]
+    assert messages[-1]["role"] == "tool"
+    assert json.loads(messages[-1]["content"]) == payload

@@ -215,11 +215,16 @@ def main() -> int:
     ap.add_argument("--levels", default="L0")
     ap.add_argument("--maps", type=int, default=100,
                     help="每级使用的 task 数（保留旧参数名）")
+    ap.add_argument("--train-source", choices=("tasks", "maps"),
+                    default="tasks",
+                    help="训练数据来源：新 tasks 或旧的 train maps")
     ap.add_argument("--epochs", type=int, default=1)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--lr", type=float, default=5e-5)
     ap.add_argument("--history-window", type=int, default=12)
     ap.add_argument("--max-seq-len", type=int, default=4096)
+    ap.add_argument("--recovery-per-task", type=int, default=0,
+                    help="每个 task 额外注入的撞墙恢复样本数")
     ap.add_argument("--val-limit", type=int, default=10)
     ap.add_argument("--test-limit", type=int, default=10)
     ap.add_argument("--eval-batch-size", type=int, default=1,
@@ -259,7 +264,12 @@ def main() -> int:
         save_path = Path(args.init_adapter)
         print(f"评估 adapter ← {save_path}")
     else:
-        train_tasks = load_tasks(args.data, "train")
+        if args.train_source == "maps":
+            from dataset import load_records
+            train_tasks = load_records(
+                Path(args.data) / "maps" / "train.jsonl")
+        else:
+            train_tasks = load_tasks(args.data, "train")
         items, actions, n_maps = build_agent_sft_items(
             train_tasks, tokenizer,
             levels=levels,
@@ -267,6 +277,7 @@ def main() -> int:
             history_window=args.history_window,
             max_seq_len=args.max_seq_len,
             seed=args.seed,
+            recovery_per_task=args.recovery_per_task,
         )
         print(f"maps={n_maps} sft_items={len(items)} "
               f"actions={dict(actions)}")
@@ -296,11 +307,13 @@ def main() -> int:
             "config": {
                 "levels": list(levels),
                 "maps_per_level": args.maps,
+                "train_source": args.train_source,
                 "epochs": args.epochs,
                 "batch_size": args.batch_size,
                 "lr": args.lr,
                 "history_window": args.history_window,
                 "max_seq_len": args.max_seq_len,
+                "recovery_per_task": args.recovery_per_task,
                 "seed": args.seed,
             },
         }, save_path)
