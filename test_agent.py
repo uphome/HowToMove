@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import json
+import random
+from collections import Counter
 
 from agent import AgentGroup, MazeAgent
+from agent.sft_data import direction_between, random_shortest_path
 from env.maze import Maze, bfs_field
 from rollout import Step, format_tool_call
 
@@ -137,3 +140,22 @@ def test_agent_group_batches_active_trajectories():
     assert runs[1].turns[0]["tool_result"]["reason"] == (
         "Invalid tool call. The episode ended."
     )
+
+
+def test_random_shortest_path_is_valid_and_mixes_first_action():
+    # In an empty grid the first step can be right or down. The fixed BFS
+    # ordering only produces down; the randomized path should cover both.
+    maze = make_maze(goal=(4, 4), max_steps=8)
+    first_actions = Counter()
+    for seed in range(32):
+        path = random_shortest_path(maze, random.Random(seed))
+        assert path[0] == maze.start
+        assert path[-1] == maze.goal
+        assert len(path) == maze.distance(maze.start) + 1
+        assert all(
+            abs(a[0] - b[0]) + abs(a[1] - b[1]) == 1
+            for a, b in zip(path, path[1:])
+        )
+        first_actions[direction_between(path[0], path[1])] += 1
+    assert first_actions["right"] > 0
+    assert first_actions["down"] > 0

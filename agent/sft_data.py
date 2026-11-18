@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from collections import Counter
 from dataclasses import dataclass
 from typing import Iterable
@@ -32,6 +33,30 @@ def direction_between(a: tuple[int, int], b: tuple[int, int]) -> str:
     raise ValueError(f"non-adjacent path step {a} -> {b}")
 
 
+def random_shortest_path(maze, rng: random.Random) -> list[tuple[int, int]]:
+    """Pick uniformly among all legal distance-decreasing neighbours.
+
+    The fixed BFS traversal in Maze.shortest_path() always tries up/down
+    first, which biases the first action of SFT trajectories.
+    """
+    path = [maze.start]
+    pos = maze.start
+    d = maze.distance(pos)
+    while pos != maze.goal:
+        choices = []
+        for name, (dx, dy) in ACTIONS.items():
+            nxt = (pos[0] + dx, pos[1] + dy)
+            if maze.is_free(*nxt) and maze.distance(nxt) == d - 1:
+                choices.append((name, nxt))
+        if not choices:
+            raise RuntimeError(f"no descending neighbour from {pos}")
+        name, nxt = rng.choice(choices)
+        path.append(nxt)
+        pos = nxt
+        d -= 1
+    return path
+
+
 def build_agent_sft_items(
     records,
     tokenizer,
@@ -40,6 +65,7 @@ def build_agent_sft_items(
     maps_per_level: int = 100,
     history_window: int = 12,
     max_seq_len: int = 4096,
+    seed: int = 7,
 ) -> tuple[list[AgentSFTItem], Counter, int]:
     levels = tuple(levels)
     by_level = {lv: [] for lv in levels}
@@ -56,7 +82,8 @@ def build_agent_sft_items(
     actions: Counter = Counter()
     for rec in selected:
         maze = rec.to_maze()
-        path = maze.shortest_path()
+        task_seed = (int(rec.hash[:16], 16) ^ (seed * 1000003)) & 0xFFFFFFFF
+        path = random_shortest_path(maze, random.Random(task_seed))
         agent = MazeAgent(
             maze, None,
             history_window=history_window,
@@ -99,4 +126,9 @@ def build_agent_sft_items(
     return items, actions, len(selected)
 
 
-__all__ = ["AgentSFTItem", "build_agent_sft_items", "direction_between"]
+__all__ = [
+    "AgentSFTItem",
+    "build_agent_sft_items",
+    "direction_between",
+    "random_shortest_path",
+]

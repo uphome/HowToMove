@@ -1,9 +1,12 @@
 """SFT for the static-map tool-calling agent.
 
-Trajectories are generated from data/maps/*.jsonl on the fly; no state or
-trajectory dataset is stored under data/.
+Trajectories are generated from data/layouts and data/tasks on the fly;
+no state or trajectory dataset is stored under data/.
 
     python scripts/sft_agent.py --levels L0 --maps 100 --epochs 1
+
+Use ``--eval-only --init-adapter ...`` to evaluate an existing adapter
+without rebuilding or training again. ``--plot-dir`` saves the loss curve.
 """
 
 from __future__ import annotations
@@ -24,7 +27,7 @@ import paths  # noqa: E402,F401
 
 import torch  # noqa: E402
 
-from agent import AgentGroup, ChatPolicy, load_tasks  # noqa: E402
+from agent import ChatPolicy, MazeAgent, load_tasks  # noqa: E402
 from agent.sft_data import build_agent_sft_items  # noqa: E402
 from engine_rl import RolloutEngine, Sampling, load_model  # noqa: E402
 from env.maze import LEVELS  # noqa: E402
@@ -42,36 +45,59 @@ def pick_maps(records, levels, per_level: int):
 
 
 def evaluate_agent(policy, records, *, history_window: int,
-                   split: str) -> dict:
+                   split: str, batch_size: int = 1) -> dict:
+    """Evaluate task records, batching independent agents when possible."""
     rows = []
-    for i, rec in enumerate(records, 1):
-        group = AgentGroup(
-            rec.to_maze(), policy, g=1,
-            history_window=history_window,
-            episode_prefix=f"{split}-{i}",
-        )
-        run = group.run()[0]
-        actions = Counter(t["action"] for t in run.turns
-                          if t["action"] is not None)
-        rows.append({
-            "id": rec.id,
-            "level": rec.level,
-            "shortest": rec.shortest,
-            "steps": run.steps,
-            "success": bool(run.success),
-            "truncated": bool(run.truncated),
-            "reward": round(run.total_reward, 4),
-            "collisions": sum(1 for t in run.turns
-                              if t["tool_result"]["blocked"]),
-            "format_errors": sum(1 for t in run.turns
-                                 if t["action"] is None),
-            "actions": dict(actions),
-        })
-        r = rows[-1]
-        print(f"  [{split} {i}/{len(records)}] {rec.id:16s} "
-              f"steps={r['steps']:2d} success={str(r['success']):5s} "
-              f"coll={r['collisions']:2d} fmt={r['format_errors']} "
-              f"actions={dict(actions)}")
+    batch_size = max(1, batch_size)
+    for start in range(0, len(records), batch_size):
+        chunk = records[start:start + batch_size]
+        agents = [
+            MazeAgent(
+                rec.to_maze(),
+                history_window=history_window,
+                episode_id=f"{split}-{start + j + 1}",
+            )
+            for j, rec in enumerate(chunk)
+        ]
+        active = list(agents)
+        while active:
+            messages = [agent.messages() for agent in active]
+            batch_fn = getattr(policy, "act_batch", None)
+            if batch_fn is None:
+                steps = [policy.act(m) for m in messages]
+            else:
+                steps = batch_fn(messages)
+            if len(steps) != len(active):
+                raise RuntimeError(
+                    f"policy returned {len(steps)} steps for "
+                    f"{len(active)} active agents")
+            for agent, step in zip(active, steps):
+                agent.apply(step)
+            active = [agent for agent in active if not agent.done]
+
+        for j, (rec, agent) in enumerate(zip(chunk, agents), start + 1):
+            run = agent.to_run()
+            actions = Counter(t["action"] for t in run.turns
+                              if t["action"] is not None)
+            rows.append({
+                "id": rec.id,
+                "level": rec.level,
+                "shortest": rec.shortest,
+                "steps": run.steps,
+                "success": bool(run.success),
+                "truncated": bool(run.truncated),
+                "reward": round(run.total_reward, 4),
+                "collisions": sum(1 for t in run.turns
+                                  if t["tool_result"]["blocked"]),
+                "format_errors": sum(1 for t in run.turns
+                                     if t["action"] is None),
+                "actions": dict(actions),
+            })
+            r = rows[-1]
+            print(f"  [{split} {j}/{len(records)}] {rec.id:16s} "
+                  f"steps={r['steps']:2d} success={str(r['success']):5s} "
+                  f"coll={r['collisions']:2d} fmt={r['format_errors']} "
+                  f"actions={dict(actions)}")
     n = len(rows)
     ok = sum(r["success"] for r in rows)
     all_actions = Counter()
@@ -107,9 +133,30 @@ def _pad_batch(chunk, device):
     return ids, p, lens
 
 
+def plot_loss(history: list[dict], out_dir: str) -> None:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    steps = [x["step"] for x in history]
+    losses = [x["loss"] for x in history]
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    ax.plot(steps, losses, linewidth=1.2)
+    ax.set_xlabel("step")
+    ax.set_ylabel("cross entropy loss")
+    ax.set_title("Agent SFT loss")
+    ax.grid(alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(out / "sft_loss.png", dpi=150)
+    plt.close(fig)
+
+
 def train_sft(items, model, tokenizer, device, *, epochs: int,
               batch_size: int, lr: float, seed: int,
-              init_state: dict | None = None) -> tuple[LoRAAdapter, int]:
+              init_state: dict | None = None
+              ) -> tuple[LoRAAdapter, int, list[dict]]:
     rng = random.Random(seed)
     adapter = LoRAAdapter(model, r=16, alpha=32)
     if init_state is not None:
@@ -126,6 +173,7 @@ def train_sft(items, model, tokenizer, device, *, epochs: int,
 
     step = 0
     t0 = time.time()
+    loss_history = []
     for epoch in range(1, epochs + 1):
         losses = []
         for plen in sorted(buckets):
@@ -143,7 +191,13 @@ def train_sft(items, model, tokenizer, device, *, epochs: int,
                     adapter.trainable_parameters(), 1.0)
                 optimizer.step()
                 step += 1
-                losses.append(float(loss.detach()))
+                value = float(loss.detach())
+                losses.append(value)
+                loss_history.append({
+                    "epoch": epoch,
+                    "step": step,
+                    "loss": value,
+                })
                 if step % 20 == 0:
                     print(f"epoch={epoch} step={step} "
                           f"loss={statistics.mean(losses[-20:]):.4f}")
@@ -151,7 +205,7 @@ def train_sft(items, model, tokenizer, device, *, epochs: int,
               f"elapsed={(time.time()-t0)/60:.1f} min")
     model.model.grad_checkpoint = False
     model.eval()
-    return adapter, step
+    return adapter, step, loss_history
 
 
 def main() -> int:
@@ -160,7 +214,7 @@ def main() -> int:
     ap.add_argument("--data", default="data")
     ap.add_argument("--levels", default="L0")
     ap.add_argument("--maps", type=int, default=100,
-                    help="每级使用的地图数")
+                    help="每级使用的 task 数（保留旧参数名）")
     ap.add_argument("--epochs", type=int, default=1)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--lr", type=float, default=5e-5)
@@ -168,8 +222,14 @@ def main() -> int:
     ap.add_argument("--max-seq-len", type=int, default=4096)
     ap.add_argument("--val-limit", type=int, default=10)
     ap.add_argument("--test-limit", type=int, default=10)
+    ap.add_argument("--eval-batch-size", type=int, default=1,
+                    help="并行评估的独立 agent 数")
+    ap.add_argument("--eval-only", action="store_true",
+                    help="只加载 --init-adapter 并评估，不训练")
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--init-adapter", default=None)
+    ap.add_argument("--plot-dir", default=None,
+                    help="可选：保存 sft_loss.png 的目录")
     ap.add_argument("--save-dir", default="/tmp/opencode/sft_agent")
     ap.add_argument("--json", default="/tmp/opencode/sft_agent.json")
     args = ap.parse_args()
@@ -185,51 +245,71 @@ def main() -> int:
     model, tokenizer, device = load_model(args.model)
     tie_embeddings(model)
 
-    train_tasks = load_tasks(args.data, "train")
-    items, actions, n_maps = build_agent_sft_items(
-        train_tasks, tokenizer,
-        levels=levels,
-        maps_per_level=args.maps,
-        history_window=args.history_window,
-        max_seq_len=args.max_seq_len,
-    )
-    print(f"maps={n_maps} sft_items={len(items)} actions={dict(actions)}")
-    if not items:
-        raise RuntimeError("no SFT items generated")
-
-    init_state = None
-    if args.init_adapter:
+    if args.eval_only:
+        if not args.init_adapter:
+            ap.error("--eval-only requires --init-adapter")
         blob = torch.load(args.init_adapter, map_location=device)
-        init_state = blob.get("adapter", blob)
-        print(f"初始化 adapter ← {args.init_adapter}")
-    adapter, steps = train_sft(
-        items, model, tokenizer, device,
-        epochs=args.epochs, batch_size=args.batch_size,
-        lr=args.lr, seed=args.seed, init_state=init_state,
-    )
+        adapter = LoRAAdapter(model, r=16, alpha=32)
+        adapter.load_state_dict(blob.get("adapter", blob))
+        model.eval()
+        items: list = []
+        actions: Counter = Counter()
+        n_maps = 0
+        loss_history: list[dict] = []
+        save_path = Path(args.init_adapter)
+        print(f"评估 adapter ← {save_path}")
+    else:
+        train_tasks = load_tasks(args.data, "train")
+        items, actions, n_maps = build_agent_sft_items(
+            train_tasks, tokenizer,
+            levels=levels,
+            maps_per_level=args.maps,
+            history_window=args.history_window,
+            max_seq_len=args.max_seq_len,
+            seed=args.seed,
+        )
+        print(f"maps={n_maps} sft_items={len(items)} "
+              f"actions={dict(actions)}")
+        if not items:
+            raise RuntimeError("no SFT items generated")
 
-    save_dir = Path(args.save_dir)
-    save_dir.mkdir(parents=True, exist_ok=True)
-    save_path = save_dir / "sft_agent.pt"
-    torch.save({
-        "adapter": adapter.state_dict(),
-        "updates": steps,
-        "config": {
-            "levels": list(levels),
-            "maps_per_level": args.maps,
-            "epochs": args.epochs,
-            "batch_size": args.batch_size,
-            "lr": args.lr,
-            "history_window": args.history_window,
-            "max_seq_len": args.max_seq_len,
-            "seed": args.seed,
-        },
-    }, save_path)
-    print(f"adapter → {save_path}")
+        init_state = None
+        if args.init_adapter:
+            blob = torch.load(args.init_adapter, map_location=device)
+            init_state = blob.get("adapter", blob)
+            print(f"初始化 adapter ← {args.init_adapter}")
+        adapter, steps, loss_history = train_sft(
+            items, model, tokenizer, device,
+            epochs=args.epochs, batch_size=args.batch_size,
+            lr=args.lr, seed=args.seed, init_state=init_state,
+        )
+        if args.plot_dir:
+            plot_loss(loss_history, args.plot_dir)
+            print(f"loss plot → {Path(args.plot_dir) / 'sft_loss.png'}")
+
+        save_dir = Path(args.save_dir)
+        save_dir.mkdir(parents=True, exist_ok=True)
+        save_path = save_dir / "sft_agent.pt"
+        torch.save({
+            "adapter": adapter.state_dict(),
+            "updates": steps,
+            "config": {
+                "levels": list(levels),
+                "maps_per_level": args.maps,
+                "epochs": args.epochs,
+                "batch_size": args.batch_size,
+                "lr": args.lr,
+                "history_window": args.history_window,
+                "max_seq_len": args.max_seq_len,
+                "seed": args.seed,
+            },
+        }, save_path)
+        print(f"adapter → {save_path}")
 
     # Evaluate the exact agent/tool protocol, greedy.
+    eval_batch = max(1, args.eval_batch_size)
     engine = RolloutEngine(
-        model, tokenizer, max_batch=1,
+        model, tokenizer, max_batch=eval_batch,
         max_seq_len=args.max_seq_len, kv_ratio=0.5, device=device)
     policy = ChatPolicy(
         engine, tokenizer,
@@ -239,10 +319,12 @@ def main() -> int:
     test_tasks = load_tasks(args.data, "test")
     val = evaluate_agent(
         policy, pick_maps(val_tasks, levels, args.val_limit),
-        history_window=args.history_window, split="val")
+        history_window=args.history_window, split="val",
+        batch_size=eval_batch)
     test = evaluate_agent(
         policy, pick_maps(test_tasks, levels, args.test_limit),
-        history_window=args.history_window, split="test")
+        history_window=args.history_window, split="test",
+        batch_size=eval_batch)
     print(f"val: {val}")
     print(f"test: {test}")
 
@@ -251,8 +333,10 @@ def main() -> int:
         "maps": n_maps,
         "items": len(items),
         "train_actions": dict(actions),
+        "loss_history": loss_history,
         "val": val,
         "test": test,
+        "eval_batch_size": eval_batch,
         "adapter": str(save_path),
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     engine.close()
