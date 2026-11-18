@@ -133,7 +133,27 @@ def _pad_batch(chunk, device):
     return ids, p, lens
 
 
-def plot_loss(history: list[dict], out_dir: str) -> None:
+def moving_average(values: list[float], window: int) -> list[float]:
+    """Centered moving average for a noisy per-step training loss."""
+    window = max(1, int(window))
+    n = len(values)
+    if window == 1 or n < 2:
+        return list(values)
+    half = window // 2
+    prefix = [0.0]
+    for value in values:
+        prefix.append(prefix[-1] + value)
+    out = []
+    for i in range(n):
+        lo = max(0, i - half)
+        hi = min(n, i + half + 1)
+        out.append((prefix[hi] - prefix[lo]) / (hi - lo))
+    return out
+
+
+def plot_loss(history: list[dict], out_dir: str, *,
+              smooth_window: int = 50,
+              filename: str = "sft_loss.png") -> None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -142,14 +162,20 @@ def plot_loss(history: list[dict], out_dir: str) -> None:
     out.mkdir(parents=True, exist_ok=True)
     steps = [x["step"] for x in history]
     losses = [x["loss"] for x in history]
+    smooth = moving_average(losses, smooth_window)
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    ax.plot(steps, losses, linewidth=1.2)
+    if smooth_window > 1:
+        ax.plot(steps, losses, color="#9ecae1", linewidth=0.7,
+                alpha=0.55, label="per-step loss")
+    ax.plot(steps, smooth, color="#1f77b4", linewidth=1.9,
+            label=f"moving average (w={smooth_window})")
     ax.set_xlabel("step")
     ax.set_ylabel("cross entropy loss")
     ax.set_title("Agent SFT loss")
     ax.grid(alpha=0.25)
+    ax.legend(fontsize=8)
     fig.tight_layout()
-    fig.savefig(out / "sft_loss.png", dpi=150)
+    fig.savefig(out / filename, dpi=150)
     plt.close(fig)
 
 
@@ -235,6 +261,8 @@ def main() -> int:
     ap.add_argument("--init-adapter", default=None)
     ap.add_argument("--plot-dir", default=None,
                     help="可选：保存 sft_loss.png 的目录")
+    ap.add_argument("--smooth-window", type=int, default=50,
+                    help="loss 曲线移动平均窗口")
     ap.add_argument("--save-dir", default="/tmp/opencode/sft_agent")
     ap.add_argument("--json", default="/tmp/opencode/sft_agent.json")
     args = ap.parse_args()
@@ -295,7 +323,8 @@ def main() -> int:
             lr=args.lr, seed=args.seed, init_state=init_state,
         )
         if args.plot_dir:
-            plot_loss(loss_history, args.plot_dir)
+            plot_loss(loss_history, args.plot_dir,
+                      smooth_window=args.smooth_window)
             print(f"loss plot → {Path(args.plot_dir) / 'sft_loss.png'}")
 
         save_dir = Path(args.save_dir)
@@ -314,6 +343,7 @@ def main() -> int:
                 "history_window": args.history_window,
                 "max_seq_len": args.max_seq_len,
                 "recovery_per_task": args.recovery_per_task,
+                "smooth_window": args.smooth_window,
                 "seed": args.seed,
             },
         }, save_path)

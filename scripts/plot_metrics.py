@@ -22,6 +22,23 @@ import matplotlib.pyplot as plt
 SFT_RE = re.compile(r"epoch=(\d+)\s+step=(\d+)\s+loss=([0-9.eE+-]+)")
 
 
+def moving_average(values: list[float], window: int) -> list[float]:
+    window = max(1, int(window))
+    n = len(values)
+    if window == 1 or n < 2:
+        return list(values)
+    half = window // 2
+    prefix = [0.0]
+    for value in values:
+        prefix.append(prefix[-1] + value)
+    out = []
+    for i in range(n):
+        lo = max(0, i - half)
+        hi = min(n, i + half + 1)
+        out.append((prefix[hi] - prefix[lo]) / (hi - lo))
+    return out
+
+
 def parse_sft(path: Path) -> tuple[list[int], list[float], str]:
     steps, losses = [], []
     for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
@@ -32,7 +49,8 @@ def parse_sft(path: Path) -> tuple[list[int], list[float], str]:
     return steps, losses, path.stem
 
 
-def plot_sft(logs: list[Path], out: Path) -> None:
+def plot_sft(logs: list[Path], out: Path, *,
+             smooth_window: int = 50) -> None:
     if not logs:
         return
     fig, ax = plt.subplots(figsize=(8, 4.5))
@@ -40,7 +58,12 @@ def plot_sft(logs: list[Path], out: Path) -> None:
         steps, losses, name = parse_sft(path)
         if not steps:
             continue
-        ax.plot(steps, losses, linewidth=1.4, label=name)
+        if smooth_window > 1:
+            ax.plot(steps, losses, linewidth=0.7, alpha=0.25,
+                    label=f"{name} (raw)")
+        smooth = moving_average(losses, smooth_window)
+        ax.plot(steps, smooth, linewidth=1.8,
+                label=f"{name} (MA {smooth_window})")
     ax.set_xlabel("step")
     ax.set_ylabel("cross entropy loss")
     ax.set_title("SFT loss")
@@ -103,11 +126,14 @@ def main() -> int:
                     help="可重复；SFT 训练日志")
     ap.add_argument("--grpo-json", default=None,
                     help="train_grpo 产出的 JSON")
+    ap.add_argument("--smooth-window", type=int, default=50,
+                    help="SFT loss 移动平均窗口")
     ap.add_argument("--out", default="reports/curves")
     args = ap.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    plot_sft([Path(x) for x in args.sft_log], out)
+    plot_sft([Path(x) for x in args.sft_log], out,
+             smooth_window=args.smooth_window)
     if args.grpo_json:
         plot_grpo(Path(args.grpo_json), out)
     print(f"curves -> {out}")

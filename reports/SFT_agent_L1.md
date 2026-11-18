@@ -120,7 +120,7 @@ recovery/task:     2；recovery=8 实验为 8
 seed:              7
 ```
 
-Loss 曲线：
+Loss 曲线（浅色为 per-step，粗线为 50-step centered moving average）：
 
 无 recovery：
 

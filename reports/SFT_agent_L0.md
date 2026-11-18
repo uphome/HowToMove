@@ -78,12 +78,12 @@ seed:           7
 
 训练总 step 数：1798。
 
-Loss 曲线：
+Loss 曲线（浅色为 per-step，粗线为 50-step centered moving average）：
 
 ![L0 Agent SFT loss](curves/sft_agent_l0_600_loss.png)
 
-曲线从约 0.08–0.10 持续下降到接近 0；两个 epoch 的切换处有一个短暂
-的 bucket 重排峰，但整体趋势稳定。
+平滑曲线从约 0.08–0.10 持续下降到接近 0；两个 epoch 的切换处有一个
+短暂的 bucket 重排峰，但整体趋势稳定。
 
 ---
 
