@@ -298,6 +298,7 @@ map-only v3 的 L0/L1 训练结果见：
 ```text
 reports/SFT_agent_v3_L0.md
 reports/SFT_agent_v3_L1.md
+reports/SFT_agent_v3_L2.md
 reports/AGENT_BASELINE.md
 reports/GRPO_SIGNAL_v3_L1.md
 reports/GRPO_AGENT_v3_L1.md
