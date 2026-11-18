@@ -85,6 +85,59 @@ Loss 曲线（浅色为 per-step，粗线为 50-step centered moving average）�
 平滑曲线从约 0.08–0.10 持续下降到接近 0；两个 epoch 的切换处有一个
 短暂的 bucket 重排峰，但整体趋势稳定。
 
+### 3.1 为什么 loss 曲线会有尖峰
+
+L0 共 6533 个 SFT turns，按 **精确 prompt 长度** 分成了 153 个 bucket：
+
+```text
+prompt 长度范围：367..1415
+每个 batch：同一 prompt 长度
+bucket 顺序：短 → 长
+bucket 内部：随机 shuffle
+```
+
+因此训练并不是把长短 prompt 混在同一个 batch 里，而是：
+
+```text
+epoch 1：短 prompt bucket → 长 prompt bucket
+step 899：epoch 1 结束
+step 900：epoch 2 从最短 bucket 重新开始
+```
+
+曲线上有两个不同现象：
+
+| 位置 | 现象 | 原因 |
+|---|---|---|
+| step 104 | 单个 0.160 的尖峰 | 某个小 batch 的 loss 异常高；前后步约 0.04–0.06，下一步即恢复 |
+| step 900 附近 | 平滑线整体抬升 | epoch 边界；epoch 1 末尾最后 10 步均值约 0.005，epoch 2 开头 10 步约 0.054 |
+
+所以：
+
+- step 104 的尖峰不是模型发散，而是一个 batch 的异常高 loss；
+- step 900 附近是 epoch 分界，不是模型在这一步突然变差；
+- 50-step moving average 把 epoch 边界前后的分布变化显示成了一个宽峰。
+
+这种分桶方式的优点是：
+
+- 不需要为短 prompt 补齐到长 prompt，减少 padding；
+- 显存和计算更稳定；
+- batch 构建和 `_pad_batch` 实现简单。
+
+缺点是：
+
+- 同一 batch 内的样本长度高度相关，梯度噪声更集中；
+- 小 bucket 可能只有 1–2 个样本，单步 loss 很容易被一个难样本拉高；
+- 每个 epoch 都按短到长重新开始，epoch 边界会产生人为的 loss 跳变；
+- 意外形成“短 prompt → 长 prompt”的课程顺序，而不是全局随机混合。
+
+这次没有修改训练逻辑；如果后续要改善曲线，优先考虑单独实验：
+
+```text
+保留长度分桶，但每个 epoch 打乱 bucket 顺序
+```
+
+或者使用长度区间分桶 / attention mask 做真正的变长 batch。
+
 ---
 
 ## 4. 评估协议
