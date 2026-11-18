@@ -1,0 +1,84 @@
+{
+  "version": 2,
+  "created_at": "2026-11-18T10:36:26",
+  "builder": "scripts/build_layout_tasks.py",
+  "split_rule": {
+    "L1-L4": "layout-level split; all tasks of a layout stay together",
+    "L0": "one empty layout; task-level split"
+  },
+  "quotas": {
+    "layouts": {
+      "train": 120,
+      "val": 16,
+      "test": 16,
+      "per_level_L1_L4": true
+    },
+    "tasks_per_layout": 5,
+    "L0_tasks": {
+      "train": 600,
+      "val": 80,
+      "test": 80
+    }
+  },
+  "files": {
+    "layouts/train.jsonl": {
+      "sha256": "b40d681add2f882d4296c43bdf6707f750fb251329038c4d35104694db268fb7",
+      "count": 481
+    },
+    "tasks/train.jsonl": {
+      "sha256": "1ef2cee57f04b1ccc3258c020c4f92220a608cdf08e100ab52d01e55c2f2670f",
+      "count": 3000
+    },
+    "layouts/val.jsonl": {
+      "sha256": "d55718274c8ac0f37c4b0eda9800b556b90131800fc1cd13ad48aa57bd13173e",
+      "count": 65
+    },
+    "tasks/val.jsonl": {
+      "sha256": "68830f144b7dda64e9c6a0bad44ee919b32a99e406fee02cca08b75a1c2f0a2a",
+      "count": 400
+    },
+    "layouts/test.jsonl": {
+      "sha256": "1969e1139a0a84409011f86affd1c17d6d5e812c7b00f7b267fb38d5400efb95",
+      "count": 65
+    },
+    "tasks/test.jsonl": {
+      "sha256": "59e29c578afbae4562da45eb211a89460f6a81a10c3c8cb0c9148a483e12b9bb",
+      "count": 400
+    }
+  },
+  "counts": {
+    "train": {
+      "layouts": 481,
+      "tasks": 3000,
+      "levels": {
+        "L0": 600,
+        "L1": 600,
+        "L2": 600,
+        "L3": 600,
+        "L4": 600
+      }
+    },
+    "val": {
+      "layouts": 65,
+      "tasks": 400,
+      "levels": {
+        "L0": 80,
+        "L1": 80,
+        "L2": 80,
+        "L3": 80,
+        "L4": 80
+      }
+    },
+    "test": {
+      "layouts": 65,
+      "tasks": 400,
+      "levels": {
+        "L0": 80,
+        "L1": 80,
+        "L2": 80,
+        "L3": 80,
+        "L4": 80
+      }
+    }
+  }
+}

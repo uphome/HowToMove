@@ -52,8 +52,7 @@
     "val_per_level": 80,
     "test_per_level": 80,
     "hard": 200,
-    "ood_per_level": 25,
-    "eval_states": 300
+    "ood_per_level": 25
   },
   "files": {
     "maps/train.jsonl": {
@@ -75,10 +74,6 @@
     "maps/test_ood.jsonl": {
       "count": 200,
       "sha256": "8f7c79766ec6d234253a7094e65dcfa9d5bc940e02dce391f890d23edb6c1837"
-    },
-    "eval_states.jsonl": {
-      "count": 300,
-      "sha256": "fb787e009ea18becb08053e5d5c0406015cea22ab5de426046e528674655bf4f"
     }
   },
   "counts": {
@@ -86,7 +81,6 @@
     "maps/val.jsonl": 400,
     "maps/test_id.jsonl": 400,
     "maps/test_hard.jsonl": 200,
-    "maps/test_ood.jsonl": 200,
-    "eval_states.jsonl": 300
+    "maps/test_ood.jsonl": 200
   }
 }

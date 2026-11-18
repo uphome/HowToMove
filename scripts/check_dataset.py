@@ -89,26 +89,31 @@ def main() -> int:
                 check(r.detour >= 6, f"{name}/{r.id} detour < 6")
                 check(r.level in ("L2", "L3", "L4"), f"{name}/{r.id} 级别不该进 hard")
 
-    # ---- 5. eval_states ----
-    states = [json.loads(line) for line in
-              (root / "eval_states.jsonl").read_text(encoding="utf-8").splitlines()
-              if line.strip()]
-    by_id = {r.id: r for r in splits["test_id"]}
-    check(len(states) == manifest["files"]["eval_states.jsonl"]["count"],
-          "eval_states 计数与 manifest 不符")
-    for s in states:
-        rec = by_id.get(s["map_id"])
-        check(rec is not None, f"{s['id']} 引用了不存在的 map_id")
-        if rec is None:
-            continue
-        maze = rec.to_maze()
-        pos = tuple(s["pos"])
-        expect = optimal_actions(maze, pos)
-        check(s["optimal_actions"] == expect,
-              f"{s['id']} optimal_actions 不一致 {s['optimal_actions']} vs {expect}")
-        check(bool(expect), f"{s['id']} 没有最优动作（终点？）")
-        check(s["state"] == render_state(maze, pos), f"{s['id']} state 文本不一致")
-        check(maze.distance(pos) >= 3, f"{s['id']} 距离太近")
+    # ---- 5. eval_states（新 Agent 数据只保留地图，可不存在）----
+    states = []
+    eval_path = root / "eval_states.jsonl"
+    if eval_path.exists() and "eval_states.jsonl" in manifest["files"]:
+        states = [json.loads(line) for line in
+                  eval_path.read_text(encoding="utf-8").splitlines()
+                  if line.strip()]
+        by_id = {r.id: r for r in splits["test_id"]}
+        check(len(states) == manifest["files"]["eval_states.jsonl"]["count"],
+              "eval_states 计数与 manifest 不符")
+        for s in states:
+            rec = by_id.get(s["map_id"])
+            check(rec is not None, f"{s['id']} 引用了不存在的 map_id")
+            if rec is None:
+                continue
+            maze = rec.to_maze()
+            pos = tuple(s["pos"])
+            expect = optimal_actions(maze, pos)
+            check(s["optimal_actions"] == expect,
+                  f"{s['id']} optimal_actions 不一致 {s['optimal_actions']} vs {expect}")
+            check(bool(expect), f"{s['id']} 没有最优动作（终点？）")
+            check(s["state"] == render_state(maze, pos), f"{s['id']} state 文本不一致")
+            check(maze.distance(pos) >= 3, f"{s['id']} 距离太近")
+    elif eval_path.exists():
+        warns.append("eval_states.jsonl 存在但不在 manifest 中，已跳过")
 
     # ---- 6. 配额（以 manifest 为准，支持任意规模）----
     if args.strict_counts:
@@ -148,7 +153,10 @@ def main() -> int:
     print("PASS  数据集检查全部通过")
     print(f"  地图总数 {sum(len(v) for v in splits.values())}")
     print(f"  各 split 哈希互不相交；所有图可解且 shortest <= max_steps-2")
-    print(f"  eval_states 的 optimal_actions 与 BFS 重算一致")
+    if states:
+        print(f"  eval_states 的 optimal_actions 与 BFS 重算一致")
+    else:
+        print("  eval_states 未保留（map-only 数据集）")
     return 0
 
 
