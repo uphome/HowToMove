@@ -145,7 +145,7 @@ rollout 轨迹。
 
 ## 3. Split
 
-split 单位是 map，不再按 layout/task 分组：
+总量仍然是：
 
 ```text
 4000 train maps
@@ -161,11 +161,38 @@ val:   100 maps/level
 test:  100 maps/level
 ```
 
-当前按 map hash 排序后切分，保证 deterministic，且 map 不跨 split。
+split 规则分两级处理：
 
-> 因为不按墙形分组，相同墙形在不同位置的 map 可能出现在不同 split；
-> 这是当前简化规则的已知代价。若后续需要严格墙形隔离，再引入
-> wall-set hash 分组。
+### L1–L4：按具体墙体集合分组
+
+```text
+wall_set_id = hash(width, height, sorted(absolute walls))
+```
+
+同一个 wall set 的所有 map 必须进入同一个 split。当前生成器每个
+wall set 生成一张 map，因此 L1–L4 的 train/val/test 各自使用完全
+不相交的 800/100/100 个墙体集合。
+
+这样可以避免：
+
+```text
+同一组墙
++ 不同 start/goal
+→ 一个在 train，一个在 val/test
+```
+
+### L0：按 map 划分
+
+L0 只有一个空墙体集合，无法做 wall-set 隔离，因此按 map
+（start/goal）哈希划分：
+
+```text
+L0 train: 800 maps
+L0 val:   100 maps
+L0 test:  100 maps
+```
+
+L0 的评估只能说明 start/goal 泛化，不能说明墙体泛化。
 
 ---
 
@@ -205,8 +232,8 @@ python scripts/build_maps_v3.py \
 生成过程：
 
 1. 每个 level 生成候选 map；
-2. 按内容 hash 去重；
-3. 按 map hash 排序；
+2. L1–L4 每个具体 wall set 只取一张 map；L0 直接按 map hash 去重；
+3. L1–L4 按 wall-set hash 排序；L0 按 map hash 排序；
 4. 每级取 800/100/100 填入 train/val/test；
 5. 写 manifest 和 sha256。
 
@@ -222,8 +249,11 @@ python scripts/check_maps_v3.py --data data
 
 ```text
 train maps 4000 levels {'L0': 800, 'L1': 800, 'L2': 800, 'L3': 800, 'L4': 800}
+train wall_sets {'L0': 1, 'L1': 800, 'L2': 800, 'L3': 800, 'L4': 800}
 val   maps  500 levels {'L0': 100, 'L1': 100, 'L2': 100, 'L3': 100, 'L4': 100}
+val   wall_sets {'L0': 1, 'L1': 100, 'L2': 100, 'L3': 100, 'L4': 100}
 test  maps  500 levels {'L0': 100, 'L1': 100, 'L2': 100, 'L3': 100, 'L4': 100}
+test  wall_sets {'L0': 1, 'L1': 100, 'L2': 100, 'L3': 100, 'L4': 100}
 PASS map dataset checks
 ```
 
@@ -232,6 +262,8 @@ PASS map dataset checks
 - manifest 的 sha256 和行数；
 - map id / content hash 唯一；
 - split 之间无重复 map；
+- L1–L4 的 wall set 不跨 split；
+- L0 只有一个空 wall set，按 map 划分；
 - walls/start/goal 合法；
 - BFS 可解；
 - `shortest` / `detour` 一致；
@@ -269,7 +301,8 @@ rng = random.Random(task_seed)
 ## 8. 已知限制
 
 - 当前仍是固定 12×12、max_steps=30；
-- split 按 map，不保证相同墙形不跨 split；
-- L0 的墙为空，只有 start/goal 组合；
+- L1–L4 当前每个具体 wall set 只生成一张 map，因此没有同一组墙的
+  多 start/goal 训练样本；
+- L0 的墙为空，只有 start/goal 组合，不能验证墙体泛化；
 - 轨迹/step 仍为运行时生成，不单独保存；
 - 任意尺寸、任意墙形和任意 start/goal 仍是后续目标。

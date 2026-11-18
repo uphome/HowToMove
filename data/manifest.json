@@ -5,7 +5,7 @@
     "train": 4000,
     "val": 500
   },
-  "created_at": "2026-11-18T16:57:12",
+  "created_at": "2026-11-18T17:18:57",
   "dimensions": {
     "height": 12,
     "max_steps": 30,
@@ -14,15 +14,15 @@
   "files": {
     "maps/test.jsonl": {
       "count": 500,
-      "sha256": "6dad8b2f99dc02fff7afedf2184ff83eab9be05462246f34e1b2dd597d0338be"
+      "sha256": "5de7e68f3496a220557b1e51da407c990f1cebe0bbcb355b33536865aeced72f"
     },
     "maps/train.jsonl": {
       "count": 4000,
-      "sha256": "2366fdc2e7427cb1cad7bfaf458207ae9d3c82a442f19e1c9d6fad50d47f6e1e"
+      "sha256": "02160cac4c176cdbf07a0f5a11770ed8e42c20e1c4dd1cf49e3da759810314b2"
     },
     "maps/val.jsonl": {
       "count": 500,
-      "sha256": "163043840ac865b67431e48a37aff66a373545f402a763c3928753d0a78a1039"
+      "sha256": "09578f634adf72b3d19ad952e48b1a5a98a7f8260686f0ddff4e84daf7bb4583"
     }
   },
   "levels": {
@@ -57,7 +57,34 @@
     }
   },
   "seed": 7,
-  "split_rule": "map-level split; each map is walls + start + goal; no wall-shape or layout grouping",
+  "split_rule": {
+    "L0": "map-level (one empty wall set; split by start/goal)",
+    "L1-L4": "wall-set-level; maps sharing the same exact absolute walls stay in one split"
+  },
   "unit": "map",
-  "version": 3
+  "version": 3,
+  "wall_set_rule": "wall set = (width, height, sorted absolute walls); start/goal excluded",
+  "wall_sets": {
+    "test": {
+      "L0": 1,
+      "L1": 100,
+      "L2": 100,
+      "L3": 100,
+      "L4": 100
+    },
+    "train": {
+      "L0": 1,
+      "L1": 800,
+      "L2": 800,
+      "L3": 800,
+      "L4": 800
+    },
+    "val": {
+      "L0": 1,
+      "L1": 100,
+      "L2": 100,
+      "L3": 100,
+      "L4": 100
+    }
+  }
 }

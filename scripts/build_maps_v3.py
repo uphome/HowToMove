@@ -47,10 +47,31 @@ def write_jsonl(path: Path, records: list[MapRecord]) -> None:
             ) + "\n")
 
 
+def wall_set_key(rec: MapRecord) -> tuple:
+    """Concrete wall placement; start/goal are deliberately excluded."""
+    return (rec.width, rec.height, tuple(sorted(rec.walls)))
+
+
+def wall_set_hash(rec: MapRecord) -> str:
+    payload = {
+        "w": rec.width,
+        "h": rec.height,
+        "walls": sorted([x, y] for x, y in rec.walls),
+    }
+    return hashlib.sha256(json.dumps(
+        payload, sort_keys=True, separators=(",", ":")
+    ).encode()).hexdigest()
+
+
 def generate_level(level: str, count: int, *, seed: int,
                    width: int, height: int, max_steps: int,
                    max_attempts: int) -> list[MapRecord]:
-    pool: dict[str, MapRecord] = {}
+    # L0 has only one empty wall set, so its split is map/start-goal level.
+    # L1-L4 generate one map per concrete wall set. This makes the wall-set
+    # split exact and prevents the same walls from appearing in train and
+    # val/test with a different start/goal.
+    unique_by_wall = level != "L0"
+    pool: dict[tuple | str, MapRecord] = {}
     attempt = 0
     while len(pool) < count and attempt < max_attempts:
         try:
@@ -65,14 +86,19 @@ def generate_level(level: str, count: int, *, seed: int,
             attempt += 1
             continue
         rec = MapRecord.from_maze(maze)
-        pool.setdefault(rec.hash, rec)
+        key = wall_set_key(rec) if unique_by_wall else rec.hash
+        pool.setdefault(key, rec)
         attempt += 1
 
     if len(pool) < count:
         raise RuntimeError(
-            f"{level}: generated only {len(pool)} unique maps "
+            f"{level}: generated only {len(pool)} unique "
+            f"{'wall sets' if unique_by_wall else 'maps'} "
             f"after {attempt} attempts, need {count}"
         )
+    if unique_by_wall:
+        keys = [wall_set_key(r) for r in pool.values()]
+        assert len(keys) == len(set(keys)), "duplicate wall set"
     return sorted(pool.values(), key=lambda r: r.hash)
 
 
@@ -114,11 +140,18 @@ def main() -> int:
     rows = {name: [] for name in split}
     for level in LEVELS:
         records = maps[level]
+        if level == "L0":
+            # One empty wall set: split maps by start/goal hash.
+            ordered = sorted(records, key=lambda r: r.hash)
+        else:
+            # One map per wall set; sort by the wall-set hash so the split
+            # is explicitly wall-set based and reproducible.
+            ordered = sorted(records, key=wall_set_hash)
         cursor = 0
         for name, n in split.items():
-            rows[name].extend(records[cursor:cursor + n])
+            rows[name].extend(ordered[cursor:cursor + n])
             cursor += n
-        if cursor != len(records):
+        if cursor != len(ordered):
             raise RuntimeError(f"{level}: split does not consume all maps")
 
     manifest = {
@@ -132,9 +165,16 @@ def main() -> int:
             "max_steps": args.max_steps,
         },
         "unit": "map",
-        "split_rule": (
-            "map-level split; each map is walls + start + goal; "
-            "no wall-shape or layout grouping"
+        "split_rule": {
+            "L0": "map-level (one empty wall set; split by start/goal)",
+            "L1-L4": (
+                "wall-set-level; maps sharing the same exact absolute walls "
+                "stay in one split"
+            ),
+        },
+        "wall_set_rule": (
+            "wall set = (width, height, sorted absolute walls); "
+            "start/goal excluded"
         ),
         "quotas": {
             "per_level": args.per_level,
@@ -142,6 +182,7 @@ def main() -> int:
         },
         "counts": {},
         "levels": {},
+        "wall_sets": {},
         "files": {},
     }
 
@@ -155,6 +196,11 @@ def main() -> int:
         manifest["counts"][name] = len(records)
         manifest["levels"][name] = dict(sorted(Counter(
             r.level for r in records).items()))
+        manifest["wall_sets"][name] = {
+            level: len({wall_set_key(r) for r in records
+                        if r.level == level})
+            for level in LEVELS
+        }
 
     manifest_path = out / "manifest.json"
     manifest_path.write_text(

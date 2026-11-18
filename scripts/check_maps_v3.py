@@ -18,6 +18,10 @@ from env.maze import INF, LEVEL_RULES, LEVELS, bfs_field, manhattan  # noqa: E40
 SPLITS = ("train", "val", "test")
 
 
+def wall_set_key(rec: MapRecord) -> tuple:
+    return (rec.width, rec.height, tuple(sorted(rec.walls)))
+
+
 def load_jsonl(path: Path) -> list[MapRecord]:
     out = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -65,6 +69,22 @@ def main() -> int:
         overlap = {r.hash for r in records[a]} & {r.hash for r in records[b]}
         check(not overlap, f"map overlap {a}/{b}: {len(overlap)}")
 
+    # L1-L4 split by exact wall set; L0 has one empty wall set and is
+    # intentionally map/start-goal split.
+    wall_sets = {
+        split: {
+            level: {wall_set_key(r) for r in rs if r.level == level}
+            for level in LEVELS
+        }
+        for split, rs in records.items()
+    }
+    for level in ("L1", "L2", "L3", "L4"):
+        for a, b in (("train", "val"), ("train", "test"),
+                     ("val", "test")):
+            overlap = wall_sets[a][level] & wall_sets[b][level]
+            check(not overlap,
+                  f"{level} wall-set overlap {a}/{b}: {len(overlap)}")
+
     for split, rs in records.items():
         for rec in rs:
             check(rec.hash == content_hash(
@@ -99,7 +119,11 @@ def main() -> int:
     for split in SPLITS:
         print(split, "maps", len(records[split]),
               "levels", dict(sorted(Counter(
-                  r.level for r in records[split]).items())))
+                  r.level for r in records[split]).items())),
+              "wall_sets", {
+                  level: len(wall_sets[split][level])
+                  for level in LEVELS
+              })
 
     if errors:
         print(f"FAIL {len(errors)}")
