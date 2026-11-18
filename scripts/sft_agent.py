@@ -1,7 +1,7 @@
 """SFT for the static-map tool-calling agent.
 
-Trajectories are generated from data/layouts and data/tasks on the fly;
-no state or trajectory dataset is stored under data/.
+Maps are loaded from data/maps/{train,val,test}.jsonl. Trajectories are
+generated from a map on the fly; no trajectory dataset is stored.
 
     python scripts/sft_agent.py --levels L0 --maps 100 --epochs 1
 
@@ -27,8 +27,9 @@ import paths  # noqa: E402,F401
 
 import torch  # noqa: E402
 
-from agent import ChatPolicy, MazeAgent, load_tasks  # noqa: E402
+from agent import ChatPolicy, MazeAgent  # noqa: E402
 from agent.sft_data import build_agent_sft_items  # noqa: E402
+from dataset import load_records  # noqa: E402
 from engine_rl import RolloutEngine, Sampling, load_model  # noqa: E402
 from env.maze import LEVELS  # noqa: E402
 from grpo.adapter import LoRAAdapter, tie_embeddings  # noqa: E402
@@ -239,11 +240,8 @@ def main() -> int:
     ap.add_argument("--model", default=str(paths.MODEL_PATH))
     ap.add_argument("--data", default="data")
     ap.add_argument("--levels", default="L0")
-    ap.add_argument("--maps", type=int, default=100,
-                    help="每级使用的 task 数（保留旧参数名）")
-    ap.add_argument("--train-source", choices=("tasks", "maps"),
-                    default="tasks",
-                    help="训练数据来源：新 tasks 或旧的 train maps")
+    ap.add_argument("--maps", type=int, default=800,
+                    help="每级使用的 map 数")
     ap.add_argument("--epochs", type=int, default=1)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--lr", type=float, default=5e-5)
@@ -292,12 +290,8 @@ def main() -> int:
         save_path = Path(args.init_adapter)
         print(f"评估 adapter ← {save_path}")
     else:
-        if args.train_source == "maps":
-            from dataset import load_records
-            train_tasks = load_records(
-                Path(args.data) / "maps" / "train.jsonl")
-        else:
-            train_tasks = load_tasks(args.data, "train")
+        train_tasks = load_records(
+            Path(args.data) / "maps" / "train.jsonl")
         items, actions, n_maps = build_agent_sft_items(
             train_tasks, tokenizer,
             levels=levels,
@@ -336,7 +330,6 @@ def main() -> int:
             "config": {
                 "levels": list(levels),
                 "maps_per_level": args.maps,
-                "train_source": args.train_source,
                 "epochs": args.epochs,
                 "batch_size": args.batch_size,
                 "lr": args.lr,
@@ -358,8 +351,8 @@ def main() -> int:
         engine, tokenizer,
         Sampling(max_tokens=48, temperature=0.0),
     )
-    val_tasks = load_tasks(args.data, "val")
-    test_tasks = load_tasks(args.data, "test")
+    val_tasks = load_records(Path(args.data) / "maps" / "val.jsonl")
+    test_tasks = load_records(Path(args.data) / "maps" / "test.jsonl")
     val = evaluate_agent(
         policy, pick_maps(val_tasks, levels, args.val_limit),
         history_window=args.history_window, split="val",

@@ -2,7 +2,10 @@
 
 > 日期：2026-11-18 ｜ 模型：Qwen3-0.6B + LoRA
 > 训练脚本：`scripts/sft_agent.py`
-> 数据：`data/layouts` + `data/tasks`，L0 任务级 split
+> 数据：旧 v2 `data/layouts` + `data/tasks`（历史结果）
+>
+> 当前数据契约已改为 map-only v3，见
+> [`reports/DATASET_maps.md`](DATASET_maps.md)；本文结果尚未在 v3 上重训。
 
 ---
 

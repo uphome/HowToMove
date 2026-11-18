@@ -1,86 +1,63 @@
 {
-  "version": 1,
-  "created_at": "2026-11-17T09:58:42",
-  "builder": "scripts/build_dataset.py",
-  "generator": {
-    "file": "env/maze.py",
-    "level_rules": {
-      "L0": {
-        "min_dist": 8,
-        "min_detour": 0
-      },
-      "L1": {
-        "min_dist": 8,
-        "min_detour": 2
-      },
-      "L2": {
-        "min_dist": 8,
-        "min_detour": 2
-      },
-      "L3": {
-        "min_dist": 8,
-        "min_detour": 4
-      },
-      "L4": {
-        "min_dist": 8,
-        "min_detour": 2
-      }
-    },
+  "builder": "scripts/build_maps_v3.py",
+  "counts": {
+    "test": 500,
+    "train": 4000,
+    "val": 500
+  },
+  "created_at": "2026-11-18T16:57:12",
+  "dimensions": {
+    "height": 12,
     "max_steps": 30,
-    "main_size": [
-      12,
-      12
-    ],
-    "ood_sizes": [
-      [
-        8,
-        8
-      ],
-      [
-        16,
-        16
-      ]
-    ]
-  },
-  "split_rule": "sha256(canonical)[:8] % 100 -> train:<70 val:<84 test_id:<92 test_hard:<100",
-  "seeds": {
-    "main": 6000,
-    "ood": 2500
-  },
-  "quotas": {
-    "train_per_level": 600,
-    "val_per_level": 80,
-    "test_per_level": 80,
-    "hard": 200,
-    "ood_per_level": 25
+    "width": 12
   },
   "files": {
+    "maps/test.jsonl": {
+      "count": 500,
+      "sha256": "6dad8b2f99dc02fff7afedf2184ff83eab9be05462246f34e1b2dd597d0338be"
+    },
     "maps/train.jsonl": {
-      "count": 3000,
-      "sha256": "c03bc418a686d892247283127d430a4dfa13bb6d36093af64bb33acf86d0b917"
+      "count": 4000,
+      "sha256": "2366fdc2e7427cb1cad7bfaf458207ae9d3c82a442f19e1c9d6fad50d47f6e1e"
     },
     "maps/val.jsonl": {
-      "count": 400,
-      "sha256": "715901e81335ff97f07fbcdda3f0a035ad3d42c60f213feccfe5788e0ca82f6c"
-    },
-    "maps/test_id.jsonl": {
-      "count": 400,
-      "sha256": "c7072c48c0f37650c3e60fb5f26673c9562926c3042f9347176b1df4440da152"
-    },
-    "maps/test_hard.jsonl": {
-      "count": 200,
-      "sha256": "8ffd65d132edd6ba5cb99fc83740352c3341e12b451dc0d1bae01b0615faad72"
-    },
-    "maps/test_ood.jsonl": {
-      "count": 200,
-      "sha256": "8f7c79766ec6d234253a7094e65dcfa9d5bc940e02dce391f890d23edb6c1837"
+      "count": 500,
+      "sha256": "163043840ac865b67431e48a37aff66a373545f402a763c3928753d0a78a1039"
     }
   },
-  "counts": {
-    "maps/train.jsonl": 3000,
-    "maps/val.jsonl": 400,
-    "maps/test_id.jsonl": 400,
-    "maps/test_hard.jsonl": 200,
-    "maps/test_ood.jsonl": 200
-  }
+  "levels": {
+    "test": {
+      "L0": 100,
+      "L1": 100,
+      "L2": 100,
+      "L3": 100,
+      "L4": 100
+    },
+    "train": {
+      "L0": 800,
+      "L1": 800,
+      "L2": 800,
+      "L3": 800,
+      "L4": 800
+    },
+    "val": {
+      "L0": 100,
+      "L1": 100,
+      "L2": 100,
+      "L3": 100,
+      "L4": 100
+    }
+  },
+  "quotas": {
+    "per_level": 1000,
+    "splits": {
+      "test": 100,
+      "train": 800,
+      "val": 100
+    }
+  },
+  "seed": 7,
+  "split_rule": "map-level split; each map is walls + start + goal; no wall-shape or layout grouping",
+  "unit": "map",
+  "version": 3
 }
