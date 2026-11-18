@@ -58,7 +58,59 @@ Map = 尺寸 + 具体 walls + start + goal
 `id` 是 map 的唯一标识；`hash` 是
 `(width,height,walls,start,goal)` 的内容哈希。
 
-### 2.2 墙形
+### 2.2 Map 唯一性判定
+
+Map 是否相同，不由文件名、生成 seed 或 Python 对象决定，而由规范化后的
+内容哈希决定：
+
+```python
+canonical_payload = {
+    "w": int(width),
+    "h": int(height),
+    "walls": sorted([int(x), int(y)] for x, y in walls),
+    "start": [int(start[0]), int(start[1])],
+    "goal": [int(goal[0]), int(goal[1])],
+}
+hash = sha256(json.dumps(
+    canonical_payload, sort_keys=True, separators=(",", ":")
+).encode())
+```
+
+参与唯一性判断的字段只有：
+
+```text
+width
+height
+walls 的绝对坐标
+start
+goal
+```
+
+因此：
+
+| 情况 | 是否相同 |
+|---|---|
+| walls 顺序不同，内容一样 | 相同 |
+| seed 不同，但 walls/start/goal 一样 | 相同 |
+| 同一墙形，摆在不同位置 | 不同 |
+| 同一墙形和位置，start 不同 | 不同 |
+| 同一墙形和位置，goal 不同 | 不同 |
+| 尺寸不同 | 不同 |
+
+当前 `level`、`max_steps`、`seed` 不参与内容哈希，只作为记录字段存在。
+`map_id` 使用 `level + hash 前 10 位`，但唯一性校验使用完整 hash。
+
+`check_maps_v3.py` 会检查：
+
+- 全局 map content hash 唯一；
+- map id 唯一；
+- train/val/test 之间没有重复 map；
+- 每条记录的 hash 与重新计算值一致。
+
+> 如果以后要求 `level` 或 `max_steps` 也参与地图身份，需要把它们加入
+> canonical payload，并重新生成数据集。
+
+### 2.3 墙形
 
 墙形不落盘成独立实体，只在生成时决定：
 
@@ -78,7 +130,7 @@ L4：随机 1~3 个墙形
 → 不同 map
 ```
 
-### 2.3 轨迹与 step
+### 2.4 轨迹与 step
 
 轨迹和 step 不落盘：
 
