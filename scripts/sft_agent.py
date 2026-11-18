@@ -99,21 +99,30 @@ def evaluate_agent(policy, records, *, history_window: int,
                   f"steps={r['steps']:2d} success={str(r['success']):5s} "
                   f"coll={r['collisions']:2d} fmt={r['format_errors']} "
                   f"actions={dict(actions)}")
-    n = len(rows)
-    ok = sum(r["success"] for r in rows)
-    all_actions = Counter()
-    for r in rows:
-        all_actions.update(r["actions"])
-    return {
-        "n": n,
-        "success": ok,
-        "success_rate": round(ok / n, 4) if n else 0.0,
-        "mean_steps": round(statistics.mean(r["steps"] for r in rows), 1)
-                       if rows else 0.0,
-        "collisions": sum(r["collisions"] for r in rows),
-        "format_errors": sum(r["format_errors"] for r in rows),
-        "actions": dict(all_actions),
+    def aggregate(selected):
+        n = len(selected)
+        ok = sum(r["success"] for r in selected)
+        actions = Counter()
+        for r in selected:
+            actions.update(r["actions"])
+        return {
+            "n": n,
+            "success": ok,
+            "success_rate": round(ok / n, 4) if n else 0.0,
+            "mean_steps": round(
+                statistics.mean(r["steps"] for r in selected), 1
+            ) if selected else 0.0,
+            "collisions": sum(r["collisions"] for r in selected),
+            "format_errors": sum(r["format_errors"] for r in selected),
+            "actions": dict(actions),
+        }
+
+    result = aggregate(rows)
+    result["by_level"] = {
+        level: aggregate([r for r in rows if r["level"] == level])
+        for level in sorted({r["level"] for r in rows})
     }
+    return result
 
 
 def _pad_batch(chunk, device):
@@ -277,18 +286,21 @@ def main() -> int:
     tie_embeddings(model)
 
     if args.eval_only:
-        if not args.init_adapter:
-            ap.error("--eval-only requires --init-adapter")
-        blob = torch.load(args.init_adapter, map_location=device)
-        adapter = LoRAAdapter(model, r=16, alpha=32)
-        adapter.load_state_dict(blob.get("adapter", blob))
+        if args.init_adapter:
+            blob = torch.load(args.init_adapter, map_location=device)
+            adapter = LoRAAdapter(model, r=16, alpha=32)
+            adapter.load_state_dict(blob.get("adapter", blob))
+            save_path = Path(args.init_adapter)
+            print(f"评估 adapter ← {save_path}")
+        else:
+            adapter = None
+            save_path = None
+            print("评估 base model（无 adapter）")
         model.eval()
         items: list = []
         actions: Counter = Counter()
         n_maps = 0
         loss_history: list[dict] = []
-        save_path = Path(args.init_adapter)
-        print(f"评估 adapter ← {save_path}")
     else:
         train_tasks = load_records(
             Path(args.data) / "maps" / "train.jsonl")
@@ -373,7 +385,7 @@ def main() -> int:
         "val": val,
         "test": test,
         "eval_batch_size": eval_batch,
-        "adapter": str(save_path),
+        "adapter": str(save_path) if save_path is not None else None,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     engine.close()
     return 0
