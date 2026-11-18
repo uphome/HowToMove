@@ -293,8 +293,7 @@ rng = random.Random(task_seed)
 
 保证。固定 `seed`、map 数据和代码版本时，恢复样本相同。
 
-当前 L0/L1 报告中的训练结果来自旧 layout/task/source-map 数据，属于
-历史结果；map-only v3 还没有重新训练。
+旧 L0/L1 训练报告和权重已经清理；map-only v3 还没有开始训练。
 
 ---
 
@@ -306,3 +305,30 @@ rng = random.Random(task_seed)
 - L0 的墙为空，只有 start/goal 组合，不能验证墙体泛化；
 - 轨迹/step 仍为运行时生成，不单独保存；
 - 任意尺寸、任意墙形和任意 start/goal 仍是后续目标。
+
+---
+
+## 9. 测试集可视化
+
+以下图片从 `data/maps/test.jsonl` 每个 level 按 hash 取前 10 张，
+蓝线为一条 BFS 最短路径，绿点为 start，红叉为 goal。
+
+L1：
+
+![L1 test maps](curves/maps_L1.png)
+
+L2：
+
+![L2 test maps](curves/maps_L2.png)
+
+L3：
+
+![L3 test maps](curves/maps_L3.png)
+
+L4：
+
+![L4 test maps](curves/maps_L4.png)
+
+总览：
+
+![L1-L4 overview](curves/maps_L1_L4_overview.png)
