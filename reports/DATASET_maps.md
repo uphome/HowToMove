@@ -293,7 +293,13 @@ rng = random.Random(task_seed)
 
 保证。固定 `seed`、map 数据和代码版本时，恢复样本相同。
 
-旧 L0/L1 训练报告和权重已经清理；map-only v3 还没有开始训练。
+map-only v3 的 L0/L1 训练结果见：
+
+```text
+reports/SFT_agent_v3_L0.md
+reports/SFT_agent_v3_L1.md
+reports/AGENT_BASELINE.md
+```
 
 ---
 
