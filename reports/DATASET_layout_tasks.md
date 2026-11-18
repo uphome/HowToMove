@@ -30,9 +30,6 @@ Layout（墙形） → Task（start/goal） → Trajectory（按需生成） →
 `data/states/` 和旧的单步 `eval_states.jsonl` 已移除；轨迹不落盘，
 由 `agent/sft_data.py` 从 tasks 按需生成。
 
-> `reports/dataset.md` 是旧的 v1 map-only 数据集报告；
-> 本文是当前 Agent 格式使用的 layout/task 数据集报告。
-
 ---
 
 ## 2. 数据单位
