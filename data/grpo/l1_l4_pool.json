@@ -1,0 +1,5831 @@
+{
+  "version": 1,
+  "created_at": "2026-11-19T19:39:12",
+  "source": "scripts/screen_grpo_maps.py",
+  "policy": "L4 SFT",
+  "selection": "greedy success == false",
+  "n_screened": 3200,
+  "n_hard": 324,
+  "screened_by_level": {
+    "L1": 800,
+    "L2": 800,
+    "L3": 800,
+    "L4": 800
+  },
+  "hard_by_level": {
+    "L1": 29,
+    "L2": 45,
+    "L3": 125,
+    "L4": 125
+  },
+  "format_errors": 2,
+  "rows": [
+    {
+      "actions": {
+        "down": 16,
+        "right": 14
+      },
+      "collisions": 27,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-0809a09b2d",
+      "reward": -58.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 28,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-0b61faaf5a",
+      "reward": -61.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 8,
+        "up": 10
+      },
+      "collisions": 3,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-1eb183a819",
+      "reward": -2.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 4,
+        "left": 16,
+        "right": 10
+      },
+      "collisions": 1,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-3d426a952d",
+      "reward": 6.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 15
+      },
+      "collisions": 28,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-44a6ae696d",
+      "reward": -59.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 5
+    },
+    {
+      "actions": {
+        "down": 15,
+        "right": 15
+      },
+      "collisions": 27,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-5835352c18",
+      "reward": -56.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 20,
+        "right": 10
+      },
+      "collisions": 24,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-6905043944",
+      "reward": -55.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 16,
+        "right": 1,
+        "up": 12
+      },
+      "collisions": 20,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-69be93907d",
+      "reward": -49.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 28,
+        "left": 1,
+        "right": 1
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-6b7c9b61a5",
+      "reward": -44.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 5
+    },
+    {
+      "actions": {
+        "left": 11,
+        "right": 1,
+        "up": 18
+      },
+      "collisions": 20,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-72fd8cc33d",
+      "reward": -47.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 13,
+        "up": 17
+      },
+      "collisions": 20,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-7af0a425b2",
+      "reward": -53.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 28,
+        "left": 1,
+        "right": 1
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-7ee99dfeb7",
+      "reward": -47.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 5
+    },
+    {
+      "actions": {
+        "down": 16,
+        "right": 14
+      },
+      "collisions": 25,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-8346ee06e3",
+      "reward": -52.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 5,
+        "left": 12,
+        "right": 13
+      },
+      "collisions": 6,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-946158c0ce",
+      "reward": -13.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 18
+      },
+      "collisions": 26,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-a75dbfcfae",
+      "reward": -53.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "left": 6,
+        "right": 10,
+        "up": 14
+      },
+      "collisions": 8,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-a778f06622",
+      "reward": -11.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 28,
+        "left": 1,
+        "right": 1
+      },
+      "collisions": 25,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-a799f805d1",
+      "reward": -50.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 2
+    },
+    {
+      "actions": {
+        "down": 28,
+        "left": 1,
+        "right": 1
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-aaa9a160d9",
+      "reward": -44.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 4
+    },
+    {
+      "actions": {
+        "left": 24,
+        "up": 6
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-bb1e9adf95",
+      "reward": -54.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 27,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-c2f1fd945a",
+      "reward": -60.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 27,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-cb5c2b6835",
+      "reward": -58.0,
+      "shortest": 20,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 28,
+        "left": 1,
+        "right": 1
+      },
+      "collisions": 25,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-d558e4d644",
+      "reward": -50.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 2
+    },
+    {
+      "actions": {
+        "down": 18,
+        "right": 12
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-d78782cd6b",
+      "reward": -54.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "right": 14
+      },
+      "collisions": 28,
+      "detour": 14,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-dae6cf85f9",
+      "reward": -61.0,
+      "shortest": 22,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 28,
+        "left": 1,
+        "right": 1
+      },
+      "collisions": 25,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-dafc7cc6ea",
+      "reward": -50.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 2
+    },
+    {
+      "actions": {
+        "left": 28,
+        "up": 2
+      },
+      "collisions": 28,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-de13626dd3",
+      "reward": -61.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 28,
+        "left": 1,
+        "right": 1
+      },
+      "collisions": 26,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-ed70ca3288",
+      "reward": -53.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 2
+    },
+    {
+      "actions": {
+        "down": 18,
+        "right": 12
+      },
+      "collisions": 24,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-f3df61aa97",
+      "reward": -55.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 15
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L1",
+      "map_id": "L1-f7e18f5e72",
+      "reward": -61.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "left": 17,
+        "up": 13
+      },
+      "collisions": 17,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-00de2b5429",
+      "reward": -34.0,
+      "shortest": 20,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 2,
+        "right": 1,
+        "up": 27
+      },
+      "collisions": 22,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-025c924f30",
+      "reward": -41.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "down": 14,
+        "right": 15,
+        "up": 1
+      },
+      "collisions": 26,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-02a2706fd6",
+      "reward": -55.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 5
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 13,
+        "right": 3
+      },
+      "collisions": 26,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-0cbd152cca",
+      "reward": -55.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "down": 14,
+        "right": 15,
+        "up": 1
+      },
+      "collisions": 24,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-0d927b7245",
+      "reward": -51.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 3,
+        "right": 11,
+        "up": 1
+      },
+      "collisions": 17,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-1036999b72",
+      "reward": -30.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "down": 8,
+        "left": 11,
+        "right": 10,
+        "up": 1
+      },
+      "collisions": 9,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-13419b301c",
+      "reward": -24.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "left": 13,
+        "right": 4,
+        "up": 13
+      },
+      "collisions": 15,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-2281108bfa",
+      "reward": -24.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 13,
+        "right": 16,
+        "up": 1
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-25fad4b665",
+      "reward": -53.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "left": 27,
+        "up": 3
+      },
+      "collisions": 24,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-26d1108096",
+      "reward": -55.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 12,
+        "right": 4
+      },
+      "collisions": 20,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-2c34317d4f",
+      "reward": -47.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 14,
+        "right": 5,
+        "up": 10
+      },
+      "collisions": 4,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-30d3a1eb80",
+      "reward": 3.0,
+      "shortest": 20,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 18,
+        "left": 11,
+        "up": 1
+      },
+      "collisions": 22,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-334b624a2b",
+      "reward": -45.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 5
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 17,
+        "up": 1
+      },
+      "collisions": 20,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-35e3533c8a",
+      "reward": -39.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "right": 11,
+        "up": 19
+      },
+      "collisions": 18,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-395755f221",
+      "reward": -33.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 15,
+        "right": 1
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-449c9efce4",
+      "reward": -55.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 3,
+        "right": 13,
+        "up": 2
+      },
+      "collisions": 19,
+      "detour": 16,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-4ea9bd173a",
+      "reward": -38.0,
+      "shortest": 24,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 19,
+        "left": 6,
+        "right": 5
+      },
+      "collisions": 15,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-4fb7bd063b",
+      "reward": -22.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 10,
+        "left": 19,
+        "up": 1
+      },
+      "collisions": 19,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-52758e56c8",
+      "reward": -36.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "right": 14,
+        "up": 16
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-54710fd485",
+      "reward": -62.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "left": 16,
+        "up": 14
+      },
+      "collisions": 26,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-7aa08fa0fa",
+      "reward": -53.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 17,
+        "left": 6,
+        "right": 5,
+        "up": 2
+      },
+      "collisions": 18,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-84cd6a4482",
+      "reward": -39.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "left": 12,
+        "right": 1,
+        "up": 17
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-883042cf62",
+      "reward": -48.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 8,
+        "right": 18,
+        "up": 4
+      },
+      "collisions": 24,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-8c0e00b1eb",
+      "reward": -51.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 15,
+        "right": 15
+      },
+      "collisions": 27,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-8de9a4b5d4",
+      "reward": -56.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "left": 13,
+        "right": 2,
+        "up": 15
+      },
+      "collisions": 26,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-92f5d4cc95",
+      "reward": -55.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "down": 3,
+        "left": 14,
+        "right": 1,
+        "up": 12
+      },
+      "collisions": 20,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-9f131ec909",
+      "reward": -45.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 6,
+        "right": 4,
+        "up": 19
+      },
+      "collisions": 18,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-a058f7286d",
+      "reward": -41.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 15,
+        "up": 1
+      },
+      "collisions": 27,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-a8b6415448",
+      "reward": -58.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "left": 19,
+        "right": 3,
+        "up": 8
+      },
+      "collisions": 16,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-ad95d82ecb",
+      "reward": -27.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "left": 13,
+        "right": 1,
+        "up": 16
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-ae2d9cbb74",
+      "reward": -55.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 12,
+        "right": 14,
+        "up": 4
+      },
+      "collisions": 19,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-b0519cc1eb",
+      "reward": -40.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 3,
+        "right": 14
+      },
+      "collisions": 21,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-b5ae2eb01d",
+      "reward": -42.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "left": 12,
+        "right": 2,
+        "up": 16
+      },
+      "collisions": 22,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-b8aea73989",
+      "reward": -43.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "left": 13,
+        "right": 1,
+        "up": 16
+      },
+      "collisions": 25,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-c17f6849a3",
+      "reward": -54.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 16,
+        "right": 2
+      },
+      "collisions": 23,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-c6a0095b18",
+      "reward": -52.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 14,
+        "right": 11,
+        "up": 5
+      },
+      "collisions": 16,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-c727ab1017",
+      "reward": -39.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-d3b9b042a3",
+      "reward": -52.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 13,
+        "right": 16,
+        "up": 1
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-e552d2b7a9",
+      "reward": -46.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 4,
+        "left": 18,
+        "right": 3,
+        "up": 5
+      },
+      "collisions": 24,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-ea24b59d15",
+      "reward": -51.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 5
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 1,
+        "right": 13
+      },
+      "collisions": 28,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-eb497c8aa7",
+      "reward": -61.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 4
+    },
+    {
+      "actions": {
+        "left": 10,
+        "right": 3,
+        "up": 17
+      },
+      "collisions": 22,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-ee8619e077",
+      "reward": -49.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 3,
+        "right": 11,
+        "up": 16
+      },
+      "collisions": 20,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-f0a34d5df4",
+      "reward": -43.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 3,
+        "right": 9,
+        "up": 3
+      },
+      "collisions": 19,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-f6860f9c2b",
+      "reward": -40.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 18,
+        "right": 12
+      },
+      "collisions": 22,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L2",
+      "map_id": "L2-ffc648c8de",
+      "reward": -47.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "left": 2,
+        "right": 12,
+        "up": 16
+      },
+      "collisions": 27,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-0053ed89c3",
+      "reward": -58.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 5,
+        "left": 10,
+        "right": 1,
+        "up": 14
+      },
+      "collisions": 17,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-0266f6be0a",
+      "reward": -38.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "right": 14
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-02ce1e6850",
+      "reward": -61.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 8,
+        "right": 7
+      },
+      "collisions": 12,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-0390113e27",
+      "reward": -25.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "left": 11,
+        "right": 2,
+        "up": 17
+      },
+      "collisions": 20,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-043842f764",
+      "reward": -37.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "left": 19,
+        "right": 3,
+        "up": 8
+      },
+      "collisions": 21,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-068214cfad",
+      "reward": -38.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "left": 15,
+        "up": 15
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-0714a8babd",
+      "reward": -62.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 11,
+        "left": 17,
+        "right": 1,
+        "up": 1
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-0a58740aed",
+      "reward": -60.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 18,
+        "left": 1,
+        "right": 11
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-0ae2884926",
+      "reward": -56.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 4,
+        "right": 13
+      },
+      "collisions": 25,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-0b91a085fb",
+      "reward": -50.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 24,
+        "right": 6
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-0c13249ee4",
+      "reward": -60.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "left": 9,
+        "up": 21
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-11f98bcc04",
+      "reward": -60.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 3,
+        "right": 12
+      },
+      "collisions": 26,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-136331e580",
+      "reward": -53.0,
+      "shortest": 22,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 4,
+        "right": 8,
+        "up": 2
+      },
+      "collisions": 16,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-136fe0c94c",
+      "reward": -37.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 4,
+        "left": 8,
+        "right": 12,
+        "up": 6
+      },
+      "collisions": 12,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-13e4dd98e0",
+      "reward": -27.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 14,
+        "up": 16
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-14be15495f",
+      "reward": -61.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 1,
+        "right": 13,
+        "up": 1
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-17e165fd35",
+      "reward": -57.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 13,
+        "right": 2
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-1c65247fe1",
+      "reward": -46.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 12,
+        "right": 1,
+        "up": 2
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-1f4eadeb51",
+      "reward": -58.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 15,
+        "right": 1
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-22d58b3529",
+      "reward": -60.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 15,
+        "right": 1,
+        "up": 13
+      },
+      "collisions": 27,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-250094ff67",
+      "reward": -58.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 15,
+        "right": 15
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-2536f247f4",
+      "reward": -60.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 12,
+        "right": 5,
+        "up": 11
+      },
+      "collisions": 12,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-295a831467",
+      "reward": -17.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 15,
+        "right": 14,
+        "up": 1
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-2ae8e2877a",
+      "reward": -60.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 27,
+        "up": 2
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-2b7d695bc9",
+      "reward": -60.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 9,
+        "right": 11,
+        "up": 8
+      },
+      "collisions": 7,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-2cad796cd1",
+      "reward": -14.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 16,
+        "right": 1,
+        "up": 1
+      },
+      "collisions": 25,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-302ce122ad",
+      "reward": -54.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 13,
+        "right": 3,
+        "up": 1
+      },
+      "collisions": 24,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-316d3b04a0",
+      "reward": -51.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 1,
+        "right": 13,
+        "up": 2
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-33afb61f9f",
+      "reward": -56.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 7,
+        "left": 15,
+        "up": 8
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-368f51eddd",
+      "reward": -62.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 15,
+        "up": 14
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-3896611f70",
+      "reward": -62.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 5,
+        "right": 13,
+        "up": 12
+      },
+      "collisions": 16,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-39b0ed3db2",
+      "reward": -27.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 14,
+        "right": 12,
+        "up": 4
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-3bc7a6a20a",
+      "reward": -55.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 10,
+        "right": 4
+      },
+      "collisions": 20,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-3cdf16310f",
+      "reward": -41.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 16,
+        "up": 1
+      },
+      "collisions": 26,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-3ef3ac132d",
+      "reward": -53.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "left": 14,
+        "up": 16
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-406363ddf8",
+      "reward": -60.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 11,
+        "right": 2,
+        "up": 16
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-4111d29667",
+      "reward": -50.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 18,
+        "left": 1,
+        "right": 9,
+        "up": 2
+      },
+      "collisions": 22,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-45032287ac",
+      "reward": -47.0,
+      "shortest": 21,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 17,
+        "right": 5,
+        "up": 7
+      },
+      "collisions": 13,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-46be724e81",
+      "reward": -20.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 8,
+        "right": 5,
+        "up": 15
+      },
+      "collisions": 16,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-47415ba2c6",
+      "reward": -35.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 8,
+        "right": 10,
+        "up": 11
+      },
+      "collisions": 19,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-48f024cf03",
+      "reward": -42.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 3,
+        "left": 8,
+        "right": 13,
+        "up": 6
+      },
+      "collisions": 10,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-4a4e032540",
+      "reward": -13.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 1,
+        "right": 12,
+        "up": 16
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-4c0a72b7fd",
+      "reward": -59.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 9,
+        "right": 5,
+        "up": 14
+      },
+      "collisions": 19,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-4e973db6b7",
+      "reward": -42.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 13,
+        "up": 3
+      },
+      "collisions": 26,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-50486a413e",
+      "reward": -55.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 14,
+        "up": 1
+      },
+      "collisions": 29,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-51317f189f",
+      "reward": -60.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 13,
+        "right": 2,
+        "up": 1
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-549f589012",
+      "reward": -59.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 10,
+        "left": 4,
+        "right": 3,
+        "up": 13
+      },
+      "collisions": 13,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-54e9c89ab8",
+      "reward": -26.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "left": 2,
+        "up": 28
+      },
+      "collisions": 27,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-55b84c6962",
+      "reward": -54.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-55f6ade9dd",
+      "reward": -61.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "down": 16,
+        "right": 14
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-5eb7725adb",
+      "reward": -62.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 2,
+        "right": 13,
+        "up": 1
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-5f1cdadfcb",
+      "reward": -55.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 1,
+        "right": 14,
+        "up": 15
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-6353248149",
+      "reward": -61.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "right": 14
+      },
+      "collisions": 24,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-643becf273",
+      "reward": -51.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 15,
+        "right": 2
+      },
+      "collisions": 26,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-65673e99d8",
+      "reward": -55.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 14,
+        "right": 1
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-664f24f31e",
+      "reward": -61.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 1,
+        "right": 14,
+        "up": 14
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-66d92917e6",
+      "reward": -56.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 17
+      },
+      "collisions": 24,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-67cb113a0f",
+      "reward": -53.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 5,
+        "left": 12,
+        "right": 6,
+        "up": 7
+      },
+      "collisions": 11,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-68792101b7",
+      "reward": -24.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 13,
+        "right": 2,
+        "up": 13
+      },
+      "collisions": 25,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-6aa36e1374",
+      "reward": -52.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 13,
+        "right": 1,
+        "up": 2
+      },
+      "collisions": 24,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-6d0867d4a1",
+      "reward": -51.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 14,
+        "right": 1,
+        "up": 1
+      },
+      "collisions": 25,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-73ae155ec1",
+      "reward": -54.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 13,
+        "right": 2,
+        "up": 2
+      },
+      "collisions": 25,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-75c365fe1e",
+      "reward": -54.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "right": 12,
+        "up": 18
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-790f65b466",
+      "reward": -59.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 6,
+        "right": 16,
+        "up": 6
+      },
+      "collisions": 14,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-794622a643",
+      "reward": -25.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 16,
+        "right": 14
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-7977454667",
+      "reward": -61.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 22,
+        "right": 8
+      },
+      "collisions": 27,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-7c0803940e",
+      "reward": -58.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "down": 10,
+        "left": 17,
+        "up": 3
+      },
+      "collisions": 25,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-7ee2a23bd2",
+      "reward": -54.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 14,
+        "right": 4,
+        "up": 10
+      },
+      "collisions": 12,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-80811f1834",
+      "reward": -23.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 10,
+        "left": 11,
+        "right": 1,
+        "up": 8
+      },
+      "collisions": 18,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-8148bcc2af",
+      "reward": -39.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 4,
+        "right": 13,
+        "up": 13
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-87372451ad",
+      "reward": -62.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 1,
+        "right": 13
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-8928802670",
+      "reward": -57.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 9,
+        "left": 20,
+        "up": 1
+      },
+      "collisions": 18,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-8a548651b6",
+      "reward": -37.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 11,
+        "left": 5,
+        "right": 11,
+        "up": 3
+      },
+      "collisions": 20,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-9301c5dd16",
+      "reward": -43.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 3,
+        "right": 11,
+        "up": 15
+      },
+      "collisions": 26,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-95661e41b1",
+      "reward": -55.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 12,
+        "right": 2
+      },
+      "collisions": 19,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-95b9c4dd1c",
+      "reward": -38.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "down": 8,
+        "right": 14,
+        "up": 8
+      },
+      "collisions": 17,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-978a59759e",
+      "reward": -38.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 15
+      },
+      "collisions": 27,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-9907722f80",
+      "reward": -58.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-9ab6eacb8d",
+      "reward": -58.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 3,
+        "left": 6,
+        "right": 13,
+        "up": 8
+      },
+      "collisions": 16,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-9bbbf6dd6d",
+      "reward": -31.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 7,
+        "left": 6,
+        "right": 14,
+        "up": 3
+      },
+      "collisions": 18,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-9fd239df86",
+      "reward": -39.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 2,
+        "right": 2,
+        "up": 26
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-a3e12fab07",
+      "reward": -46.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 11,
+        "left": 18,
+        "up": 1
+      },
+      "collisions": 27,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-a453b989c5",
+      "reward": -56.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 13,
+        "right": 1,
+        "up": 14
+      },
+      "collisions": 26,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-a6ead193f2",
+      "reward": -55.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 10,
+        "left": 13,
+        "right": 6,
+        "up": 1
+      },
+      "collisions": 24,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-a9674e3f9c",
+      "reward": -51.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 1,
+        "right": 6,
+        "up": 23
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-aa44116a31",
+      "reward": -60.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 17,
+        "up": 1
+      },
+      "collisions": 28,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-ad03a6288a",
+      "reward": -59.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 11,
+        "left": 18,
+        "up": 1
+      },
+      "collisions": 20,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-ada97b0c17",
+      "reward": -45.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 2,
+        "right": 1,
+        "up": 26
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-ae5b3e8fd0",
+      "reward": -59.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 13,
+        "right": 15,
+        "up": 2
+      },
+      "collisions": 23,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-b6fc62b5f2",
+      "reward": -52.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 6,
+        "left": 14,
+        "up": 10
+      },
+      "collisions": 15,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-b9f846e55b",
+      "reward": -24.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 13,
+        "right": 2
+      },
+      "collisions": 22,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-ba41311d4b",
+      "reward": -43.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "left": 12,
+        "right": 3,
+        "up": 15
+      },
+      "collisions": 22,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-ba75f13b09",
+      "reward": -45.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 11,
+        "right": 3
+      },
+      "collisions": 18,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-bba86b73dd",
+      "reward": -31.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 16
+      },
+      "collisions": 26,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-bc3d8f9532",
+      "reward": -59.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 14,
+        "up": 15
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-c509bc514c",
+      "reward": -59.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "left": 3,
+        "right": 12,
+        "up": 15
+      },
+      "collisions": 24,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-c7eb346ed3",
+      "reward": -55.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 15,
+        "right": 1,
+        "up": 1
+      },
+      "collisions": 26,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-c9f0056158",
+      "reward": -55.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "right": 14
+      },
+      "collisions": 29,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-cb52207dbc",
+      "reward": -62.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 9,
+        "left": 6,
+        "right": 8,
+        "up": 7
+      },
+      "collisions": 6,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-cedf516900",
+      "reward": -11.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 20,
+        "left": 10
+      },
+      "collisions": 30,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-d06118b880",
+      "reward": -63.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 17,
+        "left": 3,
+        "right": 10
+      },
+      "collisions": 20,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-d4991b7b03",
+      "reward": -39.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 3,
+        "left": 7,
+        "right": 6,
+        "up": 14
+      },
+      "collisions": 11,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-d8b4f6537e",
+      "reward": -24.0,
+      "shortest": 21,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "left": 4,
+        "up": 26
+      },
+      "collisions": 25,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-d8ce4545b8",
+      "reward": -52.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-db8ca14d2c",
+      "reward": -61.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 14,
+        "up": 14
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-dd04308742",
+      "reward": -60.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 18,
+        "up": 11
+      },
+      "collisions": 28,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-de61b34566",
+      "reward": -59.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 14,
+        "right": 1,
+        "up": 1
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-de88d39a04",
+      "reward": -56.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 5,
+        "left": 10,
+        "right": 7,
+        "up": 8
+      },
+      "collisions": 5,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-e02a1fb9a9",
+      "reward": -10.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 15,
+        "up": 1
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-e1807a325d",
+      "reward": -57.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 2,
+        "right": 14,
+        "up": 1
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-e189124090",
+      "reward": -56.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-e50bf89e2b",
+      "reward": -62.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 15,
+        "up": 14
+      },
+      "collisions": 29,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-e580e73ddf",
+      "reward": -62.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 7,
+        "left": 1,
+        "right": 2,
+        "up": 20
+      },
+      "collisions": 20,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-e6aa8e4739",
+      "reward": -33.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "left": 13,
+        "right": 2,
+        "up": 15
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-ecc271a35b",
+      "reward": -48.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 5,
+        "right": 10,
+        "up": 15
+      },
+      "collisions": 16,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-ee442701f4",
+      "reward": -31.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 13,
+        "right": 2
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-ee673113a0",
+      "reward": -46.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 7,
+        "left": 7,
+        "right": 12,
+        "up": 4
+      },
+      "collisions": 15,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-f1bc71c714",
+      "reward": -32.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 2,
+        "right": 12,
+        "up": 2
+      },
+      "collisions": 24,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-f2f0945ab0",
+      "reward": -51.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "left": 15,
+        "right": 1,
+        "up": 14
+      },
+      "collisions": 27,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-f3b17971b3",
+      "reward": -56.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 14,
+        "up": 2
+      },
+      "collisions": 26,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-f508587c94",
+      "reward": -55.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-f7ac7cb9af",
+      "reward": -62.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 13,
+        "right": 14,
+        "up": 3
+      },
+      "collisions": 27,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-face5dae00",
+      "reward": -58.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 19,
+        "left": 6,
+        "right": 3,
+        "up": 2
+      },
+      "collisions": 20,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-fc5bc476a3",
+      "reward": -43.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "left": 1,
+        "right": 13,
+        "up": 16
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L3",
+      "map_id": "L3-fe9189c14f",
+      "reward": -62.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 12,
+        "right": 4,
+        "up": 14
+      },
+      "collisions": 21,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-00c987401f",
+      "reward": -42.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 2,
+        "right": 13,
+        "up": 14
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-02b25b26ed",
+      "reward": -55.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "down": 12,
+        "right": 16,
+        "up": 2
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-0334d24628",
+      "reward": -46.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "left": 24,
+        "up": 6
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-03b63b429f",
+      "reward": -47.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 19
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 25,
+      "detour": 12,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-050d62a85d",
+      "reward": -58.0,
+      "shortest": 21,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 23
+    },
+    {
+      "actions": {
+        "down": 8,
+        "left": 3,
+        "right": 11,
+        "up": 8
+      },
+      "collisions": 2,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-07e26c159d",
+      "reward": 1.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "right": 2,
+        "up": 28
+      },
+      "collisions": 28,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-07f43d672a",
+      "reward": -59.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 28
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 10,
+        "right": 4
+      },
+      "collisions": 21,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-0e170bdf58",
+      "reward": -36.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 19
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 15
+      },
+      "collisions": 27,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-0e89768999",
+      "reward": -56.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 2,
+        "right": 20,
+        "up": 8
+      },
+      "collisions": 24,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-111000c3b9",
+      "reward": -57.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 10,
+        "right": 18,
+        "up": 2
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-12d48bcf37",
+      "reward": -56.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 22,
+        "right": 8
+      },
+      "collisions": 29,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-1395fdbb7b",
+      "reward": -62.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "left": 12,
+        "right": 1,
+        "up": 17
+      },
+      "collisions": 22,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-1540716aa7",
+      "reward": -43.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 11,
+        "right": 15,
+        "up": 4
+      },
+      "collisions": 16,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-164266af26",
+      "reward": -29.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "down": 8,
+        "left": 18,
+        "up": 4
+      },
+      "collisions": 19,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-16726b0d95",
+      "reward": -44.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "left": 15,
+        "right": 9,
+        "up": 6
+      },
+      "collisions": 12,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-1b3740ce82",
+      "reward": -17.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 23
+    },
+    {
+      "actions": {
+        "down": 14,
+        "right": 13,
+        "up": 3
+      },
+      "collisions": 24,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-1dfd02c82d",
+      "reward": -51.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 15
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-1f521debab",
+      "reward": -62.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 21
+    },
+    {
+      "actions": {
+        "left": 18,
+        "up": 12
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-1f5d459bb3",
+      "reward": -44.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 26
+    },
+    {
+      "actions": {
+        "left": 15,
+        "up": 15
+      },
+      "collisions": 29,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-1fc9024b30",
+      "reward": -62.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 21
+    },
+    {
+      "actions": {
+        "down": 4,
+        "left": 4,
+        "right": 13,
+        "up": 9
+      },
+      "collisions": 12,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-20bbdfa87b",
+      "reward": -21.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 18
+    },
+    {
+      "actions": {
+        "right": 14,
+        "up": 16
+      },
+      "collisions": 28,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-2724c6da61",
+      "reward": -61.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "down": 9,
+        "right": 17,
+        "up": 4
+      },
+      "collisions": 18,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-2da1af8da0",
+      "reward": -39.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 11,
+        "right": 4
+      },
+      "collisions": 22,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-3160d82970",
+      "reward": -39.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 10
+    },
+    {
+      "actions": {
+        "left": 29,
+        "up": 1
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-3327bded4f",
+      "reward": -60.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 27,
+        "up": 3
+      },
+      "collisions": 27,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-37f86cd2ae",
+      "reward": -54.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 28
+    },
+    {
+      "actions": {
+        "down": 12,
+        "right": 16,
+        "up": 2
+      },
+      "collisions": 24,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-3c0f1e2816",
+      "reward": -49.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "left": 4,
+        "up": 2
+      },
+      "collisions": 3,
+      "detour": 4,
+      "format_errors": 1,
+      "level": "L4",
+      "map_id": "L4-3d8374b6f6",
+      "reward": -19.7,
+      "shortest": 14,
+      "steps": 7,
+      "success": false,
+      "truncated": false,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "left": 27,
+        "up": 3
+      },
+      "collisions": 20,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-3efc1447bd",
+      "reward": -37.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 14
+    },
+    {
+      "actions": {
+        "left": 13,
+        "up": 17
+      },
+      "collisions": 21,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-405c31d753",
+      "reward": -46.0,
+      "shortest": 22,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 29
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 5,
+        "right": 6,
+        "up": 18
+      },
+      "collisions": 19,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-4450c9622c",
+      "reward": -44.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "down": 11,
+        "right": 16,
+        "up": 3
+      },
+      "collisions": 19,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-4963db419e",
+      "reward": -36.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 22
+    },
+    {
+      "actions": {
+        "left": 15,
+        "up": 15
+      },
+      "collisions": 25,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-499766efe0",
+      "reward": -52.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 25
+    },
+    {
+      "actions": {
+        "left": 1,
+        "right": 6,
+        "up": 23
+      },
+      "collisions": 24,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-4b8b1c0ab2",
+      "reward": -55.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "down": 10,
+        "left": 18,
+        "up": 2
+      },
+      "collisions": 24,
+      "detour": 14,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-5031655cb6",
+      "reward": -57.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "right": 14,
+        "up": 16
+      },
+      "collisions": 25,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-550ca0acfd",
+      "reward": -54.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 11,
+        "right": 7
+      },
+      "collisions": 14,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-5568705bf9",
+      "reward": -25.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "down": 8,
+        "left": 2,
+        "right": 13,
+        "up": 7
+      },
+      "collisions": 8,
+      "detour": 14,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-5aa81a5f47",
+      "reward": -7.0,
+      "shortest": 25,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 18
+    },
+    {
+      "actions": {
+        "left": 15,
+        "up": 15
+      },
+      "collisions": 30,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-5c541dbc93",
+      "reward": -63.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 14
+    },
+    {
+      "actions": {
+        "left": 14,
+        "up": 16
+      },
+      "collisions": 27,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-6019b41872",
+      "reward": -58.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 22
+    },
+    {
+      "actions": {
+        "down": 11,
+        "left": 14,
+        "right": 5
+      },
+      "collisions": 9,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-60c98f1bdc",
+      "reward": -10.0,
+      "shortest": 23,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 18
+    },
+    {
+      "actions": {
+        "down": 19,
+        "left": 3,
+        "right": 8
+      },
+      "collisions": 17,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-6374bd00c8",
+      "reward": -44.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 27
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 7,
+        "right": 12,
+        "up": 9
+      },
+      "collisions": 11,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-6633b9504c",
+      "reward": -14.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 17,
+        "left": 13
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-695e909acb",
+      "reward": -55.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 6
+    },
+    {
+      "actions": {
+        "left": 13,
+        "right": 1,
+        "up": 16
+      },
+      "collisions": 22,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-6a5cf177cd",
+      "reward": -45.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 15
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-6af2be9fd7",
+      "reward": -62.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 22
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 13,
+        "right": 2
+      },
+      "collisions": 20,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-6c9126a180",
+      "reward": -45.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 16,
+        "right": 1
+      },
+      "collisions": 22,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-6e884136d7",
+      "reward": -47.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 22
+    },
+    {
+      "actions": {
+        "left": 2,
+        "right": 3,
+        "up": 25
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-71d92ab36e",
+      "reward": -48.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-71e2505e65",
+      "reward": -57.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 18
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 14,
+        "right": 1
+      },
+      "collisions": 27,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-73d48abf26",
+      "reward": -56.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 26
+    },
+    {
+      "actions": {
+        "left": 8,
+        "up": 22
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-740da77202",
+      "reward": -59.0,
+      "shortest": 8,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 26
+    },
+    {
+      "actions": {
+        "left": 16,
+        "right": 6,
+        "up": 8
+      },
+      "collisions": 17,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-74fbfa4ed8",
+      "reward": -38.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 16
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-75a8aa5680",
+      "reward": -55.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "down": 10,
+        "left": 9,
+        "right": 5,
+        "up": 6
+      },
+      "collisions": 2,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-798309082e",
+      "reward": -13.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 26
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 2,
+        "right": 21,
+        "up": 5
+      },
+      "collisions": 21,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-7b09a03b6a",
+      "reward": -44.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "left": 17,
+        "right": 2,
+        "up": 11
+      },
+      "collisions": 25,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-7eca950843",
+      "reward": -52.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 21
+    },
+    {
+      "actions": {
+        "left": 16,
+        "up": 14
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-7f8db817d0",
+      "reward": -62.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 27
+    },
+    {
+      "actions": {
+        "down": 1,
+        "left": 4,
+        "up": 1
+      },
+      "collisions": 2,
+      "detour": 6,
+      "format_errors": 1,
+      "level": "L4",
+      "map_id": "L4-80694c01b9",
+      "reward": -10.7,
+      "shortest": 12,
+      "steps": 7,
+      "success": false,
+      "truncated": false,
+      "walls": 19
+    },
+    {
+      "actions": {
+        "down": 25,
+        "left": 1,
+        "right": 3,
+        "up": 1
+      },
+      "collisions": 17,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-831ce3d07a",
+      "reward": -28.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "down": 14,
+        "right": 14,
+        "up": 2
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-85b3f338f6",
+      "reward": -50.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 1,
+        "right": 14
+      },
+      "collisions": 25,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-888189bcff",
+      "reward": -58.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "down": 17,
+        "right": 13
+      },
+      "collisions": 26,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-88ba635f2a",
+      "reward": -57.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 21
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 1,
+        "right": 13
+      },
+      "collisions": 27,
+      "detour": 16,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-8c5271c5f1",
+      "reward": -58.0,
+      "shortest": 22,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 20
+    },
+    {
+      "actions": {
+        "down": 14,
+        "right": 14,
+        "up": 2
+      },
+      "collisions": 23,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-8c600cd942",
+      "reward": -48.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "left": 13,
+        "up": 17
+      },
+      "collisions": 27,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-8cdff3b44a",
+      "reward": -56.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 22
+    },
+    {
+      "actions": {
+        "down": 11,
+        "left": 19
+      },
+      "collisions": 29,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-8f9ce29e5a",
+      "reward": -62.0,
+      "shortest": 20,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 14
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 15
+      },
+      "collisions": 29,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-9090bfcf1a",
+      "reward": -62.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 29
+    },
+    {
+      "actions": {
+        "left": 27,
+        "up": 3
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-92c8602687",
+      "reward": -54.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "left": 14,
+        "up": 16
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-92eb95ca63",
+      "reward": -53.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 23
+    },
+    {
+      "actions": {
+        "down": 17,
+        "left": 5,
+        "right": 8
+      },
+      "collisions": 9,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-952c85d6b1",
+      "reward": -14.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 24
+    },
+    {
+      "actions": {
+        "down": 7,
+        "right": 12,
+        "up": 11
+      },
+      "collisions": 19,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-957659a75c",
+      "reward": -42.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "left": 5,
+        "right": 11,
+        "up": 14
+      },
+      "collisions": 17,
+      "detour": 14,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-95ac98a9ec",
+      "reward": -40.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 23
+    },
+    {
+      "actions": {
+        "down": 12,
+        "right": 18
+      },
+      "collisions": 23,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-973fe9f45c",
+      "reward": -42.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 21
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 15
+      },
+      "collisions": 27,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-98f117afe4",
+      "reward": -58.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 26
+    },
+    {
+      "actions": {
+        "down": 17,
+        "left": 2,
+        "right": 11
+      },
+      "collisions": 21,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-9c7af5d735",
+      "reward": -48.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 7
+    },
+    {
+      "actions": {
+        "left": 3,
+        "up": 27
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-a027b5c708",
+      "reward": -61.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 19
+    },
+    {
+      "actions": {
+        "left": 15,
+        "up": 15
+      },
+      "collisions": 26,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-a062d087c6",
+      "reward": -55.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 22
+    },
+    {
+      "actions": {
+        "right": 15,
+        "up": 15
+      },
+      "collisions": 29,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-a1e9e80dc0",
+      "reward": -62.0,
+      "shortest": 23,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 18
+    },
+    {
+      "actions": {
+        "left": 19,
+        "up": 11
+      },
+      "collisions": 21,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-a72082fd7d",
+      "reward": -40.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 19
+    },
+    {
+      "actions": {
+        "right": 14,
+        "up": 16
+      },
+      "collisions": 28,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-a80bdaca28",
+      "reward": -61.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "left": 13,
+        "up": 17
+      },
+      "collisions": 28,
+      "detour": 14,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-b19884abf8",
+      "reward": -57.0,
+      "shortest": 24,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 23
+    },
+    {
+      "actions": {
+        "down": 7,
+        "left": 18,
+        "up": 5
+      },
+      "collisions": 15,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-b41f941b03",
+      "reward": -34.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 16
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-b74688599f",
+      "reward": -61.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "left": 6,
+        "right": 4,
+        "up": 20
+      },
+      "collisions": 9,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-b75ab6237f",
+      "reward": -10.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 1,
+        "right": 13,
+        "up": 2
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-b7a9d0f05d",
+      "reward": -55.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "left": 2,
+        "right": 12,
+        "up": 16
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-b7b7bd7e97",
+      "reward": -53.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 15,
+        "left": 14,
+        "up": 1
+      },
+      "collisions": 28,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-b931c15d23",
+      "reward": -57.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "down": 13,
+        "left": 10,
+        "right": 1,
+        "up": 6
+      },
+      "collisions": 17,
+      "detour": 24,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-b97d53cd91",
+      "reward": -38.0,
+      "shortest": 27,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 20
+    },
+    {
+      "actions": {
+        "left": 22,
+        "up": 8
+      },
+      "collisions": 18,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-bafdc41ed6",
+      "reward": -43.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 18
+    },
+    {
+      "actions": {
+        "down": 12,
+        "left": 10,
+        "right": 8
+      },
+      "collisions": 16,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-bc98e5f8ca",
+      "reward": -35.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 28
+    },
+    {
+      "actions": {
+        "down": 17,
+        "left": 9,
+        "right": 4
+      },
+      "collisions": 19,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-bd4fb69556",
+      "reward": -38.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 13
+    },
+    {
+      "actions": {
+        "down": 14,
+        "left": 1,
+        "right": 12,
+        "up": 3
+      },
+      "collisions": 23,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-bdd534c22a",
+      "reward": -48.0,
+      "shortest": 21,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "left": 2,
+        "right": 15,
+        "up": 13
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-bf0c18c118",
+      "reward": -59.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "down": 3,
+        "left": 19,
+        "up": 8
+      },
+      "collisions": 25,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-c01118c9f9",
+      "reward": -54.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 20
+    },
+    {
+      "actions": {
+        "left": 2,
+        "right": 12,
+        "up": 16
+      },
+      "collisions": 25,
+      "detour": 10,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-c0b02471a7",
+      "reward": -54.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 21
+    },
+    {
+      "actions": {
+        "down": 12,
+        "right": 14,
+        "up": 4
+      },
+      "collisions": 24,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-c10126da4c",
+      "reward": -45.0,
+      "shortest": 16,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 27
+    },
+    {
+      "actions": {
+        "left": 1,
+        "right": 1,
+        "up": 28
+      },
+      "collisions": 24,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-c210b700ca",
+      "reward": -47.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 8
+    },
+    {
+      "actions": {
+        "down": 16,
+        "left": 14
+      },
+      "collisions": 29,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-c27842065b",
+      "reward": -60.0,
+      "shortest": 11,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "down": 28,
+        "left": 1,
+        "right": 1
+      },
+      "collisions": 22,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-c6ccd5ba4f",
+      "reward": -41.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 2
+    },
+    {
+      "actions": {
+        "left": 1,
+        "right": 4,
+        "up": 25
+      },
+      "collisions": 28,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-ca797ced67",
+      "reward": -59.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 14
+    },
+    {
+      "actions": {
+        "left": 28,
+        "up": 2
+      },
+      "collisions": 28,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-cc8a1f755a",
+      "reward": -57.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 24
+    },
+    {
+      "actions": {
+        "down": 2,
+        "left": 22,
+        "right": 2,
+        "up": 4
+      },
+      "collisions": 22,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-d0ac90f632",
+      "reward": -45.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 22
+    },
+    {
+      "actions": {
+        "down": 9,
+        "left": 11,
+        "up": 10
+      },
+      "collisions": 29,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-d1d0881987",
+      "reward": -62.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "down": 17,
+        "left": 12,
+        "right": 1
+      },
+      "collisions": 21,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-d43e00d834",
+      "reward": -40.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 26
+    },
+    {
+      "actions": {
+        "down": 10,
+        "left": 14,
+        "up": 6
+      },
+      "collisions": 15,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-d76827ce97",
+      "reward": -36.0,
+      "shortest": 12,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 27
+    },
+    {
+      "actions": {
+        "down": 11,
+        "right": 15,
+        "up": 4
+      },
+      "collisions": 22,
+      "detour": 14,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-d996990722",
+      "reward": -39.0,
+      "shortest": 25,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "down": 19,
+        "left": 2,
+        "right": 9
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-db268deb8a",
+      "reward": -62.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "left": 28,
+        "up": 2
+      },
+      "collisions": 26,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-e4f192673a",
+      "reward": -55.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "down": 18,
+        "left": 1,
+        "right": 11
+      },
+      "collisions": 27,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-e5cb109078",
+      "reward": -56.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "right": 15,
+        "up": 15
+      },
+      "collisions": 25,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-eadddc6225",
+      "reward": -56.0,
+      "shortest": 9,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 18
+    },
+    {
+      "actions": {
+        "down": 15,
+        "right": 12,
+        "up": 3
+      },
+      "collisions": 26,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-eb6a1990f8",
+      "reward": -55.0,
+      "shortest": 18,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 16
+    },
+    {
+      "actions": {
+        "down": 16,
+        "right": 12,
+        "up": 2
+      },
+      "collisions": 23,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-ed8e09c82a",
+      "reward": -46.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 26
+    },
+    {
+      "actions": {
+        "left": 1,
+        "right": 5,
+        "up": 24
+      },
+      "collisions": 26,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-ef21a9cabf",
+      "reward": -57.0,
+      "shortest": 17,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 17
+    },
+    {
+      "actions": {
+        "left": 15,
+        "up": 15
+      },
+      "collisions": 25,
+      "detour": 6,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-f068d84557",
+      "reward": -58.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 20
+    },
+    {
+      "actions": {
+        "left": 16,
+        "up": 14
+      },
+      "collisions": 26,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-f23d8f2e0f",
+      "reward": -55.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 19
+    },
+    {
+      "actions": {
+        "left": 1,
+        "right": 14,
+        "up": 15
+      },
+      "collisions": 26,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-f3b7245595",
+      "reward": -57.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 32
+    },
+    {
+      "actions": {
+        "down": 3,
+        "left": 8,
+        "right": 3,
+        "up": 16
+      },
+      "collisions": 11,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-f3ff344528",
+      "reward": -28.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 9
+    },
+    {
+      "actions": {
+        "down": 2,
+        "right": 28
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-f8866c7841",
+      "reward": -59.0,
+      "shortest": 10,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 29
+    },
+    {
+      "actions": {
+        "right": 14,
+        "up": 16
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-fa71ce63c9",
+      "reward": -62.0,
+      "shortest": 14,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 12
+    },
+    {
+      "actions": {
+        "down": 15,
+        "right": 15
+      },
+      "collisions": 24,
+      "detour": 14,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-fbd15aebca",
+      "reward": -55.0,
+      "shortest": 25,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 28
+    },
+    {
+      "actions": {
+        "down": 11,
+        "right": 14,
+        "up": 5
+      },
+      "collisions": 13,
+      "detour": 8,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-fcad3bc9dd",
+      "reward": -32.0,
+      "shortest": 22,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 22
+    },
+    {
+      "actions": {
+        "left": 19,
+        "up": 11
+      },
+      "collisions": 23,
+      "detour": 2,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-fd0b3295a4",
+      "reward": -48.0,
+      "shortest": 13,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 15
+    },
+    {
+      "actions": {
+        "down": 15,
+        "right": 14,
+        "up": 1
+      },
+      "collisions": 28,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-feb0c1d609",
+      "reward": -59.0,
+      "shortest": 19,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    },
+    {
+      "actions": {
+        "left": 1,
+        "right": 13,
+        "up": 16
+      },
+      "collisions": 29,
+      "detour": 4,
+      "format_errors": 0,
+      "level": "L4",
+      "map_id": "L4-fed8f6ef90",
+      "reward": -62.0,
+      "shortest": 15,
+      "steps": 30,
+      "success": false,
+      "truncated": true,
+      "walls": 11
+    }
+  ]
+}
