@@ -118,6 +118,7 @@ def build_agent_sft_items(
     max_seq_len: int = 4096,
     seed: int = 7,
     recovery_per_task: int = 0,
+    recovery_depth: int = 1,
 ) -> tuple[list[AgentSFTItem], Counter, int]:
     levels = tuple(levels)
     by_level = {lv: [] for lv in levels}
@@ -186,13 +187,35 @@ def build_agent_sft_items(
             if i in recovery_at:
                 blocked_action, blocked_by = rng.choice(
                     blocked_directions(maze, path[i]))
-                payload = _blocked_payload(
-                    maze, path[i], blocked_action, blocked_by)
-                add_item(
-                    _collision_messages(agent, blocked_action, payload),
-                    action,
-                    i + 1,
+                # Build a separate agent, replay the correct prefix, then
+                # inject the blocked action. This lets us train several
+                # post-collision steps without mutating the main trajectory.
+                rec_agent = MazeAgent(
+                    maze, None,
+                    history_window=history_window,
+                    episode_id=f"{rec.id}/recovery/{i}",
                 )
+                for j in range(i):
+                    prefix_action = direction_between(path[j], path[j + 1])
+                    rec_agent.apply(Step(
+                        text=format_tool_call(prefix_action),
+                        action=prefix_action,
+                    ))
+                rec_agent.apply(Step(
+                    text=format_tool_call(blocked_action),
+                    action=blocked_action,
+                ))
+                for depth in range(max(1, recovery_depth)):
+                    idx = i + depth
+                    if idx >= len(path) - 1:
+                        break
+                    recovery_action = direction_between(
+                        path[idx], path[idx + 1])
+                    add_item(rec_agent.messages(), recovery_action, idx + 1)
+                    rec_agent.apply(Step(
+                        text=format_tool_call(recovery_action),
+                        action=recovery_action,
+                    ))
 
             # Apply the teacher action to obtain the exact next tool result.
             completion = tokenizer.encode(

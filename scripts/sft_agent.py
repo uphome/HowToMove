@@ -258,6 +258,8 @@ def main() -> int:
     ap.add_argument("--max-seq-len", type=int, default=4096)
     ap.add_argument("--recovery-per-task", type=int, default=0,
                     help="每个 task 额外注入的撞墙恢复样本数")
+    ap.add_argument("--recovery-depth", type=int, default=1,
+                    help="每个恢复状态沿最优路径继续训练的步数")
     ap.add_argument("--val-limit", type=int, default=10)
     ap.add_argument("--test-limit", type=int, default=10)
     ap.add_argument("--eval-batch-size", type=int, default=1,
@@ -312,6 +314,7 @@ def main() -> int:
             max_seq_len=args.max_seq_len,
             seed=args.seed,
             recovery_per_task=args.recovery_per_task,
+            recovery_depth=args.recovery_depth,
         )
         print(f"maps={n_maps} sft_items={len(items)} "
               f"actions={dict(actions)}")
@@ -348,6 +351,7 @@ def main() -> int:
                 "history_window": args.history_window,
                 "max_seq_len": args.max_seq_len,
                 "recovery_per_task": args.recovery_per_task,
+                "recovery_depth": args.recovery_depth,
                 "smooth_window": args.smooth_window,
                 "seed": args.seed,
             },
