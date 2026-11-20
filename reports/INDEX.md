@@ -70,6 +70,7 @@ SFT/L1.md
 SFT/L2.md
 SFT/L3.md
 SFT/L4.md
+SFT/L4_RECOVERY_DEPTH3.md
 ```
 
 最终 L4 checkpoint：

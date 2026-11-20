@@ -312,6 +312,28 @@ reports/SFT/SUMMARY.md
 reports/SFT/L0.md ... reports/SFT/L4.md
 ```
 
+L4 的更长 recovery 实验：
+
+```text
+recovery_per_task=2
+recovery_depth=3
+```
+
+结果：
+
+```text
+L4 val/test: 79/81
+L3 val/test: 89/89
+L4 collisions: 401/395
+```
+
+相比 L4 SFT，L4 test +2、L3 test +4，但 L1/L2 有轻微回退。
+详见：
+
+```text
+reports/SFT/L4_RECOVERY_DEPTH3.md
+```
+
 ### 5.2 Baseline
 
 base Qwen3 在 L0/L1：
@@ -481,5 +503,5 @@ reports/INDEX.md
 - 模型目前仍会在部分 L2–L4 hard walls 上反复撞墙；
 - GRPO 只完成 20/324 hard map updates；
 - GRPO 还没有加 KL reference 约束；
-- L4 的 recovery_depth=3 仍是实验；
+- L4 的 recovery_depth=3 已完成，收益有限且带来少量回归；
 - 通用对话能力尚未做系统回归测试。
