@@ -7,6 +7,30 @@
 
 ---
 
+## 0. GRPO pool 筛选摘要
+
+用最终 L4 SFT checkpoint 对 L1–L4 全部 3200 张 train maps 各跑一条
+greedy 轨迹：
+
+| level | screened | easy | hard |
+|---|---:|---:|---:|
+| L1 | 800 | 771 | 29 |
+| L2 | 800 | 755 | 45 |
+| L3 | 800 | 675 | 125 |
+| L4 | 800 | 675 | 125 |
+| 合计 | 3200 | 2876 | **324** |
+
+选择规则：
+
+```text
+greedy success == false
+→ unified GRPO pool
+```
+
+详细筛选流程见 [`SCREENING.md`](SCREENING.md)。
+
+---
+
 ## 1. 训练结果
 
 本次只训练了 pool 的前 20 个 update：
@@ -51,23 +75,23 @@ L4: 不变
 
 Reward：
 
-![GRPO reward](curves/grpo_unified_chunk1_reward.png)
+![GRPO reward](../curves/grpo/grpo_unified_chunk1_reward.png)
 
 Reward range：
 
-![GRPO reward range](curves/grpo_unified_chunk1_reward_range.png)
+![GRPO reward range](../curves/grpo/grpo_unified_chunk1_reward_range.png)
 
 KL：
 
-![GRPO KL](curves/grpo_unified_chunk1_kl.png)
+![GRPO KL](../curves/grpo/grpo_unified_chunk1_kl.png)
 
 Loss：
 
-![GRPO loss](curves/grpo_unified_chunk1_loss.png)
+![GRPO loss](../curves/grpo/grpo_unified_chunk1_loss.png)
 
 Success：
 
-![GRPO success](curves/grpo_unified_chunk1_success.png)
+![GRPO success](../curves/grpo/grpo_unified_chunk1_success.png)
 
 当前 `beta=0`，KL 仅作为诊断曲线，不参与 loss 约束；KL 采样估计可以为负。
 
@@ -78,33 +102,46 @@ Success：
 
 L0：
 
-![L0 rollouts](curves/grpo_chunk1_rollout_L0.png)
+![L0 rollouts](../curves/rollouts/grpo_chunk1_rollout_L0.png)
 
 L1：
 
-![L1 rollouts](curves/grpo_chunk1_rollout_L1.png)
+![L1 rollouts](../curves/rollouts/grpo_chunk1_rollout_L1.png)
 
 L2：
 
-![L2 rollouts](curves/grpo_chunk1_rollout_L2.png)
+![L2 rollouts](../curves/rollouts/grpo_chunk1_rollout_L2.png)
 
 L3：
 
-![L3 rollouts](curves/grpo_chunk1_rollout_L3.png)
+![L3 rollouts](../curves/rollouts/grpo_chunk1_rollout_L3.png)
 
 L4：
 
-![L4 rollouts](curves/grpo_chunk1_rollout_L4.png)
+![L4 rollouts](../curves/rollouts/grpo_chunk1_rollout_L4.png)
 
 GIF：
 
 ```text
-reports/curves/grpo_chunk1_rollout_L0.gif
-reports/curves/grpo_chunk1_rollout_L1.gif
-reports/curves/grpo_chunk1_rollout_L2.gif
-reports/curves/grpo_chunk1_rollout_L3.gif
-reports/curves/grpo_chunk1_rollout_L4.gif
+../curves/rollouts/grpo_chunk1_rollout_L0.gif
+../curves/rollouts/grpo_chunk1_rollout_L1.gif
+../curves/rollouts/grpo_chunk1_rollout_L2.gif
+../curves/rollouts/grpo_chunk1_rollout_L3.gif
+../curves/rollouts/grpo_chunk1_rollout_L4.gif
 ```
+
+### 典型失败轨迹
+
+| level | map | steps | collisions | actions |
+|---|---|---:|---:|---|
+| L1 | L1-361d91521e | 30 | 23 | down=28, left=1, right=1 |
+| L1 | L1-af9327c158 | 30 | 24 | left=28, up=2 |
+| L2 | L2-193fc1e11c | 30 | 28 | up=27, left=3 |
+| L2 | L2-3bc54dd42c | 30 | 25 | left=16, down=13 |
+| L3 | L3-3b1f6faacc | 30 | 29 | up=22, right=8 |
+| L3 | L3-5b0d673443 | 30 | 28 | down=18, right=11 |
+| L4 | L4-23362226b3 | 30 | 29 | up=29, left=1 |
+| L4 | L4-2c5c58f39c | 30 | 28 | left=27, down=3 |
 
 ## 5. 可视化观察
 

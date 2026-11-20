@@ -5,7 +5,7 @@
 > 脚本：`scripts/grpo_signal_agent.py`
 >
 > 后续 GRPO 训练结果见
-> [`reports/GRPO_AGENT_v3_L1.md`](GRPO_AGENT_v3_L1.md)。
+> [`PILOT_L1.md`](PILOT_L1.md)。
 
 ---
 
@@ -86,37 +86,7 @@ GRPO 有信号，但不能只靠随机训练 map：
 
 ---
 
-## 4. 下一步
-
-建议实现 Agent GRPO：
-
-```text
-L1 SFT checkpoint
-→ 每张 map G=8 Agent rollout
-→ group advantage
-→ MultiStepGRPOTrainer
-→ 固定 val/test 100 评估
-```
-
-第一版先做小规模：
-
-```text
-updates: 10–20
-maps/update: 1–4
-G: 8
-temperature: 0.8
-```
-
-观察：
-
-- success 是否提升；
-- collisions 是否下降；
-- 是否出现格式错误；
-- 是否只优化了已成功轨迹的效率，而没有改善失败组。
-
----
-
-## 5. 复现
+## 4. 复现
 
 ```bash
 python scripts/grpo_signal_agent.py \

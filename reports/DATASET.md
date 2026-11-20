@@ -296,18 +296,18 @@ rng = random.Random(task_seed)
 map-only v3 的 L0/L1 训练结果见：
 
 ```text
-reports/SFT_agent_v3_L0.md
-reports/SFT_agent_v3_L1.md
-reports/SFT_agent_v3_L2.md
-reports/SFT_agent_v3_L3.md
-reports/SFT_agent_v3_L4.md
-reports/SFT_agent_v3_all.md
-reports/AGENT_BASELINE.md
-reports/GRPO_SCREEN_v3.md
-reports/GRPO_SIGNAL_v3_L1.md
-reports/GRPO_AGENT_v3_L1.md
-reports/GRPO_UNIFIED_v3.md
-reports/GRPO_PRELIMINARY_v3.md
+SFT/L0.md
+SFT/L1.md
+SFT/L2.md
+SFT/L3.md
+SFT/L4.md
+SFT/SUMMARY.md
+BASELINE.md
+GRPO/SCREENING.md
+GRPO/SIGNAL_L1.md
+GRPO/PILOT_L1.md
+GRPO/UNIFIED_CHUNK1.md
+GRPO/UNIFIED_CHUNK1.md
 ```
 
 ---
@@ -330,20 +330,20 @@ reports/GRPO_PRELIMINARY_v3.md
 
 L1：
 
-![L1 test maps](curves/maps_L1.png)
+![L1 test maps](curves/maps/maps_L1.png)
 
 L2：
 
-![L2 test maps](curves/maps_L2.png)
+![L2 test maps](curves/maps/maps_L2.png)
 
 L3：
 
-![L3 test maps](curves/maps_L3.png)
+![L3 test maps](curves/maps/maps_L3.png)
 
 L4：
 
-![L4 test maps](curves/maps_L4.png)
+![L4 test maps](curves/maps/maps_L4.png)
 
 总览：
 
-![L1-L4 overview](curves/maps_L1_L4_overview.png)
+![L1-L4 overview](curves/maps/maps_L1_L4_overview.png)

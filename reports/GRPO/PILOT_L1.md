@@ -94,7 +94,7 @@ update 10: success 8/8, samples 121, loss 0.0930
 注意：成功组也可能因为路径长度、碰撞次数和 step reward 不同而有
 advantage；因此并不要求每个组都包含成功和失败。
 
-![GRPO update loss](curves/grpo_agent_v3_l1_loss.png)
+![GRPO update loss](../curves/grpo/grpo_agent_v3_l1_loss.png)
 
 ---
 

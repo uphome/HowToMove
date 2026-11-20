@@ -127,7 +127,7 @@ L1: 0/100, 0/100, format errors 100
 完整 baseline：
 
 ```text
-reports/AGENT_BASELINE.md
+../BASELINE.md
 ```
 
 ---
@@ -137,29 +137,31 @@ reports/AGENT_BASELINE.md
 SFT：
 
 ```text
-reports/SFT_agent_v3_L0.md
-reports/SFT_agent_v3_L1.md
-reports/SFT_agent_v3_L2.md
-reports/SFT_agent_v3_L3.md
-reports/SFT_agent_v3_L4.md
+L0.md
+L1.md
+L2.md
+L3.md
+L4.md
 ```
 
-GRPO pilot：
+GRPO：
 
 ```text
-reports/GRPO_SIGNAL_v3_L1.md
-reports/GRPO_AGENT_v3_L1.md
+../GRPO/SCREENING.md
+../GRPO/SIGNAL_L1.md
+../GRPO/PILOT_L1.md
+../GRPO/UNIFIED_CHUNK1.md
 ```
 
 曲线：
 
 ```text
-reports/curves/sft_agent_v3_l0_loss.png
-reports/curves/sft_agent_v3_l1_loss.png
-reports/curves/sft_agent_v3_l2_loss.png
-reports/curves/sft_agent_v3_l3_loss.png
-reports/curves/sft_agent_v3_l4_loss.png
-reports/curves/grpo_agent_v3_l1_loss.png
+../curves/sft/sft_agent_v3_l0_loss.png
+../curves/sft/sft_agent_v3_l1_loss.png
+../curves/sft/sft_agent_v3_l2_loss.png
+../curves/sft/sft_agent_v3_l3_loss.png
+../curves/sft/sft_agent_v3_l4_loss.png
+../curves/grpo/grpo_agent_v3_l1_loss.png
 ```
 
 ---
@@ -172,20 +174,3 @@ L2/L3/L4 都出现了训练完成后评估阶段接近 1 小时被后台进程�
 - 主评估和保留性评估均用 checkpoint 单独补跑；
 - GPU 0 上同时存在其他用户训练进程，后续评估已迁移到 GPU 1；
 - 没有发现 CUDA OOM 或显存泄漏证据。
-
----
-
-## 7. 下一步
-
-最终 L4 SFT checkpoint 已经可以作为统一 GRPO 的起点。
-
-统一 GRPO 建议：
-
-```text
-L1–L4 train maps
-→ greedy 筛选简单 map
-→ hard map G=8 探测
-→ 统一 grpo_map_pool
-→ 一次 GRPO
-→ 全 level 100 val/test
-```
