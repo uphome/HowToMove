@@ -22,6 +22,18 @@ cd "$ROOT"
 PYTHON="${PYTHON:-/data/hjt1/anaconda3/envs/minimind/bin/python}"
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-1}"
 
+# Triton/ptxas and cache settings used by all prior successful runs.
+# Without these, a stale per-user Triton cache can produce:
+#   RuntimeError: Triton Error [CUDA]: device kernel image is invalid
+export TRITON_PTXAS_PATH="${TRITON_PTXAS_PATH:-/data/hjt1/anaconda3/envs/cuda_learn/bin/ptxas}"
+export TRITON_CACHE_DIR="${TRITON_CACHE_DIR:-/tmp/opencode/triton_cache_grpo}"
+export TRITON_DUMP_DIR="${TRITON_DUMP_DIR:-/tmp/opencode/triton_dump}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-/tmp/opencode/cache}"
+export TORCH_HOME="${TORCH_HOME:-/tmp/opencode/torch}"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export TOKENIZERS_PARALLELISM="${TOKENIZERS_PARALLELISM:-false}"
+mkdir -p "$TRITON_CACHE_DIR" "$TRITON_DUMP_DIR" "$XDG_CACHE_HOME" "$TORCH_HOME"
+
 POOL="${POOL:-data/grpo/l1_l4_pool.json}"
 POOL_SIZE="${POOL_SIZE:-324}"
 CHUNK_UPDATES="${CHUNK_UPDATES:-20}"
