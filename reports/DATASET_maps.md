@@ -306,6 +306,7 @@ reports/AGENT_BASELINE.md
 reports/GRPO_SCREEN_v3.md
 reports/GRPO_SIGNAL_v3_L1.md
 reports/GRPO_AGENT_v3_L1.md
+reports/GRPO_UNIFIED_v3.md
 ```
 
 ---
