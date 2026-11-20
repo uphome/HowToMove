@@ -305,6 +305,22 @@ SFT 结果（最终 L4 checkpoint）：
 | L3 | 90/100 | 85/100 |
 | L4 | 80/100 | 79/100 |
 
+#### SFT Loss 曲线
+
+L0–L4 顺序 SFT 的逐 step loss（浅蓝）与平滑曲线（深蓝）。
+每个 level 从上一级 checkpoint 初始化；L4 使用主实验的 `recovery_depth=1`。
+
+| L0 | L1 |
+|:---:|:---:|
+| [![L0 SFT loss](reports/curves/sft/sft_agent_v3_l0_loss.png)](reports/curves/sft/sft_agent_v3_l0_loss.png) | [![L1 SFT loss](reports/curves/sft/sft_agent_v3_l1_loss.png)](reports/curves/sft/sft_agent_v3_l1_loss.png) |
+| **L2** | **L3** |
+| [![L2 SFT loss](reports/curves/sft/sft_agent_v3_l2_loss.png)](reports/curves/sft/sft_agent_v3_l2_loss.png) | [![L3 SFT loss](reports/curves/sft/sft_agent_v3_l3_loss.png)](reports/curves/sft/sft_agent_v3_l3_loss.png) |
+| **L4** | |
+| [![L4 SFT loss](reports/curves/sft/sft_agent_v3_l4_loss.png)](reports/curves/sft/sft_agent_v3_l4_loss.png) | |
+
+L4 的 `recovery_depth=3` 对比曲线见：
+[`reports/SFT/L4_RECOVERY_DEPTH3.md`](reports/SFT/L4_RECOVERY_DEPTH3.md)。
+
 详细结果：
 
 ```text
@@ -443,6 +459,8 @@ L4 成功轨迹：
 L4 的失败案例：
 
 ![L4 failure rollout](reports/curves/rollouts/grpo_chunk1_rollout_L4.gif)
+
+> 目前是没有回退概念的。即没有死胡同。若进入死胡同，无法退出来。
 
 L4 静态轨迹图：
 
