@@ -125,7 +125,7 @@ total: 324
 curves/
 ├── maps/       数据集地图样例
 ├── sft/        L0–L4 SFT loss
-├── grpo/       GRPO reward / KL / loss / success（chunk1 + final）
+├── grpo/       GRPO reward / KL / loss / success（chunk1 + final, raw + MA20）
 └── rollouts/   GRPO chunk1 推理轨迹和 GIF
 ```
 

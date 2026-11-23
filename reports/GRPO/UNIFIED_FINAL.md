@@ -126,7 +126,8 @@ last 20 updates:  60.0%
 
 ## 4. 曲线
 
-完整 324 updates 的 reward、reward range、KL、loss 和 success 曲线：
+完整 324 updates 的 reward、reward range、KL、loss 和 success 曲线。
+浅色为原始逐 update 数据，深色为窗口 20 的 centered moving average：
 
 ![GRPO final reward](../curves/grpo/grpo_unified_final_reward.png)
 
