@@ -318,6 +318,18 @@ L0–L4 顺序 SFT 的逐 step loss（浅蓝）与平滑曲线（深蓝）。
 | **L4** | |
 | [![L4 SFT loss](reports/curves/sft/sft_agent_v3_l4_loss.png)](reports/curves/sft/sft_agent_v3_l4_loss.png) | |
 
+> **为什么 epoch 切换处 loss 会明显上升？**
+>
+> SFT 按**精确 prompt 长度**分桶训练：同一 batch 内 prompt 长度一致，
+> bucket 内随机 shuffle，bucket 顺序按短 → 长。每个 epoch 结束时最后一批
+> 是长 prompt，下一个 epoch 又从最短 bucket 开始，因此 epoch 边界会出现
+> 一次明显的 loss 抬升。这是**数据分布和 bucket 顺序重置**，不是训练发散。
+> 以 L0 为例：epoch 1 最后 10 step 平均 loss 约 `0.000003`，epoch 2 开头
+> 10 step 约 `0.0423`；但 epoch 1 平均 loss 为 `0.0263`，epoch 2 为
+> `0.0218`，整体仍然在下降。若希望边界更连续，可以后续尝试每个 epoch
+> 随机打乱 bucket 顺序。详见
+> [`reports/SFT/L0.md`](reports/SFT/L0.md) 的 3.1 节。
+
 L4 的 `recovery_depth=3` 对比曲线见：
 [`reports/SFT/L4_RECOVERY_DEPTH3.md`](reports/SFT/L4_RECOVERY_DEPTH3.md)。
 
