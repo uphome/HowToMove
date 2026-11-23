@@ -1,7 +1,7 @@
 # Reports Index
 
 > 项目：静态地图 tool-calling Agent
-> 最后更新：2026-11-20
+> 最后更新：2026-11-23
 
 ---
 
@@ -9,16 +9,16 @@
 
 ```text
 数据：map-only v3，5000 maps
-SFT：L0–L4 已完成
-最终 SFT：L4 checkpoint，全 level val 94.5% / test 93.75%
-GRPO：仅完成 chunk1（20 / 324 hard maps）
+SFT：L0–L4 已完成，val 91.6% / test 90.8%
+GRPO：324 / 324 hard maps 已完成
+最终 GRPO：val 478/500 (95.6%) / test 478/500 (95.6%)
 ```
 
 当前主要问题：
 
 ```text
-L3/L4 hard wall 上仍存在反复撞墙/30 步超时
-20 个 GRPO update 还没有明显改善
+L4 仍有少量失败，格式错误 2(val)+1(test)
+但 L4 已从 SFT 的 80/79 提升到 89/89
 ```
 
 ---
@@ -93,6 +93,7 @@ SFT/L4_RECOVERY_DEPTH3.md
 | [`GRPO/SIGNAL_L1.md`](GRPO/SIGNAL_L1.md) | L1 SFT 的 G=8 rollout 信号探测 |
 | [`GRPO/PILOT_L1.md`](GRPO/PILOT_L1.md) | 早期 L1 GRPO pilot |
 | [`GRPO/UNIFIED_CHUNK1.md`](GRPO/UNIFIED_CHUNK1.md) | 统一 GRPO chunk1：训练、reward/KL/loss、失败案例 |
+| [`GRPO/UNIFIED_FINAL.md`](GRPO/UNIFIED_FINAL.md) | 统一 GRPO 最终结果：324/324、最终 L0–L4 评估、曲线 |
 
 当前 pool：
 
@@ -104,10 +105,16 @@ L4: 125
 total: 324
 ```
 
-当前只训练了：
+训练覆盖：
 
 ```text
-20 / 324
+324 / 324
+```
+
+最终 checkpoint：
+
+```text
+/tmp/opencode/grpo_unified_chunk17/grpo_agent.pt
 ```
 
 ---
@@ -118,7 +125,7 @@ total: 324
 curves/
 ├── maps/       数据集地图样例
 ├── sft/        L0–L4 SFT loss
-├── grpo/       GRPO reward / KL / loss / success
+├── grpo/       GRPO reward / KL / loss / success（chunk1 + final）
 └── rollouts/   GRPO chunk1 推理轨迹和 GIF
 ```
 

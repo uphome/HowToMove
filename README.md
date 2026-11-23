@@ -393,21 +393,41 @@ history:      12
 max_seq_len:  4096
 ```
 
-当前只训练了：
+已完成：
 
 ```text
-20 / 324 hard maps
+324 / 324 hard maps
+17 chunks
 ```
 
-chunk1 结果：
+最终 checkpoint：
 
-| level | SFT val/test | GRPO chunk1 val/test |
-|---|---:|---:|
-| L0 | 100/100, 100/100 | 100/100, 100/100 |
-| L1 | 97/98 | 98/97 |
-| L2 | 91/92 | 92/91 |
-| L3 | 90/85 | 90/87 |
-| L4 | 80/79 | 80/79 |
+```text
+/tmp/opencode/grpo_unified_chunk17/grpo_agent.pt
+```
+
+最终 L0–L4 评估：
+
+| level | SFT val/test | chunk1 val/test | final GRPO val/test |
+|---|---:|---:|---:|
+| L0 | 100/100 | 100/100 | 99/100 |
+| L1 | 97/98 | 98/97 | 98/97 |
+| L2 | 91/92 | 92/91 | **95/97** |
+| L3 | 90/85 | 90/87 | **97/95** |
+| L4 | 80/79 | 80/79 | **89/89** |
+| **总计** | **458/454** | **460/454** | **478/478** |
+
+```text
+最终 GRPO: val 478/500 = 95.6%
+           test 478/500 = 95.6%
+```
+
+相比 SFT：
+
+```text
+val:  +20 个任务
+test: +24 个任务
+```
 
 GRPO 详情：
 
@@ -415,6 +435,7 @@ GRPO 详情：
 reports/GRPO/SCREENING.md
 reports/GRPO/PILOT_L1.md
 reports/GRPO/UNIFIED_CHUNK1.md
+reports/GRPO/UNIFIED_FINAL.md
 ```
 
 ### 5.4 Reward
@@ -519,7 +540,7 @@ reports/INDEX.md
 
 - 固定 12×12、max_steps=30；
 - 模型目前仍会在部分 L2–L4 hard walls 上反复撞墙；
-- GRPO 只完成 20/324 hard map updates；
-- GRPO 还没有加 KL reference 约束；
+- GRPO 已完成 324/324 hard maps，但仍使用 `beta=0`，KL 仅作为诊断；
+- 最终 GRPO 有 2(val)+1(test) 个 format error；
 - L4 的 recovery_depth=3 已完成，收益有限且带来少量回归；
 - 通用对话能力尚未做系统回归测试。
