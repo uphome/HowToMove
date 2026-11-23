@@ -12,6 +12,13 @@
 SFT：L0–L4 已完成，val 91.6% / test 90.8%
 GRPO：324 / 324 hard maps 已完成
 最终 GRPO：val 478/500 (95.6%) / test 478/500 (95.6%)
+泛化性：大小零样本 + 同墙新 start/goal 已测；新障碍物形状未测
+```
+
+泛化性报告：
+
+```text
+reports/GENERALIZATION.md
 ```
 
 当前主要问题：
@@ -19,6 +26,7 @@ GRPO：324 / 324 hard maps 已完成
 ```text
 L4 仍有少量失败，格式错误 2(val)+1(test)
 但 L4 已从 SFT 的 80/79 提升到 89/89
+泛化：新障碍物形状/密度尚未测试
 ```
 
 ---
