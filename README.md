@@ -429,6 +429,18 @@ val:  +20 个任务
 test: +24 个任务
 ```
 
+#### GRPO 曲线（MA 20）
+
+浅色为原始逐 update 数据，深色为窗口 20 的 centered moving average。
+
+| mean reward | success rate |
+|:---:|:---:|
+| [![GRPO final reward](reports/curves/grpo/grpo_unified_final_reward.png)](reports/curves/grpo/grpo_unified_final_reward.png) | [![GRPO final success](reports/curves/grpo/grpo_unified_final_success.png)](reports/curves/grpo/grpo_unified_final_success.png) |
+| **loss** | **KL** |
+| [![GRPO final loss](reports/curves/grpo/grpo_unified_final_loss.png)](reports/curves/grpo/grpo_unified_final_loss.png) | [![GRPO final KL](reports/curves/grpo/grpo_unified_final_kl.png)](reports/curves/grpo/grpo_unified_final_kl.png) |
+| **reward range** | |
+| [![GRPO final reward range](reports/curves/grpo/grpo_unified_final_reward_range.png)](reports/curves/grpo/grpo_unified_final_reward_range.png) | |
+
 GRPO 详情：
 
 ```text
