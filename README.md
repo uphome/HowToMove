@@ -579,7 +579,45 @@ reports/curves/maps/maps_L4.png
 
 ---
 
-## 7. 目录结构
+## 7. Maze Playground UI
+
+新增独立页面，可以自由编辑地图并让模型实时运行：
+
+```text
+http://127.0.0.1:7861/playground
+```
+
+启动：
+
+```bash
+python -m env.ui \
+  --playground-adapter /tmp/opencode/grpo_unified_chunk17/grpo_agent.pt \
+  --open
+```
+
+功能：
+
+- 自由设置 `width` / `height`；
+- 画墙、擦墙；
+- 自由设置 start / goal；
+- 导入/导出地图 JSON；
+- 设置 model、adapter、temperature、top_p、max_tokens、
+  history_window、max_seq_len、seed；
+- 运行/停止模型，实时查看 tool call、位置、reward、碰撞和轨迹；
+- 自动校验可达性、最短路径和 `max_steps`。
+
+adapter 留空时使用 base model。模型第一次运行时才加载，也可以手动
+「加载模型 / 释放模型」。
+
+详细说明：
+
+```text
+docs/PLAYGROUND.md
+```
+
+---
+
+## 8. 目录结构
 
 ```text
 agent/                 Agent runtime / policy / group

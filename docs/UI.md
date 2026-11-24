@@ -117,3 +117,15 @@ natural eval。balanced test 会强制覆盖 down-only 等单方向状态。
 
 这些都在内存里，UI 服务重启后清空；训练指标/轨迹的原始数据仍会由
 `train_grpo.py` 写到 `--json` 指定的文件。
+
+---
+
+## 4. Playground
+
+自由编辑地图并运行模型的独立页面：
+
+```text
+http://127.0.0.1:7861/playground
+```
+
+启动与 API 说明见 [`PLAYGROUND.md`](PLAYGROUND.md)。

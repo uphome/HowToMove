@@ -134,6 +134,7 @@ PAGE = r"""<!doctype html>
   <span class="badge" id="modeBadge">IDLE</span>
   <span class="badge" id="updateBadge">update —</span>
   <span class="spacer"></span>
+  <a href="/playground" style="color:var(--accent);font-size:12px;text-decoration:none">Playground →</a>
   <span class="dim" id="fps"></span>
 </header>
 

@@ -24,6 +24,16 @@ HTTP 接口
     POST /api/maze         {"level","seed","max_steps"} 新建
     POST /api/action       {"action"} 手动走一步
     POST /api/frame        外部推入任意帧（跨进程）
+
+Playground（独立页面，支持自由编辑地图 + 模型推理）：
+    GET  /playground
+    GET  /api/playground/config
+    GET  /api/playground/status
+    POST /api/playground/maze
+    POST /api/playground/load
+    POST /api/playground/run
+    POST /api/playground/stop
+    POST /api/playground/release
 """
 
 from __future__ import annotations
@@ -41,6 +51,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
 from .maze import ACTIONS, LEVELS, Maze, MazeEnv, generate, manhattan
+from .playground import PlaygroundRunner, parse_playground_map, parse_run_config
+from .playground_page import PAGE as PLAYGROUND_PAGE
 from .ui_page import PAGE
 
 DEFAULT_PORT = 7861
@@ -223,10 +235,22 @@ class VizHub:
 
 
 class UIServer:
-    def __init__(self, host: str = "127.0.0.1", port: int = DEFAULT_PORT):
+    def __init__(
+        self,
+        host: str = "127.0.0.1",
+        port: int = DEFAULT_PORT,
+        *,
+        playground_model: str | None = None,
+        playground_adapter: str | None = None,
+    ):
         self.hub = VizHub()
         self._env: MazeEnv | None = None
+        self._playground_maze: Maze | None = None
         self._lock = threading.Lock()
+        self.playground = PlaygroundRunner(
+            default_model=playground_model,
+            default_adapter=playground_adapter,
+        )
         self._httpd = ThreadingHTTPServer((host, port), _make_handler(self))
         self._httpd.daemon_threads = True
         self._thread: threading.Thread | None = None
@@ -243,6 +267,7 @@ class UIServer:
         return self
 
     def stop(self) -> None:
+        self.playground.close()
         self._httpd.shutdown()
         self._httpd.server_close()
         self._thread = None
@@ -267,6 +292,56 @@ class UIServer:
             self._env = MazeEnv(maze)
         self.hub.publish(build_frame(maze, maze.start, mode="reset"))
         return maze
+
+    # ---- Playground -------------------------------------------------
+
+    def set_playground_maze(self, payload: dict[str, Any]) -> Maze:
+        if self.playground.is_running():
+            raise ValueError("stop the current rollout before editing the map")
+        maze = parse_playground_map(payload)
+        with self._lock:
+            self._playground_maze = maze
+            self._env = MazeEnv(maze)
+        self.hub.publish(build_frame(
+            maze, maze.start, path=maze.shortest_path(),
+            mode="playground_reset",
+            info={
+                "status": "idle",
+                "shortest": maze.path_length,
+                "source": "custom",
+            },
+        ))
+        return maze
+
+    def playground_config(self) -> dict[str, Any]:
+        return self.playground.config()
+
+    def playground_status(self) -> dict[str, Any]:
+        return self.playground.status()
+
+    def start_playground(self, payload: dict[str, Any]) -> dict[str, Any]:
+        with self._lock:
+            maze = self._playground_maze
+        if maze is None:
+            raise ValueError("set a custom maze before running")
+        cfg = parse_run_config(
+            payload,
+            default_model=self.playground.default_model,
+            default_adapter=self.playground.default_adapter,
+        )
+        return self.playground.start(maze, cfg, self.hub.publish)
+
+    def stop_playground(self) -> dict[str, Any]:
+        return self.playground.stop()
+
+    def load_playground(self, payload: dict[str, Any]) -> dict[str, Any]:
+        model = str(payload.get("model") or self.playground.default_model)
+        adapter = payload.get("adapter")
+        adapter = str(adapter).strip() if adapter else None
+        return self.playground.load(model, adapter)
+
+    def release_playground(self) -> dict[str, Any]:
+        return self.playground.release()
 
     def publish(self, frame: dict[str, Any]) -> None:
         """发布一帧（UIServer / VizHub / VizClient 都支持这个接口）。"""
@@ -375,6 +450,9 @@ class _Handler(BaseHTTPRequestHandler):
         route = self.path.split("?")[0]
         if route in ("/", "/index.html"):
             self._send(200, PAGE.encode("utf-8"), "text/html; charset=utf-8")
+        elif route == "/playground":
+            self._send(200, PLAYGROUND_PAGE.encode("utf-8"),
+                       "text/html; charset=utf-8")
         elif route == "/api/state":
             self._json(200, self.ui.hub.snapshot())
         elif route == "/api/stream":
@@ -401,6 +479,10 @@ class _Handler(BaseHTTPRequestHandler):
             latest = self.ui.hub.snapshot().get("train")
             self._json(200, {"latest": latest,
                              "history": self.ui.hub.train_history()})
+        elif route == "/api/playground/config":
+            self._json(200, self.ui.playground_config())
+        elif route == "/api/playground/status":
+            self._json(200, self.ui.playground_status())
         elif route == "/api/health":
             self._json(200, {"ok": True, "frames": self.ui.hub.frames})
         else:
@@ -426,10 +508,30 @@ class _Handler(BaseHTTPRequestHandler):
             elif route == "/api/frame":
                 self.ui.publish(body)
                 self._json(200, {"ok": True})
+            elif route == "/api/playground/maze":
+                maze = self.ui.set_playground_maze(body)
+                self._json(200, {
+                    "ok": True,
+                    "meta": build_frame(maze, maze.start)["meta"],
+                })
+            elif route == "/api/playground/load":
+                self._json(200, {"ok": True,
+                                 "status": self.ui.load_playground(body)})
+            elif route == "/api/playground/run":
+                self._json(200, {"ok": True,
+                                 "status": self.ui.start_playground(body)})
+            elif route == "/api/playground/stop":
+                self._json(200, {"ok": True,
+                                 "status": self.ui.stop_playground()})
+            elif route == "/api/playground/release":
+                self._json(200, {"ok": True,
+                                 "status": self.ui.release_playground()})
             else:
                 self._json(404, {"error": "not found"})
         except ValueError as exc:
             self._json(400, {"error": str(exc)})
+        except RuntimeError as exc:
+            self._json(409, {"error": str(exc)})
         except Exception as exc:  # pragma: no cover - 防御
             self._json(500, {"error": f"{type(exc).__name__}: {exc}"})
 
@@ -599,9 +701,17 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--open", action="store_true", help="启动后自动开浏览器")
     parser.add_argument("--demo", action="store_true", help="启动后实时演示一条轨迹")
+    parser.add_argument("--playground-model", default=None,
+                        help="Playground 默认 base model 路径")
+    parser.add_argument("--playground-adapter", default=None,
+                        help="Playground 默认 LoRA adapter 路径")
     args = parser.parse_args(argv)
 
-    ui = UIServer(host=args.host, port=args.port).start()
+    ui = UIServer(
+        host=args.host, port=args.port,
+        playground_model=args.playground_model,
+        playground_adapter=args.playground_adapter,
+    ).start()
     ui.set_maze(args.level, args.seed)
     print(f"Maze UI: {ui.url}  (Ctrl+C 退出)")
     if args.demo:
