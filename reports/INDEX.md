@@ -1,7 +1,7 @@
 # Reports Index
 
 > 项目：静态地图 tool-calling Agent
-> 最后更新：2026-11-23
+> 最后更新：2026-11-24
 
 ---
 
