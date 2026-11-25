@@ -575,6 +575,52 @@ A_i = (R_i - group_mean) / group_std
 
 同一条轨迹的所有 turn 共享该 advantage。
 
+### 5.6 训练与推理框架
+
+#### 训练
+
+```text
+base model:   Qwen3-0.6B
+adapter:      LoRA, r=16, alpha=32
+framework:    PyTorch + 自定义训练循环
+```
+
+训练没有使用 HuggingFace Trainer / TRL：
+
+```text
+scripts/sft_agent.py          SFT 冷启动
+scripts/train_grpo_agent.py   多步 GRPO
+agent/                        tool-calling agent runtime
+grpo/                         LoRA / GRPO / multi-step trainer
+```
+
+SFT 只监督 assistant tool call + EOS；GRPO 使用完整轨迹的环境 reward
+和 group-relative advantage。
+
+#### 推理
+
+项目使用手搓的 Qwen3 推理引擎
+（[Qwen3-engine-from-scratch](https://github.com/uphome/Qwen3-engine-from-scratch)）：
+
+```text
+engine/                       推理核心
+engine/engine_rl.py           RolloutEngine：批量生成 + logprob
+agent/policy.py               ChatPolicy：messages → Qwen3 生成
+agent/runtime.py              MazeAgent：多步 tool-call loop
+```
+
+推理引擎包含 paged KV cache、scheduler、批量生成和 Triton kernels；
+同一套推理链路用于：
+
+```text
+SFT 评估
+GRPO rollout
+最终 held-out 评估
+Maze Playground UI
+```
+
+推理引擎来源与致谢见文末。
+
 ---
 
 ## 6. 结果可视化
@@ -615,6 +661,8 @@ reports/curves/maps/maps_L4.png
 ```text
 http://127.0.0.1:7861/playground
 ```
+
+![Maze Playground UI](reports/curves/ui/maze_playground.jpg)
 
 启动：
 
@@ -671,5 +719,38 @@ reports/
 ```text
 reports/INDEX.md
 ```
+
+---
+
+## 9. 当前不足
+
+1. **数据集生成不够好，不够多样化**
+   - 当前墙体主要来自竖墙、L 型墙、U 型墙的随机组合；
+   - 障碍物位置和组合偏随机，缺少结构化难度分层的生成器；
+   - 还需要更多复杂连通墙、窄走廊、房间和密度分层测试。
+
+2. **模型太小**
+   - 当前使用 Qwen3-0.6B，长轨迹规划和 OOD 泛化能力有限；
+   - 更大模型、更多 multi-step 数据和多尺寸训练仍是后续方向。
+
+3. **提示词没有实时周围环境**
+   - 当前 system prompt 是完整静态地图；
+   - 每轮主要依赖 tool result 和 history，没有显式的局部邻域/射线观测；
+   - 这会让模型在 hard wall 附近缺少“眼前环境”的归纳偏置，容易形成局部撞墙循环。
+
+4. **没有开启思考链推理**
+   - 当前 `ChatPolicy` 默认 `enable_thinking=False`；
+   - 模型直接生成 tool call，没有显式的计划、反思或逐步推理链；
+   - 在 L4 hard wall 上，缺少内部 deliberation 可能是反复撞墙的原因之一；
+   - 开启 thinking 会增加 token、延迟和训练成本，需要单独做训练与评估对比。
+
+---
+
+## 10. 致谢
+
+- [uphome/Qwen3-engine-from-scratch](https://github.com/uphome/Qwen3-engine-from-scratch)：
+  手搓的 Qwen3 推理引擎，本项目的 `engine/` 推理核心基于它整理和接入。
+- Qwen3-0.6B：提供 base model。
+- 项目内的 SFT、GRPO、Agent runtime、可视化和 Playground 代码均围绕该推理引擎构建。
 
 ---
