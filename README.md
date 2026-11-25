@@ -1,14 +1,43 @@
 # HowToMove
 
-一个基于 Qwen3 的 **标准 tool-calling Agent**：模型读取静态迷宫地图，通过
-`move` 工具一步步移动，从 start 走到 goal。
+## 效果预览
 
-当前仓库聚焦三件事：
+L4 成功案例：
+
+[![L4 success](reports/curves/rollouts/grpo_final_L4.gif)](reports/curves/rollouts/grpo_final_L4.gif)
+
+> 最终 GRPO 模型在 L4 hard wall 地图上的成功轨迹。蓝色线是实际执行路径；本案例 12 步、0 次碰撞。
+
+## 项目定义
+
+HowToMove 是一个**受控环境下的 tool-calling Agentic RL** 项目，研究语言模型
+能否通过多轮工具调用完成多步导航，并利用环境反馈从撞墙和错误中恢复。
+
+| 维度 | 定义 |
+|---|---|
+| 环境 | 静态迷宫：完整地图、墙体、start、goal |
+| 策略 | Qwen3-0.6B + LoRA |
+| 动作 | assistant 生成 `move(direction)` tool call |
+| 观察 | tool result JSON：位置、是否撞墙、goal delta |
+| 奖励 | 环境规则：步数、距离进展、碰撞、到达目标 |
+| 训练 | BFS 轨迹 SFT 冷启动 → hard map 筛选 → 统一 GRPO |
+| 评估 | held-out 地图、墙体布局、尺寸、start/goal |
+
+核心问题：
+
+1. SFT 冷启动能否让模型学会 tool protocol 和基本导航；
+2. GRPO 能否用环境奖励改善多步策略、减少撞墙循环；
+3. 学到的策略能否泛化到未见过的墙体、尺寸和 start/goal。
+
+边界：
+
+> 这是**受控、单工具、确定性环境**下的 Agentic RL，不是通用自主智能体，
+> 不是 RLHF，也不是单纯的 tool-call SFT。
+
+完整定义、形式化描述、训练流程和结论边界见：
 
 ```text
-map-only 数据集生成
-Agent SFT 冷启动
-Agent GRPO 强化学习
+docs/POSITIONING.md
 ```
 
 ---
@@ -536,35 +565,21 @@ A_i = (R_i - group_mean) / group_std
 
 ## 6. 结果可视化
 
-### 成功案例
+最终模型的 L4 成功轨迹见 README 开头的 **效果预览**。
 
-L1 成功轨迹：
-
-![L1 success rollout](reports/curves/rollouts/grpo_chunk1_success_L1.gif)
-
-L4 成功轨迹：
-
-![L4 success rollout](reports/curves/rollouts/grpo_chunk1_success_L4.gif)
-
-### 失败案例
-
-L4 的失败案例：
-
-![L4 failure rollout](reports/curves/rollouts/grpo_chunk1_rollout_L4.gif)
-
-> 这种情况明显是，只看着了最短路径，没有看墙壁。
-
-L4 静态轨迹图：
-
-![L4 failure map](reports/curves/rollouts/grpo_chunk1_rollout_L4.png)
-
-更多 level 的失败轨迹：
+轨迹说明：
 
 ```text
-reports/curves/rollouts/grpo_chunk1_rollout_L1.png
-reports/curves/rollouts/grpo_chunk1_rollout_L2.png
-reports/curves/rollouts/grpo_chunk1_rollout_L3.png
-reports/curves/rollouts/grpo_chunk1_rollout_L4.png
+map:        L4-001ed3d5ea
+level:      L4
+steps:      12
+collisions: 0
+```
+
+蓝色线表示实际执行路径。更早的 chunk1 可视化保留在历史报告中：
+
+```text
+reports/GRPO/UNIFIED_CHUNK1.md
 ```
 
 ### 数据集地图
@@ -586,10 +601,6 @@ reports/curves/maps/maps_L4.png
 ```text
 http://127.0.0.1:7861/playground
 ```
-
-![Maze Playground UI](reports/curves/ui/maze_playground.jpg)
-
-*自由编辑地图、设置 start/goal、配置模型参数，并实时查看模型轨迹。*
 
 启动：
 

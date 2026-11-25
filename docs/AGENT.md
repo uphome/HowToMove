@@ -2,6 +2,7 @@
 
 > 代码：`agent/`、`scripts/agent_play.py`、`scripts/agent_group_play.py`
 > 目标：把 12×12 迷宫包装成标准 tool-call agent，支持单轨迹和多轨迹并行。
+> 实验定位：受控 tool-calling Agentic RL，见 [`POSITIONING.md`](POSITIONING.md)。
 
 ---
 
