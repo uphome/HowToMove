@@ -15,6 +15,8 @@ Playground 是一个独立的浏览器页面，用来：
 http://127.0.0.1:7861/playground
 ```
 
+![Maze Playground UI](../reports/curves/ui/maze_playground.jpg)
+
 ---
 
 ## 1. 启动

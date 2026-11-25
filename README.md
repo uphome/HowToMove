@@ -587,6 +587,10 @@ reports/curves/maps/maps_L4.png
 http://127.0.0.1:7861/playground
 ```
 
+![Maze Playground UI](reports/curves/ui/maze_playground.jpg)
+
+*自由编辑地图、设置 start/goal、配置模型参数，并实时查看模型轨迹。*
+
 启动：
 
 ```bash
