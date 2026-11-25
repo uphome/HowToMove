@@ -1,12 +1,26 @@
-# HowToMove
+<div align="center">
 
-## 效果预览
+<h1>HowToMove</h1>
 
-L4 成功案例：
+<p><strong>受控环境下的 Tool-Calling Agentic RL</strong></p>
 
-[![L4 success](reports/curves/rollouts/grpo_final_L4.gif)](reports/curves/rollouts/grpo_final_L4.gif)
+<p>
+  <code>Qwen3-0.6B</code> ·
+  <code>SFT 冷启动</code> ·
+  <code>统一 GRPO</code> ·
+  <code>多步迷宫导航</code>
+</p>
 
-> 最终 GRPO 模型在 L4 hard wall 地图上的成功轨迹。蓝色线是实际执行路径；本案例 12 步、0 次碰撞。
+<a href="reports/curves/rollouts/grpo_final_L4.gif">
+  <img src="reports/curves/rollouts/grpo_final_L4.gif"
+       alt="L4 success case" width="520">
+</a>
+
+<p><sub>L4 hard-wall 成功案例 · 12 steps · 0 collisions</sub></p>
+
+</div>
+
+---
 
 ## 项目定义
 
